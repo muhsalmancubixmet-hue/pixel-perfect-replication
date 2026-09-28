@@ -64,7 +64,7 @@ const SECTIONS: { id: string; label: string; icon: typeof Settings2; fields: Fie
     fields: [
       { kind: "text", label: "Logo URL", value: "https://cdn.influencers.com/logo.svg" },
       { kind: "text", label: "Primary accent", value: "#1f9e96" },
-      { kind: "textarea", label: "Meta description", value: "India's marketplace connecting creators and businesses." },
+      { kind: "textarea", label: "Meta description", value: "Discover influencers anywhere in the world. Find the right creators for your brand." },
       { kind: "toggle", label: "Show platform badge on creator websites", hint: "'Powered by Influencers.com' footer", value: true },
     ],
   },
@@ -128,7 +128,7 @@ const SECTIONS: { id: string; label: string; icon: typeof Settings2; fields: Fie
     label: "Business settings",
     icon: Building2,
     fields: [
-      { kind: "toggle", label: "Require GST details", hint: "Mandatory for invoicing Indian businesses", value: true },
+      { kind: "toggle", label: "Require tax ID (GST, VAT, EIN…)", hint: "Collected per country tax rules", value: true },
       { kind: "select", label: "Active campaigns on Free plan", value: "1", options: ["1", "3", "5"] },
       { kind: "select", label: "Shortlist size limit", value: "25", options: ["10", "25", "50"] },
       { kind: "toggle", label: "Manual approval for new businesses", hint: "Review each signup before it goes live", value: false },

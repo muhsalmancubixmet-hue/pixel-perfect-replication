@@ -117,7 +117,7 @@ function SubscriptionsPage() {
         <StatCard label="MRR" value={money(mrr)} icon={Wallet} delta={11.2} />
         <StatCard label="Paid accounts" value={paidUsers.toLocaleString("en-IN")} icon={Users} delta={8.6} />
         <StatCard label="Plans live" value={String(plans.filter((p) => p.status === "active").length)} icon={CreditCard} />
-        <StatCard label="ARPU" value={inr(Math.round(mrr / Math.max(1, paidUsers)))} icon={Wallet} delta={2.4} />
+        <StatCard label="ARPU" value={money(Math.round(mrr / Math.max(1, paidUsers)))} icon={Wallet} delta={2.4} />
       </div>
 
       <Tabs defaultValue="Influencer">

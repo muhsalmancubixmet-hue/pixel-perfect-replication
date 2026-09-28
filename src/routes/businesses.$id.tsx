@@ -7,6 +7,7 @@ import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { campaignsForBusiness, getBusiness, money, payments, requirements } from "@/data/mock";
+import { placeLabel } from "@/data/geo";
 
 export const Route = createFileRoute("/businesses/$id")({
   loader: ({ params }) => {
