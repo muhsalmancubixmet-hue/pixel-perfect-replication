@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Users,
   Wallet,
+  Globe2,
 } from "lucide-react";
 
 import {

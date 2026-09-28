@@ -170,7 +170,7 @@ function DiscoveryPage() {
             selected === i.id && "border-primary ring-1 ring-primary",
           )}
         >
-          <UserAvatar name={i.name} src={i.avatar} className="size-10" />
+          <UserAvatar name={i.name} src={i.avatar} size={40} />
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1 truncate text-sm font-semibold">
               {i.name}
