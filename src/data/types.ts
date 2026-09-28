@@ -1,3 +1,5 @@
+import type { GeoPlace } from "./geo";
+
 export type Status =
   | "active"
   | "inactive"
@@ -49,8 +51,13 @@ export interface Influencer {
   bio: string;
   categories: string[];
   languages: string[];
-  district: string;
-  city: string;
+  /** Primary location — any country / region / city worldwide. */
+  location: GeoPlace;
+  /** Where the creator is willing to work (cities, countries, or "Remote / Worldwide"). */
+  serviceLocations: string[];
+  travelAvailable: boolean;
+  remoteAvailable: boolean;
+  currency: string;
   followers: number;
   engagement: number;
   platforms: string[];
@@ -75,8 +82,11 @@ export interface Business {
   name: string;
   logo: string;
   type: string;
-  district: string;
-  city: string;
+  /** Headquarters. */
+  location: GeoPlace;
+  /** A business may operate in many cities / countries. */
+  operatingLocations: { label: string; address: string; radiusKm: number }[];
+  currency: string;
   contactName: string;
   email: string;
   phone: string;
@@ -109,7 +119,8 @@ export interface Campaign {
     | "cancelled";
   created: string;
   deadline: string;
-  district: string;
+  location: string;
+  currency: string;
 }
 
 export interface Requirement {
@@ -117,7 +128,8 @@ export interface Requirement {
   title: string;
   business: string;
   category: string;
-  district: string;
+  location: string;
+  currency: string;
   budget: number;
   creatorsNeeded: number;
   applications: number;
@@ -183,7 +195,8 @@ export interface Category {
 export interface LocationNode {
   id: string;
   name: string;
-  type: "country" | "state" | "district" | "city";
+  type: "country" | "region" | "district" | "city" | "area";
+  status?: "active" | "inactive";
   creators: number;
   children?: LocationNode[];
 }
