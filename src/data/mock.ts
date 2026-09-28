@@ -179,6 +179,7 @@ function dateStr(daysAgo: number) {
 
 export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
   const r = rng(i * 97 + 13);
+  r(); // warm up so first picks vary across seeds
   const first = pick(FIRST, r());
   const last = pick(LAST, r());
   const name = `${first} ${last}`;
