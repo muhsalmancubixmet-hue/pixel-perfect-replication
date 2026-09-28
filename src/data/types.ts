@@ -59,7 +59,7 @@ export interface Influencer {
   services: CreatorService[];
   verification: "verified" | "pending" | "unverified";
   websiteStatus: "published" | "draft" | "suspended" | "none";
-  websiteUrl?: string;
+  websiteUrl?: string | undefined;
   websiteTemplate?: string;
   websiteVisits?: number;
   websitePublished?: string;
