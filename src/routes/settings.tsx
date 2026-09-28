@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { CURRENCIES } from "@/data/geo";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";

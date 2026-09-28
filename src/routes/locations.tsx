@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { locations } from "@/data/mock";
+import { LEVEL_LABEL, LOCATION_LEVELS } from "@/data/geo";
+import { Switch } from "@/components/ui/switch";
 import type { LocationNode } from "@/data/types";
 import { cn } from "@/lib/utils";
 
@@ -24,16 +26,16 @@ export const Route = createFileRoute("/locations")({
   head: () => ({
     meta: [
       { title: "Locations — Influencers.com SaaS Manager" },
-      { name: "description", content: "Country, state, district and city structure powering creator discovery in Kerala." },
+      { name: "description", content: "Global location hierarchy — countries, regions, districts, cities and areas — powering creator discovery worldwide." },
       { property: "og:title", content: "Locations — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Country, state, district and city structure for creator discovery." },
+      { property: "og:description", content: "Global location hierarchy powering creator discovery worldwide." },
     ],
   }),
   component: LocationsPage,
 });
 
 function Node({ node, depth }: { node: LocationNode; depth: number }) {
-  const [open, setOpen] = useState(depth < 2);
+  const [open, setOpen] = useState(depth < 1);
   const hasChildren = Boolean(node.children?.length);
 
   return (
@@ -53,8 +55,13 @@ function Node({ node, depth }: { node: LocationNode; depth: number }) {
         )}
         <span className="flex-1 truncate text-sm font-medium">{node.name}</span>
         <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-          {node.type}
+          {LEVEL_LABEL[node.type].split(" /")[0]}
         </span>
+        <Switch
+          defaultChecked={node.status !== "inactive"}
+          aria-label={`Toggle ${node.name}`}
+          onCheckedChange={(v) => mockAction(v ? "Location activated" : "Location deactivated", node.name)()}
+        />
         <span className="num w-20 text-right text-xs text-muted-foreground">{node.creators} creators</span>
         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={mockAction("Edit location", node.name)}>
           Edit
@@ -72,7 +79,7 @@ function LocationsPage() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Locations"
-        description="Country → state → district → city. Kerala is fully mapped."
+        description="Country → region / state / province → district / county → city → area. Levels adapt per country; not every country uses every level."
         actions={
           <Button size="sm" onClick={() => setOpen(true)}>
             <Plus className="size-4" /> Add location
@@ -100,20 +107,31 @@ function LocationsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="country">Country</SelectItem>
-                  <SelectItem value="state">State</SelectItem>
-                  <SelectItem value="district">District</SelectItem>
-                  <SelectItem value="city">City</SelectItem>
+                  {LOCATION_LEVELS.map((l) => (
+                    <SelectItem key={l} value={l}>
+                      {LEVEL_LABEL[l]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="parent">Parent</Label>
-              <Input id="parent" defaultValue="Kerala › Ernakulam" />
+              <Input id="parent" placeholder="e.g. United Arab Emirates › Dubai (leave empty for a country)" />
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="locname">Name</Label>
-              <Input id="locname" placeholder="e.g. Tripunithura" />
+              <Input id="locname" placeholder="e.g. Downtown, Shoreditch, Marina" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-1.5">
+                <Label htmlFor="lat">Latitude</Label>
+                <Input id="lat" placeholder="25.2048" />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="lng">Longitude</Label>
+                <Input id="lng" placeholder="55.2708" />
+              </div>
             </div>
           </div>
           <DialogFooter>
