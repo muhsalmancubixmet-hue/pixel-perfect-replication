@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { CURRENCIES } from "@/data/geo";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,7 @@ const SECTIONS: { id: string; label: string; icon: typeof Settings2; fields: Fie
       { kind: "text", label: "Platform name", value: "Influencers.com" },
       { kind: "text", label: "Support email", value: "support@influencers.com" },
       { kind: "select", label: "Default timezone", value: "Asia/Kolkata", options: ["Asia/Kolkata", "UTC", "Asia/Dubai"] },
-      { kind: "select", label: "Default currency", value: "INR (₹)", options: ["INR (₹)", "USD ($)", "AED (د.إ)"] },
+      { kind: "select", label: "Default currency", value: "INR (base currency)", options: ["INR (base currency)", "USD ($)", "AED (د.إ)"] },
       { kind: "toggle", label: "Maintenance mode", hint: "Show a maintenance page on public sites", value: false },
     ],
   },
@@ -64,7 +65,7 @@ const SECTIONS: { id: string; label: string; icon: typeof Settings2; fields: Fie
     fields: [
       { kind: "text", label: "Logo URL", value: "https://cdn.influencers.com/logo.svg" },
       { kind: "text", label: "Primary accent", value: "#1f9e96" },
-      { kind: "textarea", label: "Meta description", value: "India's marketplace connecting creators and businesses." },
+      { kind: "textarea", label: "Meta description", value: "Discover influencers anywhere in the world. Find the right creators for your brand." },
       { kind: "toggle", label: "Show platform badge on creator websites", hint: "'Powered by Influencers.com' footer", value: true },
     ],
   },
@@ -128,7 +129,7 @@ const SECTIONS: { id: string; label: string; icon: typeof Settings2; fields: Fie
     label: "Business settings",
     icon: Building2,
     fields: [
-      { kind: "toggle", label: "Require GST details", hint: "Mandatory for invoicing Indian businesses", value: true },
+      { kind: "toggle", label: "Require tax ID (GST, VAT, EIN…)", hint: "Collected per country tax rules", value: true },
       { kind: "select", label: "Active campaigns on Free plan", value: "1", options: ["1", "3", "5"] },
       { kind: "select", label: "Shortlist size limit", value: "25", options: ["10", "25", "50"] },
       { kind: "toggle", label: "Manual approval for new businesses", hint: "Review each signup before it goes live", value: false },

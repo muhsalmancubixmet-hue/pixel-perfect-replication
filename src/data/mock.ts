@@ -18,6 +18,8 @@ import type {
   VerificationItem,
   Website,
 } from "./types";
+import { BASE_CURRENCY, DEMO_GLOBAL_PLACES, DEMO_KERALA_PLACES, DEMO_PLACES, money, placeLabel } from "./geo";
+export { money } from "./geo";
 
 /* ------------------------------------------------------------------ */
 /* Deterministic pseudo-random helpers (stable across SSR + client)    */
@@ -52,40 +54,6 @@ export const CATEGORY_NAMES = [
   "Parenting",
   "Business",
 ];
-
-export const DISTRICTS = [
-  "Thiruvananthapuram",
-  "Kollam",
-  "Pathanamthitta",
-  "Alappuzha",
-  "Kottayam",
-  "Idukki",
-  "Ernakulam",
-  "Thrissur",
-  "Palakkad",
-  "Malappuram",
-  "Kozhikode",
-  "Wayanad",
-  "Kannur",
-  "Kasaragod",
-];
-
-const CITIES: Record<string, string[]> = {
-  Thiruvananthapuram: ["Kazhakkoottam", "Neyyattinkara", "Varkala", "Attingal"],
-  Kollam: ["Karunagappally", "Punalur", "Paravur"],
-  Pathanamthitta: ["Adoor", "Thiruvalla", "Pandalam"],
-  Alappuzha: ["Cherthala", "Kayamkulam", "Mararikulam"],
-  Kottayam: ["Changanassery", "Pala", "Vaikom"],
-  Idukki: ["Thodupuzha", "Munnar", "Kattappana"],
-  Ernakulam: ["Kakkanad", "Fort Kochi", "Aluva", "Perumbavoor"],
-  Thrissur: ["Guruvayur", "Chalakudy", "Irinjalakuda"],
-  Palakkad: ["Ottapalam", "Shoranur", "Chittur"],
-  Malappuram: ["Manjeri", "Tirur", "Perinthalmanna"],
-  Kozhikode: ["Vadakara", "Koyilandy", "Feroke"],
-  Wayanad: ["Kalpetta", "Sulthan Bathery", "Mananthavady"],
-  Kannur: ["Thalassery", "Payyanur", "Mattannur"],
-  Kasaragod: ["Kanhangad", "Nileshwaram", "Bekal"],
-};
 
 const FIRST = [
   "Anjali",
@@ -151,9 +119,9 @@ const PLATFORMS = [
   "Twitch",
 ];
 
-const LANGUAGES = ["Malayalam", "English", "Tamil", "Hindi", "Kannada"];
+const LANGUAGES = ["English", "Malayalam", "Hindi", "Tamil", "Arabic", "Spanish", "French", "German"];
 
-const TEMPLATES = ["Kerala Minimal", "Backwater", "Spice Route", "Studio Dark", "Coastal", "Editorial"];
+const TEMPLATES = ["Minimal", "Backwater", "Spice Route", "Studio Dark", "Coastal", "Editorial"];
 
 const SUBS_CREATOR = ["Free", "Pro", "Premium"];
 const SUBS_BUSINESS = ["Free", "Pro", "Agency"];
@@ -181,7 +149,7 @@ const BUSINESS_NAMES = [
   "Malabar Gold House",
   "Nila Ayurveda",
   "Marine Drive Homes",
-  "EduKerala Academy",
+  "Edu Bright Academy",
   "Amrita Care Clinics",
   "Zephyr Motors",
   "Techzone Kochi",
@@ -211,12 +179,14 @@ function dateStr(daysAgo: number) {
 
 export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
   const r = rng(i * 97 + 13);
+  r(); // warm up so first picks vary across seeds
   const first = pick(FIRST, r());
   const last = pick(LAST, r());
   const name = `${first} ${last}`;
   const handle = `${first.toLowerCase()}.${last.toLowerCase()}`;
-  const district = pick(DISTRICTS, r());
-  const city = pick(CITIES[district] ?? [district], r());
+  // ~1 in 3 demo creators are outside Kerala to demonstrate global reach
+  const loc = i % 3 === 2 ? at(DEMO_GLOBAL_PLACES, i / 3) : at(DEMO_KERALA_PLACES, r() * 14);
+  const location = { ...loc, lat: loc.lat + (r() - 0.5) * 0.08, lng: loc.lng + (r() - 0.5) * 0.08 };
   const cats = [pick(CATEGORY_NAMES, r()), pick(CATEGORY_NAMES, r())].filter(
     (v, idx, a) => a.indexOf(v) === idx,
   );
@@ -235,11 +205,18 @@ export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
     name,
     handle,
     avatar: `https://i.pravatar.cc/120?img=${(i % 70) + 1}`,
-    bio: `${cats[0]} creator from ${city}, ${district}. Telling Kerala stories in ${pick(LANGUAGES, r())} and English.`,
+    bio: `${cats[0]} creator based in ${placeLabel(location)}. Creates content in ${location.languages.join(" and ")}.`,
     categories: cats,
-    languages: ["Malayalam", pick(LANGUAGES, r())].filter((v, idx, a) => a.indexOf(v) === idx),
-    district,
-    city,
+    languages: [...location.languages, pick(LANGUAGES, r())].filter((v, idx, a) => a.indexOf(v) === idx),
+    location,
+    serviceLocations: [
+      location.city,
+      at(DEMO_PLACES.filter((p) => p.country === location.country && p.city !== location.city), r() * 10)?.city,
+      r() > 0.4 ? "Remote / Worldwide" : undefined,
+    ].filter((v, idx, a): v is string => !!v && a.indexOf(v) === idx),
+    travelAvailable: r() > 0.4,
+    remoteAvailable: r() > 0.3,
+    currency: location.currency,
     followers,
     engagement: Number((1.2 + r() * 7).toFixed(2)),
     platforms: plats,
@@ -312,23 +289,30 @@ export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
 export const businesses: Business[] = Array.from({ length: 24 }, (_, i) => {
   const r = rng(i * 313 + 7);
   const name = at(BUSINESS_NAMES, i);
-  const district = pick(DISTRICTS, r());
+  const loc = i % 4 === 3 ? at(DEMO_GLOBAL_PLACES, i / 4 + 3) : at(DEMO_KERALA_PLACES, r() * 14);
+  const extra = at(DEMO_PLACES, r() * DEMO_PLACES.length);
   return {
     id: `BIZ-${String(2000 + i)}`,
     name,
     logo: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
     type: pick(BUSINESS_TYPES, r()),
-    district,
-    city: pick(CITIES[district] ?? [district], r()),
+    location: loc,
+    operatingLocations: [
+      { label: placeLabel(loc), address: `${10 + Math.floor(r() * 90)} Main Street, ${loc.city}`, radiusKm: 25 },
+      ...(extra.city !== loc.city && r() > 0.5
+        ? [{ label: placeLabel(extra), address: `Branch office, ${extra.city}`, radiusKm: 15 }]
+        : []),
+    ],
+    currency: loc.currency,
     contactName: `${pick(FIRST, r())} ${pick(LAST, r())}`,
-    email: `hello@${name.toLowerCase().replace(/[^a-z]/g, "")}.in`,
-    phone: `+91 ${Math.floor(70000 + r() * 29999)} ${Math.floor(10000 + r() * 89999)}`,
+    email: `hello@${name.toLowerCase().replace(/[^a-z]/g, "")}.com`,
+    phone: `${loc.countryCode === "IN" ? "+91" : "+" + (10 + i)} ${Math.floor(70000 + r() * 29999)} ${Math.floor(10000 + r() * 89999)}`,
     campaigns: Math.floor(r() * 18),
     subscription: pick(SUBS_BUSINESS, r()),
     status: pick(["active", "active", "active", "suspended", "pending"] as const, r()),
     verification: pick(["verified", "verified", "pending", "unverified"] as const, r()),
     joined: dateStr(Math.floor(40 + r() * 650)),
-    about: `${name} is a ${pick(BUSINESS_TYPES, r()).toLowerCase()} brand based in ${district}, working with Kerala creators on always-on social campaigns.`,
+    about: `${name} is a ${pick(BUSINESS_TYPES, r()).toLowerCase()} brand based in ${placeLabel(loc)}, working with creators on always-on social campaigns.`,
     activity: Array.from({ length: 5 }, (_, k) => ({
       date: dateStr(k * 4 + Math.floor(r() * 3)),
       text: pick(
@@ -377,7 +361,8 @@ export const campaigns: Campaign[] = Array.from({ length: 36 }, (_, i) => {
     status: pick(CAMPAIGN_STATUSES, r()),
     created: dateStr(created),
     deadline: dateStr(created - 30 - Math.floor(r() * 40)),
-    district: pick(DISTRICTS, r()),
+    location: placeLabel(biz.location),
+    currency: BASE_CURRENCY,
   };
 });
 
@@ -386,10 +371,11 @@ export const requirements: Requirement[] = Array.from({ length: 22 }, (_, i) => 
   const biz = at(businesses, r() * businesses.length);
   return {
     id: `REQ-${String(4000 + i)}`,
-    title: `Need ${1 + Math.floor(r() * 8)} ${pick(CATEGORY_NAMES, r()).toLowerCase()} creators in ${pick(DISTRICTS, r())}`,
+    title: `Need ${1 + Math.floor(r() * 8)} ${pick(CATEGORY_NAMES, r()).toLowerCase()} creators in ${biz.location.city}`,
     business: biz.name,
     category: pick(CATEGORY_NAMES, r()),
-    district: pick(DISTRICTS, r()),
+    location: placeLabel(biz.location),
+    currency: BASE_CURRENCY,
     budget: Math.floor((10 + r() * 200)) * 1000,
     creatorsNeeded: 1 + Math.floor(r() * 10),
     applications: Math.floor(r() * 40),
@@ -494,34 +480,54 @@ export const categories: Category[] = CATEGORY_NAMES.map((name, i) => ({
   status: name === "Parenting" ? "inactive" : "active",
 }));
 
-export const locations: LocationNode[] = [
-  {
-    id: "LOC-IN",
-    name: "India",
-    type: "country",
-    creators: influencers.length * 12,
-    children: [
-      {
-        id: "LOC-KL",
-        name: "Kerala",
-        type: "state",
-        creators: influencers.length * 12,
-        children: DISTRICTS.map((d, i) => ({
-          id: `LOC-KL-${i}`,
-          name: d,
-          type: "district" as const,
-          creators: influencers.filter((inf) => inf.district === d).length * 12,
-          children: (CITIES[d] ?? []).map((c, k) => ({
-            id: `LOC-KL-${i}-${k}`,
-            name: c,
-            type: "city" as const,
-            creators: influencers.filter((inf) => inf.city === c).length * 6,
-          })),
-        })),
-      },
-    ],
-  },
-];
+/** Global location tree built from demo places. Levels adapt per country (district is optional). */
+function buildLocationTree(): LocationNode[] {
+  const slug = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]+/g, "-");
+  const count = (f: (inf: Influencer) => boolean) => influencers.filter(f).length * 12 + 3;
+  const countries = [...new Set(DEMO_PLACES.map((p) => p.country))];
+  return countries.map((country) => {
+    const cp = DEMO_PLACES.filter((p) => p.country === country);
+    const regions = [...new Set(cp.map((p) => p.region))];
+    return {
+      id: `LOC-${slug(country)}`,
+      name: country,
+      type: "country" as const,
+      status: "active" as const,
+      creators: count((i) => i.location.country === country),
+      children: regions.map((region) => {
+        const rp = cp.filter((p) => p.region === region);
+        const cityNode = (city: string): LocationNode => ({
+          id: `LOC-${slug(country)}-${slug(region)}-${slug(city)}`,
+          name: city,
+          type: "city",
+          status: "active",
+          creators: count((i) => i.location.city === city),
+        });
+        const districts = [...new Set(rp.map((p) => p.district).filter(Boolean))] as string[];
+        const useDistricts = districts.length > 1;
+        return {
+          id: `LOC-${slug(country)}-${slug(region)}`,
+          name: region,
+          type: "region" as const,
+          status: "active" as const,
+          creators: count((i) => i.location.region === region),
+          children: useDistricts
+            ? districts.map((d) => ({
+                id: `LOC-${slug(country)}-${slug(region)}-D-${slug(d)}`,
+                name: d,
+                type: "district" as const,
+                status: "active" as const,
+                creators: count((i) => i.location.district === d),
+                children: rp.filter((p) => p.district === d).map((p) => cityNode(p.city)),
+              }))
+            : rp.map((p) => cityNode(p.city)),
+        };
+      }),
+    };
+  });
+}
+
+export const locations: LocationNode[] = buildLocationTree();
 
 export const services: ServiceType[] = [
   { name: "Instagram Reel", platform: "Instagram", avgPrice: 12000 },
@@ -570,7 +576,7 @@ export const verifications: VerificationItem[] = [
       id: `VER-C-${k}`,
       kind: "creator" as const,
       user: i.name,
-      detail: `Aadhaar + creator portfolio · ${i.district}`,
+      detail: `ID document + creator portfolio · ${placeLabel(i.location)}`,
       submitted: dateStr(k * 2 + 1),
       status: "pending" as const,
     })),
@@ -589,7 +595,7 @@ export const verifications: VerificationItem[] = [
       id: `VER-B-${k}`,
       kind: "business" as const,
       user: b.name,
-      detail: `GSTIN + trade licence · ${b.district}`,
+      detail: `Tax ID + trade licence · ${placeLabel(b.location)}`,
       submitted: dateStr(k * 2 + 3),
       status: "pending" as const,
     })),
@@ -673,6 +679,7 @@ export const payments: Payment[] = Array.from({ length: 42 }, (_, i) => {
     user: who,
     type: pick(["Subscription", "Campaign", "Service", "Domain"] as const, r()),
     amount: Math.floor((499 + r() * 90000)),
+    currency: BASE_CURRENCY,
     status: pick(["paid", "paid", "paid", "pending", "failed", "refunded"] as const, r()),
     date: dateStr(Math.floor(r() * 120)),
     method: pick(["UPI", "Card", "Netbanking", "Wallet"], r()),
@@ -889,12 +896,12 @@ export const dashboardStats = {
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-export const inr = (n: number) =>
-  `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+/** @deprecated use money(amount, currency). Kept as base-currency alias. */
+export const inr = (n: number) => money(n);
 
 export const compact = (n: number) => {
-  if (n >= 10000000) return `${(n / 10000000).toFixed(1)}Cr`;
-  if (n >= 100000) return `${(n / 100000).toFixed(1)}L`;
+  if (n >= 1000000000) return `${(n / 1000000000).toFixed(1)}B`;
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
   return String(n);
 };
@@ -920,18 +927,18 @@ export function globalSearch(q: string): SearchResult[] {
     .filter((i) => i.name.toLowerCase().includes(term) || i.handle.includes(term))
     .slice(0, 5)
     .forEach((i) =>
-      out.push({ group: "Influencers", id: i.id, label: i.name, sub: `${i.district} · ${compact(i.followers)} followers`, to: "/influencers/$id", params: { id: i.id } }),
+      out.push({ group: "Influencers", id: i.id, label: i.name, sub: `${placeLabel(i.location)} · ${compact(i.followers)} followers`, to: "/influencers/$id", params: { id: i.id } }),
     );
   businesses
     .filter((b) => b.name.toLowerCase().includes(term))
     .slice(0, 5)
     .forEach((b) =>
-      out.push({ group: "Businesses", id: b.id, label: b.name, sub: `${b.type} · ${b.district}`, to: "/businesses/$id", params: { id: b.id } }),
+      out.push({ group: "Businesses", id: b.id, label: b.name, sub: `${b.type} · ${placeLabel(b.location)}`, to: "/businesses/$id", params: { id: b.id } }),
     );
   campaigns
     .filter((c) => c.title.toLowerCase().includes(term) || c.business.toLowerCase().includes(term))
     .slice(0, 5)
-    .forEach((c) => out.push({ group: "Campaigns", id: c.id, label: c.title, sub: `${c.business} · ${inr(c.budget)}`, to: "/campaigns" }));
+    .forEach((c) => out.push({ group: "Campaigns", id: c.id, label: c.title, sub: `${c.business} · ${money(c.budget, c.currency)}`, to: "/campaigns" }));
   requirements
     .filter((r) => r.title.toLowerCase().includes(term) || r.business.toLowerCase().includes(term))
     .slice(0, 4)
@@ -946,3 +953,8 @@ export function globalSearch(q: string): SearchResult[] {
     .forEach((d) => out.push({ group: "Domains", id: d.id, label: d.domain, sub: d.creator, to: "/domains" }));
   return out;
 }
+
+/* Global filter option lists derived from data — never hardcoded regions. */
+export const COUNTRY_OPTIONS = [...new Set(DEMO_PLACES.map((p) => p.country))].sort();
+export const CITY_OPTIONS = [...new Set(DEMO_PLACES.map((p) => p.city))].sort();
+export const LANGUAGE_OPTIONS = [...new Set(influencers.flatMap((i) => i.languages))].sort();

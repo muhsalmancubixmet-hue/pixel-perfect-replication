@@ -44,7 +44,7 @@ import {
   compact,
   dashboardStats,
   influencers,
-  inr,
+  money,
   revenueTrend,
   userGrowth,
 } from "@/data/mock";
@@ -130,7 +130,7 @@ function Dashboard() {
         <StatCard label="Active Businesses" value={compact(dashboardStats.activeBusinesses)} delta={4.2} icon={Building2} hint="last 30 days" />
         <StatCard label="Active Campaigns" value={String(dashboardStats.activeCampaigns)} delta={15.3} icon={Megaphone} hint="live now" />
         <StatCard label="Total Websites" value={compact(dashboardStats.totalWebsites)} delta={9.8} icon={Globe} hint="creator sites" />
-        <StatCard label="Monthly Revenue" value={inr(dashboardStats.monthlyRevenue)} delta={11.2} icon={Wallet} hint="MRR" />
+        <StatCard label="Monthly Revenue" value={money(dashboardStats.monthlyRevenue)} delta={11.2} icon={Wallet} hint="MRR" />
         <StatCard label="Pending Requests" value={String(dashboardStats.pendingRequests)} delta={-3.4} icon={BadgeCheck} hint="awaiting review" />
       </div>
 
@@ -213,7 +213,7 @@ function Dashboard() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Platform revenue" subtitle="Subscription and service revenue (₹)">
+        <ChartCard title="Platform revenue" subtitle="Subscription and service revenue (base currency)">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={revenueTrend} margin={{ left: -6, right: 6, top: 6 }}>
               <defs>
@@ -261,10 +261,10 @@ function Dashboard() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{c.title}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {c.business} · {c.category} · {c.district}
+                    {c.business} · {c.category} · {c.location}
                   </p>
                 </div>
-                <span className="num hidden text-sm font-semibold sm:block">{inr(c.budget)}</span>
+                <span className="num hidden text-sm font-semibold sm:block">{money(c.budget, c.currency)}</span>
                 <StatusBadge value={c.status} />
               </div>
             ))}
@@ -290,7 +290,7 @@ function Dashboard() {
                   <UserAvatar src={i.avatar} name={i.name} size={30} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{i.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{i.district}</p>
+                    <p className="truncate text-xs text-muted-foreground">{i.location.city}, {i.location.country}</p>
                   </div>
                   <span className="num text-xs text-muted-foreground">{compact(i.followers)}</span>
                 </Link>
@@ -321,7 +321,7 @@ function Dashboard() {
 
       <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
         <Plus className="size-3.5" />
-        Prototype build — all data shown is realistic sample data for Kerala; no live backend is connected yet.
+        Prototype build — all data shown is fictional demo data (Kerala is one sample market among several worldwide); no live backend is connected yet.
       </div>
     </div>
   );

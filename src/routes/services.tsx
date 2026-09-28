@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { inr, services as seedServices } from "@/data/mock";
+import { money, services as seedServices } from "@/data/mock";
 import type { ServiceType } from "@/data/types";
 
 export const Route = createFileRoute("/services")({
@@ -53,7 +53,7 @@ function ServicesPage() {
             <div className="mt-3 flex items-end justify-between">
               <div>
                 <p className="text-[11px] uppercase text-muted-foreground">Avg price</p>
-                <p className="num text-lg font-bold">{inr(s.avgPrice)}</p>
+                <p className="num text-lg font-bold">{money(s.avgPrice)}</p>
               </div>
               <div className="text-right">
                 <p className="text-[11px] uppercase text-muted-foreground">Creators</p>

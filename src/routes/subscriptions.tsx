@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { inr, plans as seedPlans } from "@/data/mock";
+import { money, plans as seedPlans } from "@/data/mock";
 import type { Plan } from "@/data/types";
 import { CreditCard, Users, Wallet } from "lucide-react";
 
@@ -52,7 +52,7 @@ function PlanGrid({
             <div>
               <p className="text-sm font-semibold">{p.name}</p>
               <p className="num mt-0.5 text-2xl font-bold">
-                {p.price === 0 ? "Free" : inr(p.price)}
+                {p.price === 0 ? "Free" : money(p.price)}
                 {p.price > 0 && <span className="text-sm font-medium text-muted-foreground">/mo</span>}
               </p>
             </div>
@@ -75,7 +75,7 @@ function PlanGrid({
             </div>
             <div className="text-right">
               <p className="text-[11px] uppercase text-muted-foreground">Monthly revenue</p>
-              <p className="num text-sm font-bold">{inr(p.monthlyRevenue)}</p>
+              <p className="num text-sm font-bold">{money(p.monthlyRevenue)}</p>
             </div>
           </div>
 
@@ -114,10 +114,10 @@ function SubscriptionsPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="MRR" value={inr(mrr)} icon={Wallet} delta={11.2} />
+        <StatCard label="MRR" value={money(mrr)} icon={Wallet} delta={11.2} />
         <StatCard label="Paid accounts" value={paidUsers.toLocaleString("en-IN")} icon={Users} delta={8.6} />
         <StatCard label="Plans live" value={String(plans.filter((p) => p.status === "active").length)} icon={CreditCard} />
-        <StatCard label="ARPU" value={inr(Math.round(mrr / Math.max(1, paidUsers)))} icon={Wallet} delta={2.4} />
+        <StatCard label="ARPU" value={money(Math.round(mrr / Math.max(1, paidUsers)))} icon={Wallet} delta={2.4} />
       </div>
 
       <Tabs defaultValue="Influencer">
@@ -143,7 +143,7 @@ function SubscriptionsPage() {
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="price">Monthly price (₹)</Label>
+              <Label htmlFor="price">Monthly price (base currency)</Label>
               <Input id="price" type="number" defaultValue={editing?.price} />
             </div>
             <div className="grid gap-1.5">

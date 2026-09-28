@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { CATEGORY_NAMES, DISTRICTS, compact, influencers } from "@/data/mock";
+import { CATEGORY_NAMES, COUNTRY_OPTIONS, CITY_OPTIONS, compact, influencers } from "@/data/mock";
 import type { Influencer } from "@/data/types";
 
 export const Route = createFileRoute("/influencers/")({
@@ -45,8 +45,8 @@ function InfluencersPage() {
       header: "Location",
       cell: (r) => (
         <span className="text-xs">
-          {r.city}
-          <span className="block text-muted-foreground">{r.district}</span>
+          {r.location.city}
+          <span className="block text-muted-foreground">{r.location.country}</span>
         </span>
       ),
     },
@@ -78,7 +78,8 @@ function InfluencersPage() {
 
   const filters: FilterDef<Influencer>[] = [
     { key: "category", label: "Category", options: CATEGORY_NAMES, match: (r, v) => r.categories.includes(v) },
-    { key: "district", label: "Location", options: DISTRICTS, match: (r, v) => r.district === v },
+    { key: "country", label: "Country", options: COUNTRY_OPTIONS, match: (r, v) => r.location.country === v },
+    { key: "city", label: "City", options: CITY_OPTIONS, match: (r, v) => r.location.city === v },
     { key: "status", label: "Status", options: ["active", "suspended", "pending"], match: (r, v) => r.status === v },
     { key: "verification", label: "Verification", options: ["verified", "pending", "unverified"], match: (r, v) => r.verification === v },
     {
@@ -114,7 +115,7 @@ function InfluencersPage() {
         getId={(r) => r.id}
         searchPlaceholder="Search by name, handle or city…"
         search={(r, t) =>
-          r.name.toLowerCase().includes(t) || r.handle.includes(t) || r.city.toLowerCase().includes(t)
+          r.name.toLowerCase().includes(t) || r.handle.includes(t) || r.location.city.toLowerCase().includes(t)
         }
         mobileCard={(r) => (
           <Link to="/influencers/$id" params={{ id: r.id }} className="block">
@@ -123,7 +124,7 @@ function InfluencersPage() {
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{r.name}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {r.categories[0]} · {r.district}
+                  {r.categories[0]} · {r.location.city}, {r.location.countryCode}
                 </p>
               </div>
             </div>

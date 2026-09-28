@@ -6,7 +6,8 @@ import { UserAvatar } from "@/components/admin/UserAvatar";
 import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { campaignsForBusiness, getBusiness, inr, payments, requirements } from "@/data/mock";
+import { campaignsForBusiness, getBusiness, money, payments, requirements } from "@/data/mock";
+import { placeLabel } from "@/data/geo";
 
 export const Route = createFileRoute("/businesses/$id")({
   loader: ({ params }) => {
@@ -64,7 +65,7 @@ function BusinessDetail() {
               <StatusBadge value={biz.verification} />
             </div>
             <p className="num text-sm text-muted-foreground">
-              {biz.type} · {biz.city}, {biz.district}
+              {biz.type} · {placeLabel(biz.location)}
             </p>
             <p className="mt-2 max-w-2xl text-sm">{biz.about}</p>
           </div>
@@ -123,7 +124,7 @@ function BusinessDetail() {
                     {c.category} · {c.creators} creators · due {c.deadline}
                   </p>
                 </div>
-                <span className="num text-sm font-semibold">{inr(c.budget)}</span>
+                <span className="num text-sm font-semibold">{money(c.budget, c.currency)}</span>
                 <StatusBadge value={c.status} />
               </div>
             ))}
@@ -141,7 +142,7 @@ function BusinessDetail() {
                     {r.applications} applications · {r.creatorsNeeded} needed
                   </p>
                 </div>
-                <span className="num text-sm font-semibold">{inr(r.budget)}</span>
+                <span className="num text-sm font-semibold">{money(r.budget, r.currency)}</span>
                 <StatusBadge value={r.status} />
               </div>
             ))}
@@ -159,7 +160,7 @@ function BusinessDetail() {
                     {p.type} · {p.method} · {p.date}
                   </p>
                 </div>
-                <span className="num text-sm font-semibold">{inr(p.amount)}</span>
+                <span className="num text-sm font-semibold">{money(p.amount, p.currency)}</span>
                 <StatusBadge value={p.status} />
               </div>
             ))}
