@@ -45,6 +45,7 @@ const GROUPS: { label: string; items: { title: string; url: string; icon: typeof
     label: "People",
     items: [
       { title: "Influencers", url: "/influencers", icon: Users },
+      { title: "Creator Map", url: "/discovery", icon: Globe2 },
       { title: "Businesses", url: "/businesses", icon: Building2 },
       { title: "Verification", url: "/verification", icon: BadgeCheck },
     ],

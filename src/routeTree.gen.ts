@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuditLogsRouteImport } from './routes/audit-logs'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as DiscoveryRouteImport } from './routes/discovery'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as MediaRouteImport } from './routes/media'
@@ -51,6 +52,11 @@ const CampaignsRoute = CampaignsRouteImport.update({
 const CategoriesRoute = CategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoveryRoute = DiscoveryRouteImport.update({
+  id: '/discovery',
+  path: '/discovery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DomainsRoute = DomainsRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/audit-logs': typeof AuditLogsRoute
   '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
+  '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/audit-logs': typeof AuditLogsRoute
   '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
+  '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/audit-logs': typeof AuditLogsRoute
   '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
+  '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/campaigns'
     | '/categories'
+    | '/discovery'
     | '/domains'
     | '/locations'
     | '/media'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/campaigns'
     | '/categories'
+    | '/discovery'
     | '/domains'
     | '/locations'
     | '/media'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/campaigns'
     | '/categories'
+    | '/discovery'
     | '/domains'
     | '/locations'
     | '/media'
@@ -308,6 +320,7 @@ export interface RootRouteChildren {
   AuditLogsRoute: typeof AuditLogsRoute
   CampaignsRoute: typeof CampaignsRoute
   CategoriesRoute: typeof CategoriesRoute
+  DiscoveryRoute: typeof DiscoveryRoute
   DomainsRoute: typeof DomainsRoute
   LocationsRoute: typeof LocationsRoute
   MediaRoute: typeof MediaRoute
@@ -357,6 +370,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/categories'
       preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discovery': {
+      id: '/discovery'
+      path: '/discovery'
+      fullPath: '/discovery'
+      preLoaderRoute: typeof DiscoveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/domains': {
@@ -500,6 +520,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuditLogsRoute: AuditLogsRoute,
   CampaignsRoute: CampaignsRoute,
   CategoriesRoute: CategoriesRoute,
+  DiscoveryRoute: DiscoveryRoute,
   DomainsRoute: DomainsRoute,
   LocationsRoute: LocationsRoute,
   MediaRoute: MediaRoute,
