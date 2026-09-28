@@ -45,7 +45,7 @@ function InfluencersPage() {
       header: "Location",
       cell: (r) => (
         <span className="text-xs">
-          {r.city}
+          {r.location.city}
           <span className="block text-muted-foreground">{r.location.country}</span>
         </span>
       ),
@@ -115,7 +115,7 @@ function InfluencersPage() {
         getId={(r) => r.id}
         searchPlaceholder="Search by name, handle or city…"
         search={(r, t) =>
-          r.name.toLowerCase().includes(t) || r.handle.includes(t) || r.city.toLowerCase().includes(t)
+          r.name.toLowerCase().includes(t) || r.handle.includes(t) || r.location.city.toLowerCase().includes(t)
         }
         mobileCard={(r) => (
           <Link to="/influencers/$id" params={{ id: r.id }} className="block">

@@ -45,7 +45,7 @@ function BusinessesPage() {
       header: "Location",
       cell: (r) => (
         <span className="text-xs">
-          {r.city}
+          {r.location.city}
           <span className="block text-muted-foreground">{r.location.country}</span>
         </span>
       ),
@@ -116,7 +116,7 @@ function BusinessesPage() {
         getId={(r) => r.id}
         searchPlaceholder="Search business, contact or city…"
         search={(r, t) =>
-          r.name.toLowerCase().includes(t) || r.contactName.toLowerCase().includes(t) || r.city.toLowerCase().includes(t)
+          r.name.toLowerCase().includes(t) || r.contactName.toLowerCase().includes(t) || r.location.city.toLowerCase().includes(t)
         }
         mobileCard={(r) => (
           <Link to="/businesses/$id" params={{ id: r.id }} className="block">
