@@ -29,7 +29,8 @@ function rng(seed: number) {
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
 
-const pick = <T,>(arr: T[], r: number) => arr[Math.floor(r * arr.length) % arr.length];
+const pick = <T,>(arr: readonly T[], r: number): T => arr[Math.floor(r * arr.length) % arr.length] as T;
+const at = <T,>(arr: readonly T[], i: number): T => arr[Math.abs(Math.floor(i)) % arr.length] as T;
 
 /* ------------------------------------------------------------------ */
 /* Reference data                                                      */
@@ -362,7 +363,7 @@ const CAMPAIGN_STATUSES: Campaign["status"][] = [
 
 export const campaigns: Campaign[] = Array.from({ length: 36 }, (_, i) => {
   const r = rng(i * 577 + 29);
-  const biz = businesses[Math.floor(r() * businesses.length)];
+  const biz = at(businesses, r() * businesses.length);
   const created = Math.floor(r() * 260);
   return {
     id: `CMP-${String(3000 + i)}`,
@@ -382,7 +383,7 @@ export const campaigns: Campaign[] = Array.from({ length: 36 }, (_, i) => {
 
 export const requirements: Requirement[] = Array.from({ length: 22 }, (_, i) => {
   const r = rng(i * 733 + 41);
-  const biz = businesses[Math.floor(r() * businesses.length)];
+  const biz = at(businesses, r() * businesses.length);
   return {
     id: `REQ-${String(4000 + i)}`,
     title: `Need ${1 + Math.floor(r() * 8)} ${pick(CATEGORY_NAMES, r()).toLowerCase()} creators in ${pick(DISTRICTS, r())}`,
@@ -545,7 +546,7 @@ export const services: ServiceType[] = [
 
 export const media: MediaItem[] = Array.from({ length: 40 }, (_, i) => {
   const r = rng(i * 89 + 17);
-  const inf = influencers[Math.floor(r() * influencers.length)];
+  const inf = at(influencers, r() * influencers.length);
   const type = pick(["image", "video", "avatar", "website"] as const, r());
   return {
     id: `MED-${String(11000 + i)}`,
@@ -665,8 +666,8 @@ export const payments: Payment[] = Array.from({ length: 42 }, (_, i) => {
   const r = rng(i * 137 + 23);
   const isBiz = r() > 0.5;
   const who = isBiz
-    ? businesses[Math.floor(r() * businesses.length)].name
-    : influencers[Math.floor(r() * influencers.length)].name;
+    ? at(businesses, r() * businesses.length).name
+    : at(influencers, r() * influencers.length).name;
   return {
     id: `TXN-${String(90000 + i * 7)}`,
     user: who,
@@ -690,8 +691,8 @@ export const tickets: Ticket[] = Array.from({ length: 28 }, (_, i) => {
   return {
     id: `TKT-${String(12000 + i)}`,
     user: isBiz
-      ? businesses[Math.floor(r() * businesses.length)].name
-      : influencers[Math.floor(r() * influencers.length)].name,
+      ? at(businesses, r() * businesses.length).name
+      : at(influencers, r() * influencers.length).name,
     subject: pick(
       [
         "Instagram sync keeps failing",
@@ -781,7 +782,7 @@ export const auditLogs: AuditLog[] = Array.from({ length: 60 }, (_, i) => {
     ["Payment refunded", "Payment"],
     ["Website suspended", "Website"],
   ];
-  const [action, entity] = actions[Math.floor(r() * actions.length)];
+  const [action, entity] = at(actions, r() * actions.length);
   const days = Math.floor(r() * 30);
   return {
     id: `LOG-${String(14000 + i)}`,
