@@ -7,7 +7,7 @@ import { StatCard } from "@/components/admin/StatCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { inr, payments } from "@/data/mock";
+import { money, payments } from "@/data/mock";
 import type { Payment } from "@/data/types";
 
 export const Route = createFileRoute("/payments")({
@@ -31,7 +31,7 @@ function PaymentsPage() {
     { key: "id", header: "Transaction", cell: (r) => <span className="num text-xs font-semibold">{r.id}</span> },
     { key: "user", header: "User / business", cell: (r) => <span className="text-sm">{r.user}</span> },
     { key: "type", header: "Type", cell: (r) => <span className="text-xs">{r.type}</span> },
-    { key: "amount", header: "Amount", cell: (r) => <span className="num text-sm font-semibold">{inr(r.amount)}</span> },
+    { key: "amount", header: "Amount", cell: (r) => <span className="num text-sm font-semibold">{money(r.amount, r.currency)}</span> },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
     { key: "method", header: "Method", secondary: true, cell: (r) => <span className="text-xs">{r.method}</span> },
     { key: "date", header: "Date", cell: (r) => <span className="num text-xs text-muted-foreground">{r.date}</span> },
@@ -86,7 +86,7 @@ function PaymentsPage() {
             </div>
             <p className="mt-1 truncate text-xs text-muted-foreground">{r.user}</p>
             <p className="num mt-1 text-sm font-bold">
-              {inr(r.amount)} <span className="text-xs font-normal text-muted-foreground">· {r.type} · {r.method}</span>
+              {money(r.amount, r.currency)} <span className="text-xs font-normal text-muted-foreground">· {r.type} · {r.method}</span>
             </p>
           </>
         )}

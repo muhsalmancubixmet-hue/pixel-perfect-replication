@@ -7,7 +7,7 @@ import { UserAvatar } from "@/components/admin/UserAvatar";
 import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { compact, getInfluencer, inr } from "@/data/mock";
+import { compact, getInfluencer, money } from "@/data/mock";
 
 export const Route = createFileRoute("/influencers/$id")({
   loader: ({ params }) => {
@@ -176,7 +176,7 @@ function InfluencerDetail() {
                   <p className="text-sm font-medium">{s.name}</p>
                   <p className="text-xs text-muted-foreground">Turnaround {s.turnaround}</p>
                 </div>
-                <p className="num text-sm font-bold">{inr(s.price)}</p>
+                <p className="num text-sm font-bold">{money(s.price, inf.currency)}</p>
               </div>
             ))}
           </div>
@@ -214,7 +214,7 @@ function InfluencerDetail() {
             <Field label="Last login" value={inf.lastLogin} />
             <Field label="Subscription" value={inf.subscription} />
             <Field label="Verification" value={<StatusBadge value={inf.verification} />} />
-            <Field label="Location" value={`${inf.city}, ${inf.district}`} />
+            <Field label="Location" value={[inf.location.city, inf.location.district, inf.location.region, inf.location.country].filter(Boolean).join(", ")} />
           </div>
         </TabsContent>
 

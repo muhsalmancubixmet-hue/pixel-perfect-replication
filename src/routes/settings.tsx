@@ -53,7 +53,7 @@ const SECTIONS: { id: string; label: string; icon: typeof Settings2; fields: Fie
       { kind: "text", label: "Platform name", value: "Influencers.com" },
       { kind: "text", label: "Support email", value: "support@influencers.com" },
       { kind: "select", label: "Default timezone", value: "Asia/Kolkata", options: ["Asia/Kolkata", "UTC", "Asia/Dubai"] },
-      { kind: "select", label: "Default currency", value: "INR (₹)", options: ["INR (₹)", "USD ($)", "AED (د.إ)"] },
+      { kind: "select", label: "Default currency", value: "INR (base currency)", options: ["INR (base currency)", "USD ($)", "AED (د.إ)"] },
       { kind: "toggle", label: "Maintenance mode", hint: "Show a maintenance page on public sites", value: false },
     ],
   },

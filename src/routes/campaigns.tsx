@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { StatCard } from "@/components/admin/StatCard";
 import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { CATEGORY_NAMES, businesses, campaigns, inr } from "@/data/mock";
+import { CATEGORY_NAMES, businesses, campaigns, money } from "@/data/mock";
 import type { Campaign } from "@/data/types";
 
 export const Route = createFileRoute("/campaigns")({
@@ -47,14 +47,14 @@ function CampaignsPage() {
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{r.title}</p>
           <p className="num truncate text-xs text-muted-foreground">
-            {r.id} · {r.district}
+            {r.id} · {r.location}
           </p>
         </div>
       ),
     },
     { key: "business", header: "Business", cell: (r) => <span className="text-xs">{r.business}</span> },
     { key: "category", header: "Category", cell: (r) => <span className="text-xs">{r.category}</span> },
-    { key: "budget", header: "Budget", cell: (r) => <span className="num text-sm font-semibold">{inr(r.budget)}</span> },
+    { key: "budget", header: "Budget", cell: (r) => <span className="num text-sm font-semibold">{money(r.budget, r.currency)}</span> },
     {
       key: "creators",
       header: "Creators",
@@ -76,9 +76,9 @@ function CampaignsPage() {
     {
       key: "budget",
       label: "Budget",
-      options: ["Under ₹50K", "₹50K – ₹2L", "Above ₹2L"],
+      options: ["Under 50K", "50K – 200K", "Above 200K"],
       match: (r, v) =>
-        v === "Under ₹50K" ? r.budget < 50000 : v === "₹50K – ₹2L" ? r.budget >= 50000 && r.budget <= 200000 : r.budget > 200000,
+        v === "Under 50K" ? r.budget < 50000 : v === "50K – 200K" ? r.budget >= 50000 && r.budget <= 200000 : r.budget > 200000,
     },
     {
       key: "date",
@@ -107,7 +107,7 @@ function CampaignsPage() {
         <StatCard label="Total campaigns" value={String(campaigns.length)} icon={Megaphone} delta={9.4} />
         <StatCard label="Active now" value={String(active)} icon={Megaphone} delta={5.2} />
         <StatCard label="Completed" value={String(completed)} icon={CheckCircle2} delta={13.8} />
-        <StatCard label="Committed budget" value={inr(totalBudget)} icon={Wallet} delta={7.1} hint={`${creators} creator slots`} />
+        <StatCard label="Committed budget" value={money(totalBudget)} icon={Wallet} delta={7.1} hint={`${creators} creator slots`} />
       </div>
 
       <DataTable
@@ -125,7 +125,7 @@ function CampaignsPage() {
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <StatusBadge value={r.status} />
-              <span className="num text-xs font-semibold">{inr(r.budget)}</span>
+              <span className="num text-xs font-semibold">{money(r.budget, r.currency)}</span>
               <span className="num ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
                 <Users className="size-3" /> {r.creators}
               </span>

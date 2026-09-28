@@ -19,7 +19,7 @@ import { ArrowDownRight, Repeat, Wallet, TrendingUp } from "lucide-react";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatCard } from "@/components/admin/StatCard";
 import { ChartCard } from "@/components/admin/ChartCard";
-import { inr, plans, revenueByAccountType, revenueByPlan, revenueTrend } from "@/data/mock";
+import { money, plans, revenueByAccountType, revenueByPlan, revenueTrend } from "@/data/mock";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({
@@ -52,21 +52,21 @@ function ReportsPage() {
       <PageHeader title="Revenue analytics" description="How the platform earns, month by month." />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <StatCard label="MRR" value={inr(mrr)} icon={Repeat} delta={11.2} />
-        <StatCard label="Subscription revenue" value={inr(latest.subscription)} icon={Wallet} delta={9.4} />
-        <StatCard label="Campaign & services" value={inr(latest.services)} icon={TrendingUp} delta={14.6} />
-        <StatCard label="Refunds" value={inr(latest.refunds)} icon={ArrowDownRight} delta={-2.1} />
-        <StatCard label="Net revenue" value={inr(net)} icon={Wallet} delta={12.8} />
+        <StatCard label="MRR" value={money(mrr)} icon={Repeat} delta={11.2} />
+        <StatCard label="Subscription revenue" value={money(latest.subscription)} icon={Wallet} delta={9.4} />
+        <StatCard label="Campaign & services" value={money(latest.services)} icon={TrendingUp} delta={14.6} />
+        <StatCard label="Refunds" value={money(latest.refunds)} icon={ArrowDownRight} delta={-2.1} />
+        <StatCard label="Net revenue" value={money(net)} icon={Wallet} delta={12.8} />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-2">
-        <ChartCard title="Revenue over time" subtitle="Subscription vs services vs refunds (₹)" className="xl:col-span-2">
+        <ChartCard title="Revenue over time" subtitle="Subscription vs services vs refunds (base currency)" className="xl:col-span-2">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={revenueTrend} margin={{ left: -4, right: 8, top: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
               <YAxis tickFormatter={(v: number) => `${Math.round(v / 1000)}K`} tickLine={false} axisLine={false} tick={axis} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => inr(v)} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => money(v)} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Line type="monotone" dataKey="subscription" stroke="var(--chart-1)" strokeWidth={2.5} dot={false} />
               <Line type="monotone" dataKey="services" stroke="var(--chart-2)" strokeWidth={2.5} dot={false} />
@@ -81,7 +81,7 @@ function ReportsPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
               <XAxis type="number" tickFormatter={(v: number) => `${Math.round(v / 1000)}K`} tickLine={false} axisLine={false} tick={axis} />
               <YAxis type="category" dataKey="name" width={90} tickLine={false} axisLine={false} tick={axis} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => inr(v)} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => money(v)} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {revenueByPlan.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -99,7 +99,7 @@ function ReportsPage() {
                   <Cell key={i} fill={COLORS[i]} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => inr(v)} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => money(v)} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
             </PieChart>
           </ResponsiveContainer>
@@ -122,9 +122,9 @@ function ReportsPage() {
               <tr key={p.id} className="border-b border-border/70 last:border-0">
                 <td className="px-3 py-2.5 font-medium">{p.name}</td>
                 <td className="px-3 py-2.5 text-xs text-muted-foreground">{p.audience}</td>
-                <td className="num px-3 py-2.5">{p.price === 0 ? "Free" : `${inr(p.price)}/mo`}</td>
+                <td className="num px-3 py-2.5">{p.price === 0 ? "Free" : `${money(p.price)}/mo`}</td>
                 <td className="num px-3 py-2.5">{p.activeUsers.toLocaleString("en-IN")}</td>
-                <td className="num px-3 py-2.5 font-semibold">{inr(p.monthlyRevenue)}</td>
+                <td className="num px-3 py-2.5 font-semibold">{money(p.monthlyRevenue)}</td>
               </tr>
             ))}
           </tbody>
