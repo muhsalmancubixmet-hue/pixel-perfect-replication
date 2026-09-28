@@ -202,11 +202,11 @@ function SocialPlatformsPage() {
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <span className="text-sm">Enable OAuth login</span>
-              <Switch defaultChecked={configure?.oauth} />
+              <Switch defaultChecked={configure?.oauth ?? false} />
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <span className="text-sm">Sync follower metrics via API</span>
-              <Switch defaultChecked={configure?.api} />
+              <Switch defaultChecked={configure?.api ?? false} />
             </div>
           </div>
           <DialogFooter>
