@@ -60,9 +60,9 @@ export interface Influencer {
   verification: "verified" | "pending" | "unverified";
   websiteStatus: "published" | "draft" | "suspended" | "none";
   websiteUrl?: string | undefined;
-  websiteTemplate?: string;
-  websiteVisits?: number;
-  websitePublished?: string;
+  websiteTemplate?: string | undefined;
+  websiteVisits?: number | undefined;
+  websitePublished?: string | undefined;
   status: "active" | "suspended" | "pending";
   subscription: string;
   joined: string;
