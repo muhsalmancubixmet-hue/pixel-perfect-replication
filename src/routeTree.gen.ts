@@ -10,14 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuditLogsRouteImport } from './routes/audit-logs'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RequirementsRouteImport } from './routes/requirements'
+import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SocialPlatformsRouteImport } from './routes/social-platforms'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
@@ -32,6 +35,11 @@ import { Route as InfluencersIdRouteImport } from './routes/influencers.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditLogsRoute = AuditLogsRouteImport.update({
+  id: '/audit-logs',
+  path: '/audit-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignsRoute = CampaignsRouteImport.update({
@@ -59,6 +67,11 @@ const MediaRoute = MediaRouteImport.update({
   path: '/media',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PaymentsRoute = PaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -72,6 +85,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const RequirementsRoute = RequirementsRouteImport.update({
   id: '/requirements',
   path: '/requirements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RolesRoute = RolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -127,14 +145,17 @@ const InfluencersIdRoute = InfluencersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/audit-logs': typeof AuditLogsRoute
   '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
+  '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
   '/requirements': typeof RequirementsRoute
+  '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -148,14 +169,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/audit-logs': typeof AuditLogsRoute
   '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
+  '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
   '/requirements': typeof RequirementsRoute
+  '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -170,14 +194,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/audit-logs': typeof AuditLogsRoute
   '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
+  '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
   '/requirements': typeof RequirementsRoute
+  '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -193,14 +220,17 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/audit-logs'
     | '/campaigns'
     | '/categories'
     | '/domains'
     | '/locations'
     | '/media'
+    | '/notifications'
     | '/payments'
     | '/reports'
     | '/requirements'
+    | '/roles'
     | '/services'
     | '/social-platforms'
     | '/subscriptions'
@@ -214,14 +244,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/audit-logs'
     | '/campaigns'
     | '/categories'
     | '/domains'
     | '/locations'
     | '/media'
+    | '/notifications'
     | '/payments'
     | '/reports'
     | '/requirements'
+    | '/roles'
     | '/services'
     | '/social-platforms'
     | '/subscriptions'
@@ -235,14 +268,17 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/audit-logs'
     | '/campaigns'
     | '/categories'
     | '/domains'
     | '/locations'
     | '/media'
+    | '/notifications'
     | '/payments'
     | '/reports'
     | '/requirements'
+    | '/roles'
     | '/services'
     | '/social-platforms'
     | '/subscriptions'
@@ -257,14 +293,17 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuditLogsRoute: typeof AuditLogsRoute
   CampaignsRoute: typeof CampaignsRoute
   CategoriesRoute: typeof CategoriesRoute
   DomainsRoute: typeof DomainsRoute
   LocationsRoute: typeof LocationsRoute
   MediaRoute: typeof MediaRoute
+  NotificationsRoute: typeof NotificationsRoute
   PaymentsRoute: typeof PaymentsRoute
   ReportsRoute: typeof ReportsRoute
   RequirementsRoute: typeof RequirementsRoute
+  RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
   SocialPlatformsRoute: typeof SocialPlatformsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
@@ -284,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit-logs': {
+      id: '/audit-logs'
+      path: '/audit-logs'
+      fullPath: '/audit-logs'
+      preLoaderRoute: typeof AuditLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campaigns': {
@@ -321,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MediaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/payments': {
       id: '/payments'
       path: '/payments'
@@ -340,6 +393,13 @@ declare module '@tanstack/react-router' {
       path: '/requirements'
       fullPath: '/requirements'
       preLoaderRoute: typeof RequirementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roles': {
+      id: '/roles'
+      path: '/roles'
+      fullPath: '/roles'
+      preLoaderRoute: typeof RolesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -417,14 +477,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuditLogsRoute: AuditLogsRoute,
   CampaignsRoute: CampaignsRoute,
   CategoriesRoute: CategoriesRoute,
   DomainsRoute: DomainsRoute,
   LocationsRoute: LocationsRoute,
   MediaRoute: MediaRoute,
+  NotificationsRoute: NotificationsRoute,
   PaymentsRoute: PaymentsRoute,
   ReportsRoute: ReportsRoute,
   RequirementsRoute: RequirementsRoute,
+  RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
   SocialPlatformsRoute: SocialPlatformsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
