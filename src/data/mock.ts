@@ -216,7 +216,7 @@ export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
   const name = `${first} ${last}`;
   const handle = `${first.toLowerCase()}.${last.toLowerCase()}`;
   const district = pick(DISTRICTS, r());
-  const city = pick(CITIES[district], r());
+  const city = pick(CITIES[district] ?? [district], r());
   const cats = [pick(CATEGORY_NAMES, r()), pick(CATEGORY_NAMES, r())].filter(
     (v, idx, a) => a.indexOf(v) === idx,
   );
@@ -311,7 +311,7 @@ export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
 
 export const businesses: Business[] = Array.from({ length: 24 }, (_, i) => {
   const r = rng(i * 313 + 7);
-  const name = BUSINESS_NAMES[i % BUSINESS_NAMES.length];
+  const name = at(BUSINESS_NAMES, i);
   const district = pick(DISTRICTS, r());
   return {
     id: `BIZ-${String(2000 + i)}`,
@@ -319,7 +319,7 @@ export const businesses: Business[] = Array.from({ length: 24 }, (_, i) => {
     logo: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
     type: pick(BUSINESS_TYPES, r()),
     district,
-    city: pick(CITIES[district], r()),
+    city: pick(CITIES[district] ?? [district], r()),
     contactName: `${pick(FIRST, r())} ${pick(LAST, r())}`,
     email: `hello@${name.toLowerCase().replace(/[^a-z]/g, "")}.in`,
     phone: `+91 ${Math.floor(70000 + r() * 29999)} ${Math.floor(10000 + r() * 89999)}`,
@@ -476,7 +476,7 @@ export const platformRequests: PlatformRequest[] = [
   id: `PRQ-${String(7500 + i)}`,
   ...p,
   status: p.status as PlatformRequest["status"],
-  profileUrl: `https://${p.platform.toLowerCase()}.com/${p.requestedBy.split(" ")[0].toLowerCase()}`,
+  profileUrl: `https://${p.platform.toLowerCase()}.com/${(p.requestedBy.split(" ")[0] ?? "creator").toLowerCase()}`,
   date: dateStr(i * 6 + 2),
   note: `Creator has an established audience on ${p.platform} and wants it shown on their Influencers.com profile and website.`,
 }));
@@ -511,7 +511,7 @@ export const locations: LocationNode[] = [
           name: d,
           type: "district" as const,
           creators: influencers.filter((inf) => inf.district === d).length * 12,
-          children: CITIES[d].map((c, k) => ({
+          children: (CITIES[d] ?? []).map((c, k) => ({
             id: `LOC-KL-${i}-${k}`,
             name: c,
             type: "city" as const,

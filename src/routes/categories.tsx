@@ -42,7 +42,10 @@ function CategoriesPage() {
     const next = [...items];
     const target = index + dir;
     if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target], next[index]];
+    const a = next[index]!;
+    const b = next[target]!;
+    next[index] = b;
+    next[target] = a;
     setItems(next.map((c, i) => ({ ...c, order: i + 1 })));
   };
 

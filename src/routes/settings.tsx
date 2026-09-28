@@ -227,8 +227,8 @@ function FieldRow({ field }: { field: Field }) {
 }
 
 function SettingsPage() {
-  const [active, setActive] = useState(SECTIONS[0].id);
-  const section = SECTIONS.find((s) => s.id === active)!;
+  const [active, setActive] = useState(SECTIONS[0]!.id);
+  const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0]!;
 
   return (
     <div className="flex flex-col gap-4">

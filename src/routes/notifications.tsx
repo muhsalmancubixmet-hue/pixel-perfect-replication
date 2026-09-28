@@ -57,7 +57,7 @@ function List({ items }: { items: NotificationItem[] }) {
 function NotificationsPage() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [audience, setAudience] = useState(AUDIENCES[0]);
+  const [audience, setAudience] = useState<string>(AUDIENCES[0]!);
   const [schedule, setSchedule] = useState("");
 
   const send = () => {

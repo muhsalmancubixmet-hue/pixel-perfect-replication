@@ -43,7 +43,7 @@ const tooltipStyle = {
 };
 
 function ReportsPage() {
-  const latest = revenueTrend[revenueTrend.length - 1];
+  const latest = revenueTrend[revenueTrend.length - 1]!;
   const mrr = plans.reduce((a, p) => a + p.monthlyRevenue, 0);
   const net = latest.subscription + latest.services - latest.refunds;
 

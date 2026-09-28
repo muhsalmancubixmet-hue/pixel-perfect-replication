@@ -63,7 +63,7 @@ function RolesPage() {
                     <span
                       className={cn(
                         "inline-block min-w-16 rounded-md px-2 py-0.5 text-[11px] font-semibold",
-                        TONE[row.levels[r]] ?? TONE.None,
+                        TONE[row.levels[r] ?? "None"] ?? TONE["None"],
                       )}
                     >
                       {row.levels[r]}

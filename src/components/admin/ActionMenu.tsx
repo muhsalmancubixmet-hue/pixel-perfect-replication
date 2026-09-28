@@ -36,7 +36,7 @@ export function ActionMenu({ items }: { items: ActionItem[] }) {
           <div key={item.label + i}>
             {item.separatorBefore && <DropdownMenuSeparator />}
             <DropdownMenuItem
-              onSelect={item.onSelect}
+              onSelect={() => item.onSelect?.()}
               className={item.destructive ? "text-destructive focus:text-destructive" : undefined}
               asChild={Boolean(item.node)}
             >
