@@ -244,6 +244,7 @@ export interface Payment {
   user: string;
   type: "Subscription" | "Campaign" | "Service" | "Domain";
   amount: number;
+  currency: string;
   status: "paid" | "pending" | "failed" | "refunded";
   date: string;
   method: string;

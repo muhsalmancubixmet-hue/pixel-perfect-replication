@@ -18,6 +18,8 @@ import type {
   VerificationItem,
   Website,
 } from "./types";
+import { BASE_CURRENCY, DEMO_GLOBAL_PLACES, DEMO_KERALA_PLACES, DEMO_PLACES, money, placeLabel } from "./geo";
+export { money } from "./geo";
 
 /* ------------------------------------------------------------------ */
 /* Deterministic pseudo-random helpers (stable across SSR + client)    */
@@ -53,7 +55,8 @@ export const CATEGORY_NAMES = [
   "Business",
 ];
 
-export const DISTRICTS = [
+/** Demo-only Kerala districts (one sample market). Not used for filters or logic. */
+const DEMO_KERALA_DISTRICTS = [
   "Thiruvananthapuram",
   "Kollam",
   "Pathanamthitta",
@@ -151,9 +154,9 @@ const PLATFORMS = [
   "Twitch",
 ];
 
-const LANGUAGES = ["Malayalam", "English", "Tamil", "Hindi", "Kannada"];
+const LANGUAGES = ["English", "Malayalam", "Hindi", "Tamil", "Arabic", "Spanish", "French", "German"];
 
-const TEMPLATES = ["Kerala Minimal", "Backwater", "Spice Route", "Studio Dark", "Coastal", "Editorial"];
+const TEMPLATES = ["Minimal", "Backwater", "Spice Route", "Studio Dark", "Coastal", "Editorial"];
 
 const SUBS_CREATOR = ["Free", "Pro", "Premium"];
 const SUBS_BUSINESS = ["Free", "Pro", "Agency"];
@@ -215,8 +218,9 @@ export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
   const last = pick(LAST, r());
   const name = `${first} ${last}`;
   const handle = `${first.toLowerCase()}.${last.toLowerCase()}`;
-  const district = pick(DISTRICTS, r());
-  const city = pick(CITIES[district] ?? [district], r());
+  // ~1 in 3 demo creators are outside Kerala to demonstrate global reach
+  const loc = i % 3 === 2 ? at(DEMO_GLOBAL_PLACES, i / 3) : at(DEMO_KERALA_PLACES, r() * 14);
+  const location = { ...loc, lat: loc.lat + (r() - 0.5) * 0.08, lng: loc.lng + (r() - 0.5) * 0.08 };
   const cats = [pick(CATEGORY_NAMES, r()), pick(CATEGORY_NAMES, r())].filter(
     (v, idx, a) => a.indexOf(v) === idx,
   );
@@ -235,11 +239,18 @@ export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
     name,
     handle,
     avatar: `https://i.pravatar.cc/120?img=${(i % 70) + 1}`,
-    bio: `${cats[0]} creator from ${city}, ${district}. Telling Kerala stories in ${pick(LANGUAGES, r())} and English.`,
+    bio: `${cats[0]} creator based in ${placeLabel(location)}. Creates content in ${location.languages.join(" and ")}.`,
     categories: cats,
-    languages: ["Malayalam", pick(LANGUAGES, r())].filter((v, idx, a) => a.indexOf(v) === idx),
-    district,
-    city,
+    languages: [...location.languages, pick(LANGUAGES, r())].filter((v, idx, a) => a.indexOf(v) === idx),
+    location,
+    serviceLocations: [
+      location.city,
+      at(DEMO_PLACES.filter((p) => p.country === location.country && p.city !== location.city), r() * 10)?.city,
+      r() > 0.4 ? "Remote / Worldwide" : undefined,
+    ].filter((v, idx, a): v is string => !!v && a.indexOf(v) === idx),
+    travelAvailable: r() > 0.4,
+    remoteAvailable: r() > 0.3,
+    currency: location.currency,
     followers,
     engagement: Number((1.2 + r() * 7).toFixed(2)),
     platforms: plats,
@@ -312,23 +323,30 @@ export const influencers: Influencer[] = Array.from({ length: 48 }, (_, i) => {
 export const businesses: Business[] = Array.from({ length: 24 }, (_, i) => {
   const r = rng(i * 313 + 7);
   const name = at(BUSINESS_NAMES, i);
-  const district = pick(DISTRICTS, r());
+  const loc = i % 4 === 3 ? at(DEMO_GLOBAL_PLACES, i / 4 + 3) : at(DEMO_KERALA_PLACES, r() * 14);
+  const extra = at(DEMO_PLACES, r() * DEMO_PLACES.length);
   return {
     id: `BIZ-${String(2000 + i)}`,
     name,
     logo: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
     type: pick(BUSINESS_TYPES, r()),
-    district,
-    city: pick(CITIES[district] ?? [district], r()),
+    location: loc,
+    operatingLocations: [
+      { label: placeLabel(loc), address: `${10 + Math.floor(r() * 90)} Main Street, ${loc.city}`, radiusKm: 25 },
+      ...(extra.city !== loc.city && r() > 0.5
+        ? [{ label: placeLabel(extra), address: `Branch office, ${extra.city}`, radiusKm: 15 }]
+        : []),
+    ],
+    currency: loc.currency,
     contactName: `${pick(FIRST, r())} ${pick(LAST, r())}`,
-    email: `hello@${name.toLowerCase().replace(/[^a-z]/g, "")}.in`,
-    phone: `+91 ${Math.floor(70000 + r() * 29999)} ${Math.floor(10000 + r() * 89999)}`,
+    email: `hello@${name.toLowerCase().replace(/[^a-z]/g, "")}.com`,
+    phone: `${loc.countryCode === "IN" ? "+91" : "+" + (10 + i)} ${Math.floor(70000 + r() * 29999)} ${Math.floor(10000 + r() * 89999)}`,
     campaigns: Math.floor(r() * 18),
     subscription: pick(SUBS_BUSINESS, r()),
     status: pick(["active", "active", "active", "suspended", "pending"] as const, r()),
     verification: pick(["verified", "verified", "pending", "unverified"] as const, r()),
     joined: dateStr(Math.floor(40 + r() * 650)),
-    about: `${name} is a ${pick(BUSINESS_TYPES, r()).toLowerCase()} brand based in ${district}, working with Kerala creators on always-on social campaigns.`,
+    about: `${name} is a ${pick(BUSINESS_TYPES, r()).toLowerCase()} brand based in ${placeLabel(loc)}, working with creators on always-on social campaigns.`,
     activity: Array.from({ length: 5 }, (_, k) => ({
       date: dateStr(k * 4 + Math.floor(r() * 3)),
       text: pick(
@@ -377,7 +395,8 @@ export const campaigns: Campaign[] = Array.from({ length: 36 }, (_, i) => {
     status: pick(CAMPAIGN_STATUSES, r()),
     created: dateStr(created),
     deadline: dateStr(created - 30 - Math.floor(r() * 40)),
-    district: pick(DISTRICTS, r()),
+    location: placeLabel(biz.location),
+    currency: BASE_CURRENCY,
   };
 });
 
@@ -386,10 +405,11 @@ export const requirements: Requirement[] = Array.from({ length: 22 }, (_, i) => 
   const biz = at(businesses, r() * businesses.length);
   return {
     id: `REQ-${String(4000 + i)}`,
-    title: `Need ${1 + Math.floor(r() * 8)} ${pick(CATEGORY_NAMES, r()).toLowerCase()} creators in ${pick(DISTRICTS, r())}`,
+    title: `Need ${1 + Math.floor(r() * 8)} ${pick(CATEGORY_NAMES, r()).toLowerCase()} creators in ${biz.location.city}`,
     business: biz.name,
     category: pick(CATEGORY_NAMES, r()),
-    district: pick(DISTRICTS, r()),
+    location: placeLabel(biz.location),
+    currency: BASE_CURRENCY,
     budget: Math.floor((10 + r() * 200)) * 1000,
     creatorsNeeded: 1 + Math.floor(r() * 10),
     applications: Math.floor(r() * 40),
