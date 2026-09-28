@@ -15,10 +15,13 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RequirementsRouteImport } from './routes/requirements'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SocialPlatformsRouteImport } from './routes/social-platforms'
+import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as WebsitesRouteImport } from './routes/websites'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
@@ -56,6 +59,11 @@ const MediaRoute = MediaRouteImport.update({
   path: '/media',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentsRoute = PaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -74,6 +82,16 @@ const ServicesRoute = ServicesRouteImport.update({
 const SocialPlatformsRoute = SocialPlatformsRouteImport.update({
   id: '/social-platforms',
   path: '/social-platforms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsRoute = SubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerificationRoute = VerificationRouteImport.update({
@@ -114,10 +132,13 @@ export interface FileRoutesByFullPath {
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
+  '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
   '/requirements': typeof RequirementsRoute
   '/services': typeof ServicesRoute
   '/social-platforms': typeof SocialPlatformsRoute
+  '/subscriptions': typeof SubscriptionsRoute
+  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
@@ -132,10 +153,13 @@ export interface FileRoutesByTo {
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
+  '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
   '/requirements': typeof RequirementsRoute
   '/services': typeof ServicesRoute
   '/social-platforms': typeof SocialPlatformsRoute
+  '/subscriptions': typeof SubscriptionsRoute
+  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
@@ -151,10 +175,13 @@ export interface FileRoutesById {
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
   '/media': typeof MediaRoute
+  '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
   '/requirements': typeof RequirementsRoute
   '/services': typeof ServicesRoute
   '/social-platforms': typeof SocialPlatformsRoute
+  '/subscriptions': typeof SubscriptionsRoute
+  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
@@ -171,10 +198,13 @@ export interface FileRouteTypes {
     | '/domains'
     | '/locations'
     | '/media'
+    | '/payments'
     | '/reports'
     | '/requirements'
     | '/services'
     | '/social-platforms'
+    | '/subscriptions'
+    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
@@ -189,10 +219,13 @@ export interface FileRouteTypes {
     | '/domains'
     | '/locations'
     | '/media'
+    | '/payments'
     | '/reports'
     | '/requirements'
     | '/services'
     | '/social-platforms'
+    | '/subscriptions'
+    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
@@ -207,10 +240,13 @@ export interface FileRouteTypes {
     | '/domains'
     | '/locations'
     | '/media'
+    | '/payments'
     | '/reports'
     | '/requirements'
     | '/services'
     | '/social-platforms'
+    | '/subscriptions'
+    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
@@ -226,10 +262,13 @@ export interface RootRouteChildren {
   DomainsRoute: typeof DomainsRoute
   LocationsRoute: typeof LocationsRoute
   MediaRoute: typeof MediaRoute
+  PaymentsRoute: typeof PaymentsRoute
   ReportsRoute: typeof ReportsRoute
   RequirementsRoute: typeof RequirementsRoute
   ServicesRoute: typeof ServicesRoute
   SocialPlatformsRoute: typeof SocialPlatformsRoute
+  SubscriptionsRoute: typeof SubscriptionsRoute
+  SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
   WebsitesRoute: typeof WebsitesRoute
   BusinessesIdRoute: typeof BusinessesIdRoute
@@ -282,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MediaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payments': {
+      id: '/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof PaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports': {
       id: '/reports'
       path: '/reports'
@@ -308,6 +354,20 @@ declare module '@tanstack/react-router' {
       path: '/social-platforms'
       fullPath: '/social-platforms'
       preLoaderRoute: typeof SocialPlatformsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions': {
+      id: '/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verification': {
@@ -362,10 +422,13 @@ const rootRouteChildren: RootRouteChildren = {
   DomainsRoute: DomainsRoute,
   LocationsRoute: LocationsRoute,
   MediaRoute: MediaRoute,
+  PaymentsRoute: PaymentsRoute,
   ReportsRoute: ReportsRoute,
   RequirementsRoute: RequirementsRoute,
   ServicesRoute: ServicesRoute,
   SocialPlatformsRoute: SocialPlatformsRoute,
+  SubscriptionsRoute: SubscriptionsRoute,
+  SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
   WebsitesRoute: WebsitesRoute,
   BusinessesIdRoute: BusinessesIdRoute,
