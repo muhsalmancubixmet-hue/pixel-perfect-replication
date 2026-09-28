@@ -55,41 +55,6 @@ export const CATEGORY_NAMES = [
   "Business",
 ];
 
-/** Demo-only Kerala districts (one sample market). Not used for filters or logic. */
-const DEMO_KERALA_DISTRICTS = [
-  "Thiruvananthapuram",
-  "Kollam",
-  "Pathanamthitta",
-  "Alappuzha",
-  "Kottayam",
-  "Idukki",
-  "Ernakulam",
-  "Thrissur",
-  "Palakkad",
-  "Malappuram",
-  "Kozhikode",
-  "Wayanad",
-  "Kannur",
-  "Kasaragod",
-];
-
-const CITIES: Record<string, string[]> = {
-  Thiruvananthapuram: ["Kazhakkoottam", "Neyyattinkara", "Varkala", "Attingal"],
-  Kollam: ["Karunagappally", "Punalur", "Paravur"],
-  Pathanamthitta: ["Adoor", "Thiruvalla", "Pandalam"],
-  Alappuzha: ["Cherthala", "Kayamkulam", "Mararikulam"],
-  Kottayam: ["Changanassery", "Pala", "Vaikom"],
-  Idukki: ["Thodupuzha", "Munnar", "Kattappana"],
-  Ernakulam: ["Kakkanad", "Fort Kochi", "Aluva", "Perumbavoor"],
-  Thrissur: ["Guruvayur", "Chalakudy", "Irinjalakuda"],
-  Palakkad: ["Ottapalam", "Shoranur", "Chittur"],
-  Malappuram: ["Manjeri", "Tirur", "Perinthalmanna"],
-  Kozhikode: ["Vadakara", "Koyilandy", "Feroke"],
-  Wayanad: ["Kalpetta", "Sulthan Bathery", "Mananthavady"],
-  Kannur: ["Thalassery", "Payyanur", "Mattannur"],
-  Kasaragod: ["Kanhangad", "Nileshwaram", "Bekal"],
-};
-
 const FIRST = [
   "Anjali",
   "Arjun",
@@ -184,7 +149,7 @@ const BUSINESS_NAMES = [
   "Malabar Gold House",
   "Nila Ayurveda",
   "Marine Drive Homes",
-  "EduKerala Academy",
+  "Edu Bright Academy",
   "Amrita Care Clinics",
   "Zephyr Motors",
   "Techzone Kochi",
@@ -514,34 +479,54 @@ export const categories: Category[] = CATEGORY_NAMES.map((name, i) => ({
   status: name === "Parenting" ? "inactive" : "active",
 }));
 
-export const locations: LocationNode[] = [
-  {
-    id: "LOC-IN",
-    name: "India",
-    type: "country",
-    creators: influencers.length * 12,
-    children: [
-      {
-        id: "LOC-KL",
-        name: "Kerala",
-        type: "state",
-        creators: influencers.length * 12,
-        children: DISTRICTS.map((d, i) => ({
-          id: `LOC-KL-${i}`,
-          name: d,
-          type: "district" as const,
-          creators: influencers.filter((inf) => inf.district === d).length * 12,
-          children: (CITIES[d] ?? []).map((c, k) => ({
-            id: `LOC-KL-${i}-${k}`,
-            name: c,
-            type: "city" as const,
-            creators: influencers.filter((inf) => inf.city === c).length * 6,
-          })),
-        })),
-      },
-    ],
-  },
-];
+/** Global location tree built from demo places. Levels adapt per country (district is optional). */
+function buildLocationTree(): LocationNode[] {
+  const slug = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]+/g, "-");
+  const count = (f: (inf: Influencer) => boolean) => influencers.filter(f).length * 12 + 3;
+  const countries = [...new Set(DEMO_PLACES.map((p) => p.country))];
+  return countries.map((country) => {
+    const cp = DEMO_PLACES.filter((p) => p.country === country);
+    const regions = [...new Set(cp.map((p) => p.region))];
+    return {
+      id: `LOC-${slug(country)}`,
+      name: country,
+      type: "country" as const,
+      status: "active" as const,
+      creators: count((i) => i.location.country === country),
+      children: regions.map((region) => {
+        const rp = cp.filter((p) => p.region === region);
+        const cityNode = (city: string): LocationNode => ({
+          id: `LOC-${slug(country)}-${slug(region)}-${slug(city)}`,
+          name: city,
+          type: "city",
+          status: "active",
+          creators: count((i) => i.location.city === city),
+        });
+        const districts = [...new Set(rp.map((p) => p.district).filter(Boolean))] as string[];
+        const useDistricts = districts.length > 1;
+        return {
+          id: `LOC-${slug(country)}-${slug(region)}`,
+          name: region,
+          type: "region" as const,
+          status: "active" as const,
+          creators: count((i) => i.location.region === region),
+          children: useDistricts
+            ? districts.map((d) => ({
+                id: `LOC-${slug(country)}-${slug(region)}-D-${slug(d)}`,
+                name: d,
+                type: "district" as const,
+                status: "active" as const,
+                creators: count((i) => i.location.district === d),
+                children: rp.filter((p) => p.district === d).map((p) => cityNode(p.city)),
+              }))
+            : rp.map((p) => cityNode(p.city)),
+        };
+      }),
+    };
+  });
+}
+
+export const locations: LocationNode[] = buildLocationTree();
 
 export const services: ServiceType[] = [
   { name: "Instagram Reel", platform: "Instagram", avgPrice: 12000 },
@@ -590,7 +575,7 @@ export const verifications: VerificationItem[] = [
       id: `VER-C-${k}`,
       kind: "creator" as const,
       user: i.name,
-      detail: `Aadhaar + creator portfolio · ${i.district}`,
+      detail: `ID document + creator portfolio · ${placeLabel(i.location)}`,
       submitted: dateStr(k * 2 + 1),
       status: "pending" as const,
     })),
@@ -609,7 +594,7 @@ export const verifications: VerificationItem[] = [
       id: `VER-B-${k}`,
       kind: "business" as const,
       user: b.name,
-      detail: `GSTIN + trade licence · ${b.district}`,
+      detail: `Tax ID + trade licence · ${placeLabel(b.location)}`,
       submitted: dateStr(k * 2 + 3),
       status: "pending" as const,
     })),
@@ -693,6 +678,7 @@ export const payments: Payment[] = Array.from({ length: 42 }, (_, i) => {
     user: who,
     type: pick(["Subscription", "Campaign", "Service", "Domain"] as const, r()),
     amount: Math.floor((499 + r() * 90000)),
+    currency: BASE_CURRENCY,
     status: pick(["paid", "paid", "paid", "pending", "failed", "refunded"] as const, r()),
     date: dateStr(Math.floor(r() * 120)),
     method: pick(["UPI", "Card", "Netbanking", "Wallet"], r()),
@@ -909,12 +895,12 @@ export const dashboardStats = {
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-export const inr = (n: number) =>
-  `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+/** @deprecated use money(amount, currency). Kept as base-currency alias. */
+export const inr = (n: number) => money(n);
 
 export const compact = (n: number) => {
-  if (n >= 10000000) return `${(n / 10000000).toFixed(1)}Cr`;
-  if (n >= 100000) return `${(n / 100000).toFixed(1)}L`;
+  if (n >= 1000000000) return `${(n / 1000000000).toFixed(1)}B`;
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
   return String(n);
 };
@@ -940,18 +926,18 @@ export function globalSearch(q: string): SearchResult[] {
     .filter((i) => i.name.toLowerCase().includes(term) || i.handle.includes(term))
     .slice(0, 5)
     .forEach((i) =>
-      out.push({ group: "Influencers", id: i.id, label: i.name, sub: `${i.district} · ${compact(i.followers)} followers`, to: "/influencers/$id", params: { id: i.id } }),
+      out.push({ group: "Influencers", id: i.id, label: i.name, sub: `${placeLabel(i.location)} · ${compact(i.followers)} followers`, to: "/influencers/$id", params: { id: i.id } }),
     );
   businesses
     .filter((b) => b.name.toLowerCase().includes(term))
     .slice(0, 5)
     .forEach((b) =>
-      out.push({ group: "Businesses", id: b.id, label: b.name, sub: `${b.type} · ${b.district}`, to: "/businesses/$id", params: { id: b.id } }),
+      out.push({ group: "Businesses", id: b.id, label: b.name, sub: `${b.type} · ${placeLabel(b.location)}`, to: "/businesses/$id", params: { id: b.id } }),
     );
   campaigns
     .filter((c) => c.title.toLowerCase().includes(term) || c.business.toLowerCase().includes(term))
     .slice(0, 5)
-    .forEach((c) => out.push({ group: "Campaigns", id: c.id, label: c.title, sub: `${c.business} · ${inr(c.budget)}`, to: "/campaigns" }));
+    .forEach((c) => out.push({ group: "Campaigns", id: c.id, label: c.title, sub: `${c.business} · ${money(c.budget, c.currency)}`, to: "/campaigns" }));
   requirements
     .filter((r) => r.title.toLowerCase().includes(term) || r.business.toLowerCase().includes(term))
     .slice(0, 4)
@@ -966,3 +952,8 @@ export function globalSearch(q: string): SearchResult[] {
     .forEach((d) => out.push({ group: "Domains", id: d.id, label: d.domain, sub: d.creator, to: "/domains" }));
   return out;
 }
+
+/* Global filter option lists derived from data — never hardcoded regions. */
+export const COUNTRY_OPTIONS = [...new Set(DEMO_PLACES.map((p) => p.country))].sort();
+export const CITY_OPTIONS = [...new Set(DEMO_PLACES.map((p) => p.city))].sort();
+export const LANGUAGE_OPTIONS = [...new Set(influencers.flatMap((i) => i.languages))].sort();
