@@ -22,6 +22,7 @@ import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RequirementsRouteImport } from './routes/requirements'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SocialPlatformsRouteImport } from './routes/social-platforms'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as SupportRouteImport } from './routes/support'
@@ -97,6 +98,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SocialPlatformsRoute = SocialPlatformsRouteImport.update({
   id: '/social-platforms',
   path: '/social-platforms',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/support': typeof SupportRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/support': typeof SupportRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/support': typeof SupportRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/requirements'
     | '/roles'
     | '/services'
+    | '/settings'
     | '/social-platforms'
     | '/subscriptions'
     | '/support'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/requirements'
     | '/roles'
     | '/services'
+    | '/settings'
     | '/social-platforms'
     | '/subscriptions'
     | '/support'
@@ -280,6 +291,7 @@ export interface FileRouteTypes {
     | '/requirements'
     | '/roles'
     | '/services'
+    | '/settings'
     | '/social-platforms'
     | '/subscriptions'
     | '/support'
@@ -305,6 +317,7 @@ export interface RootRouteChildren {
   RequirementsRoute: typeof RequirementsRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
+  SettingsRoute: typeof SettingsRoute
   SocialPlatformsRoute: typeof SocialPlatformsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   SupportRoute: typeof SupportRoute
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/social-platforms': {
       id: '/social-platforms'
       path: '/social-platforms'
@@ -489,6 +509,7 @@ const rootRouteChildren: RootRouteChildren = {
   RequirementsRoute: RequirementsRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
+  SettingsRoute: SettingsRoute,
   SocialPlatformsRoute: SocialPlatformsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   SupportRoute: SupportRoute,
