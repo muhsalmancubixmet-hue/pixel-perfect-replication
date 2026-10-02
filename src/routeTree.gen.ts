@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuditLogsRouteImport } from './routes/audit-logs'
-import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as DiscoveryRouteImport } from './routes/discovery'
 import { Route as DomainsRouteImport } from './routes/domains'
@@ -20,19 +19,20 @@ import { Route as MediaRouteImport } from './routes/media'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as RequirementsRouteImport } from './routes/requirements'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SocialPlatformsRouteImport } from './routes/social-platforms'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
-import { Route as SupportRouteImport } from './routes/support'
 import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as WebsitesRouteImport } from './routes/websites'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as BusinessesIdRouteImport } from './routes/businesses.$id'
+import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
 import { Route as InfluencersIndexRouteImport } from './routes/influencers.index'
 import { Route as InfluencersIdRouteImport } from './routes/influencers.$id'
+import { Route as RequirementsIndexRouteImport } from './routes/requirements.index'
+import { Route as SupportIndexRouteImport } from './routes/support.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -42,11 +42,6 @@ const IndexRoute = IndexRouteImport.update({
 const AuditLogsRoute = AuditLogsRouteImport.update({
   id: '/audit-logs',
   path: '/audit-logs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CampaignsRoute = CampaignsRouteImport.update({
-  id: '/campaigns',
-  path: '/campaigns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesRoute = CategoriesRouteImport.update({
@@ -89,11 +84,6 @@ const ReportsRoute = ReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RequirementsRoute = RequirementsRouteImport.update({
-  id: '/requirements',
-  path: '/requirements',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RolesRoute = RolesRouteImport.update({
   id: '/roles',
   path: '/roles',
@@ -119,11 +109,6 @@ const SubscriptionsRoute = SubscriptionsRouteImport.update({
   path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SupportRoute = SupportRouteImport.update({
-  id: '/support',
-  path: '/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const VerificationRoute = VerificationRouteImport.update({
   id: '/verification',
   path: '/verification',
@@ -144,6 +129,11 @@ const BusinessesIdRoute = BusinessesIdRouteImport.update({
   path: '/businesses/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
+  id: '/campaigns/',
+  path: '/campaigns/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InfluencersIndexRoute = InfluencersIndexRouteImport.update({
   id: '/influencers/',
   path: '/influencers/',
@@ -154,11 +144,20 @@ const InfluencersIdRoute = InfluencersIdRouteImport.update({
   path: '/influencers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RequirementsIndexRoute = RequirementsIndexRouteImport.update({
+  id: '/requirements/',
+  path: '/requirements/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportIndexRoute = SupportIndexRouteImport.update({
+  id: '/support/',
+  path: '/support/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/audit-logs': typeof AuditLogsRoute
-  '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
@@ -167,24 +166,24 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
-  '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/campaigns/': typeof CampaignsIndexRoute
   '/influencers/': typeof InfluencersIndexRoute
+  '/requirements/': typeof RequirementsIndexRoute
+  '/support/': typeof SupportIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/audit-logs': typeof AuditLogsRoute
-  '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
@@ -193,25 +192,25 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
-  '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
   '/businesses': typeof BusinessesIndexRoute
+  '/campaigns': typeof CampaignsIndexRoute
   '/influencers': typeof InfluencersIndexRoute
+  '/requirements': typeof RequirementsIndexRoute
+  '/support': typeof SupportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/audit-logs': typeof AuditLogsRoute
-  '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
@@ -220,26 +219,26 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
-  '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/campaigns/': typeof CampaignsIndexRoute
   '/influencers/': typeof InfluencersIndexRoute
+  '/requirements/': typeof RequirementsIndexRoute
+  '/support/': typeof SupportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/audit-logs'
-    | '/campaigns'
     | '/categories'
     | '/discovery'
     | '/domains'
@@ -248,24 +247,24 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/payments'
     | '/reports'
-    | '/requirements'
     | '/roles'
     | '/services'
     | '/settings'
     | '/social-platforms'
     | '/subscriptions'
-    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
     | '/influencers/$id'
     | '/businesses/'
+    | '/campaigns/'
     | '/influencers/'
+    | '/requirements/'
+    | '/support/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/audit-logs'
-    | '/campaigns'
     | '/categories'
     | '/discovery'
     | '/domains'
@@ -274,24 +273,24 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/payments'
     | '/reports'
-    | '/requirements'
     | '/roles'
     | '/services'
     | '/settings'
     | '/social-platforms'
     | '/subscriptions'
-    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
     | '/influencers/$id'
     | '/businesses'
+    | '/campaigns'
     | '/influencers'
+    | '/requirements'
+    | '/support'
   id:
     | '__root__'
     | '/'
     | '/audit-logs'
-    | '/campaigns'
     | '/categories'
     | '/discovery'
     | '/domains'
@@ -300,25 +299,25 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/payments'
     | '/reports'
-    | '/requirements'
     | '/roles'
     | '/services'
     | '/settings'
     | '/social-platforms'
     | '/subscriptions'
-    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
     | '/influencers/$id'
     | '/businesses/'
+    | '/campaigns/'
     | '/influencers/'
+    | '/requirements/'
+    | '/support/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuditLogsRoute: typeof AuditLogsRoute
-  CampaignsRoute: typeof CampaignsRoute
   CategoriesRoute: typeof CategoriesRoute
   DiscoveryRoute: typeof DiscoveryRoute
   DomainsRoute: typeof DomainsRoute
@@ -327,19 +326,20 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   PaymentsRoute: typeof PaymentsRoute
   ReportsRoute: typeof ReportsRoute
-  RequirementsRoute: typeof RequirementsRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
   SettingsRoute: typeof SettingsRoute
   SocialPlatformsRoute: typeof SocialPlatformsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
-  SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
   WebsitesRoute: typeof WebsitesRoute
   BusinessesIdRoute: typeof BusinessesIdRoute
   InfluencersIdRoute: typeof InfluencersIdRoute
   BusinessesIndexRoute: typeof BusinessesIndexRoute
+  CampaignsIndexRoute: typeof CampaignsIndexRoute
   InfluencersIndexRoute: typeof InfluencersIndexRoute
+  RequirementsIndexRoute: typeof RequirementsIndexRoute
+  SupportIndexRoute: typeof SupportIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -356,13 +356,6 @@ declare module '@tanstack/react-router' {
       path: '/audit-logs'
       fullPath: '/audit-logs'
       preLoaderRoute: typeof AuditLogsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/campaigns': {
-      id: '/campaigns'
-      path: '/campaigns'
-      fullPath: '/campaigns'
-      preLoaderRoute: typeof CampaignsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories': {
@@ -421,13 +414,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/requirements': {
-      id: '/requirements'
-      path: '/requirements'
-      fullPath: '/requirements'
-      preLoaderRoute: typeof RequirementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/roles': {
       id: '/roles'
       path: '/roles'
@@ -463,13 +449,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/support': {
-      id: '/support'
-      path: '/support'
-      fullPath: '/support'
-      preLoaderRoute: typeof SupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/verification': {
       id: '/verification'
       path: '/verification'
@@ -498,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaigns/': {
+      id: '/campaigns/'
+      path: '/campaigns'
+      fullPath: '/campaigns/'
+      preLoaderRoute: typeof CampaignsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/influencers/': {
       id: '/influencers/'
       path: '/influencers'
@@ -512,13 +498,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InfluencersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/requirements/': {
+      id: '/requirements/'
+      path: '/requirements'
+      fullPath: '/requirements/'
+      preLoaderRoute: typeof RequirementsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support/': {
+      id: '/support/'
+      path: '/support'
+      fullPath: '/support/'
+      preLoaderRoute: typeof SupportIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuditLogsRoute: AuditLogsRoute,
-  CampaignsRoute: CampaignsRoute,
   CategoriesRoute: CategoriesRoute,
   DiscoveryRoute: DiscoveryRoute,
   DomainsRoute: DomainsRoute,
@@ -527,19 +526,20 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   PaymentsRoute: PaymentsRoute,
   ReportsRoute: ReportsRoute,
-  RequirementsRoute: RequirementsRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
   SettingsRoute: SettingsRoute,
   SocialPlatformsRoute: SocialPlatformsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
-  SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
   WebsitesRoute: WebsitesRoute,
   BusinessesIdRoute: BusinessesIdRoute,
   InfluencersIdRoute: InfluencersIdRoute,
   BusinessesIndexRoute: BusinessesIndexRoute,
+  CampaignsIndexRoute: CampaignsIndexRoute,
   InfluencersIndexRoute: InfluencersIndexRoute,
+  RequirementsIndexRoute: RequirementsIndexRoute,
+  SupportIndexRoute: SupportIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
