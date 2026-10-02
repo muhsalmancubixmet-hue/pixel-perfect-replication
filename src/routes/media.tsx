@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { FileVideo, HardDrive, Image as ImageIcon } from "lucide-react";
+import { Copy, FileVideo, HardDrive, Image as ImageIcon, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatCard } from "@/components/admin/StatCard";
-import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
+import { ActionMenu } from "@/components/admin/ActionMenu";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ConfirmDialog, saved } from "@/components/admin/Dialogs";
 import { media } from "@/data/mock";
 import type { MediaItem } from "@/data/types";
 
@@ -23,7 +28,20 @@ export const Route = createFileRoute("/media")({
 
 const mb = (kb: number) => `${(kb / 1024).toFixed(1)} MB`;
 
+const cdnUrl = (m: MediaItem) => `https://cdn.influencers.com/media/${m.id.toLowerCase()}/${m.name}`;
+
 function MediaPage() {
+  const [rows, setRows] = useState<MediaItem[]>(media);
+  const [preview, setPreview] = useState<MediaItem | null>(null);
+  const [deleting, setDeleting] = useState<MediaItem | null>(null);
+  const copy = async (m: MediaItem) => {
+    try {
+      await navigator.clipboard.writeText(cdnUrl(m));
+      toast.success("CDN URL copied", { description: cdnUrl(m) });
+    } catch {
+      toast.error("Couldn't access the clipboard");
+    }
+  };
   const totalKb = media.reduce((a, m) => a + m.size, 0);
   const images = media.filter((m) => m.type === "image").length;
   const videos = media.filter((m) => m.type === "video").length;
@@ -87,7 +105,8 @@ function MediaPage() {
       </div>
 
       <DataTable
-        rows={media}
+        rows={rows}
+        onRowClick={setPreview}
         columns={columns}
         filters={filters}
         getId={(r) => r.id}
@@ -105,12 +124,63 @@ function MediaPage() {
         rowAction={(r) => (
           <ActionMenu
             items={[
-              { label: "Preview", onSelect: mockAction("Preview media", r.name) },
-              { label: "Download", onSelect: mockAction("Download queued", r.name) },
-              { label: "Delete", onSelect: mockAction("File deleted", r.name), destructive: true, separatorBefore: true },
+              { label: "Preview", onSelect: () => setPreview(r) },
+              { label: "Copy CDN URL", onSelect: () => void copy(r) },
+              { label: "Delete", onSelect: () => setDeleting(r), destructive: true, separatorBefore: true },
             ]}
           />
         )}
+      />
+
+      <Dialog open={Boolean(preview)} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="num truncate pr-6">{preview?.name}</DialogTitle>
+            <DialogDescription>Uploaded by {preview?.creator}</DialogDescription>
+          </DialogHeader>
+          {preview && (
+            <>
+              <div className="grid aspect-video place-items-center rounded-lg border border-border bg-muted text-muted-foreground">
+                {preview.type === "video" ? <FileVideo className="size-12" /> : <ImageIcon className="size-12" />}
+              </div>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-4">
+                {[
+                  ["Type", preview.type],
+                  ["Size", mb(preview.size)],
+                  ["Uploaded", preview.uploaded],
+                  ["File ID", preview.id],
+                ].map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="text-muted-foreground">{k}</dt>
+                    <dd className="num font-medium capitalize">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="num truncate rounded-md bg-muted px-3 py-2 text-xs">{cdnUrl(preview)}</p>
+            </>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="h-10 text-destructive" onClick={() => preview && setDeleting(preview)}>
+              <Trash2 className="size-4" /> Delete
+            </Button>
+            <Button className="h-10" onClick={() => preview && void copy(preview)}>
+              <Copy className="size-4" /> Copy CDN URL
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <ConfirmDialog
+        open={Boolean(deleting)}
+        onOpenChange={(o) => !o && setDeleting(null)}
+        title="Delete this file?"
+        description={`${deleting?.name ?? ""} will be removed from the creator's library and website. This can't be undone.`}
+        confirmLabel="Delete file"
+        onConfirm={() => {
+          if (!deleting) return;
+          setRows((rs) => rs.filter((m) => m.id !== deleting.id));
+          setPreview(null);
+          saved("File deleted", deleting.name);
+        }}
       />
     </div>
   );
