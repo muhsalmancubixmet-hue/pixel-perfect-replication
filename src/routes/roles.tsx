@@ -118,8 +118,8 @@ function RolesPage() {
         initial={{ role: "Support" }}
         submitLabel="Send invite"
         onSubmit={(v) => {
-          setStaff((s) => [...s, { name: String(v.name), email: String(v.email), role: String(v.role), lastActive: "Invited", active: true }]);
-          saved("Invite sent", String(v.email));
+          setStaff((s) => [...s, { name: String(v["name"]), email: String(v["email"]), role: String(v["role"]), lastActive: "Invited", active: true }]);
+          saved("Invite sent", String(v["email"]));
         }}
       />
       <FormDialog
@@ -133,7 +133,7 @@ function RolesPage() {
         initial={editing ? { role: editing.role, active: editing.active } : {}}
         onSubmit={(v) => {
           if (!editing) return;
-          setStaff((s) => s.map((x) => (x.email === editing.email ? { ...x, role: String(v.role), active: Boolean(v.active) } : x)));
+          setStaff((s) => s.map((x) => (x.email === editing.email ? { ...x, role: String(v["role"]), active: Boolean(v["active"]) } : x)));
           saved("Admin updated", editing.name);
         }}
       />

@@ -177,7 +177,7 @@ function InfluencersPage() {
         fields={addFields}
         initial={{ tier: "Free" }}
         submitLabel="Create creator"
-        onSubmit={(v) => saved("Creator created", `${String(v.name)} (${String(v.handle)}) was invited.`)}
+        onSubmit={(v) => saved("Creator created", `${String(v["name"])} (${String(v["handle"])}) was invited.`)}
       />
       <FormDrawer
         open={Boolean(editing)}
@@ -187,8 +187,8 @@ function InfluencersPage() {
         initial={editing ? { name: editing.name, handle: editing.handle, category: editing.categories[0] ?? "", tier: editing.subscription.replace(/^Influencer /, "") } : {}}
         onSubmit={(v) => {
           if (!editing) return;
-          update(editing.id, { name: String(v.name), handle: String(v.handle) });
-          saved("Creator updated", String(v.name));
+          update(editing.id, { name: String(v["name"]), handle: String(v["handle"]) });
+          saved("Creator updated", String(v["name"]));
         }}
       />
       <VerifyDialog

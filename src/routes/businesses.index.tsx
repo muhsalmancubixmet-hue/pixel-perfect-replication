@@ -173,7 +173,7 @@ function BusinessesPage() {
         fields={fields}
         initial={{ plan: "Free" }}
         submitLabel="Create business"
-        onSubmit={(v) => saved("Business created", `${String(v.name)} was invited to the Business App.`)}
+        onSubmit={(v) => saved("Business created", `${String(v["name"])} was invited to the Business App.`)}
       />
       <FormDrawer
         open={Boolean(editing)}
@@ -187,8 +187,8 @@ function BusinessesPage() {
         }
         onSubmit={(v) => {
           if (!editing) return;
-          setRows((rs) => rs.map((b) => (b.id === editing.id ? { ...b, name: String(v.name), type: String(v.type), email: String(v.email), phone: String(v.phone) } : b)));
-          saved("Business updated", String(v.name));
+          setRows((rs) => rs.map((b) => (b.id === editing.id ? { ...b, name: String(v["name"]), type: String(v["type"]), email: String(v["email"]), phone: String(v["phone"]) } : b)));
+          saved("Business updated", String(v["name"]));
         }}
       />
       <ReasonDialog

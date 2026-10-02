@@ -86,7 +86,7 @@ function ServicesPage() {
         initial={current ? { name: current.name, platform: current.platform, avgPrice: String(current.avgPrice), deliverables: "" } : {}}
         submitLabel={current ? "Save changes" : "Add service"}
         onSubmit={(v) => {
-          const patch = { name: String(v.name), platform: String(v.platform), avgPrice: Number(v.avgPrice) || 0 };
+          const patch = { name: String(v["name"]), platform: String(v["platform"]), avgPrice: Number(v["avgPrice"]) || 0 };
           if (current) setItems((s) => s.map((x) => (x.id === current.id ? { ...x, ...patch } : x)));
           else setItems((s) => [...s, { id: `SVC-${Date.now()}`, creators: 0, status: "active", ...patch }]);
           saved(current ? "Service updated" : "Service added", patch.name);
