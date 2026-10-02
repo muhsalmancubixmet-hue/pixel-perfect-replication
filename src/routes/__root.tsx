@@ -4,14 +4,17 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
+import { PUBLIC_PATHS, getSession } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -115,12 +118,49 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Closes the mobile sidebar drawer whenever the route changes. */
+function MobileNavCloser() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { setOpenMobile } = useSidebar();
+  useEffect(() => setOpenMobile(false), [pathname, setOpenMobile]);
+  return null;
+}
+
+/** Prototype session guard: sends visitors without a staff session to /login. */
+function useStaffGuard(isPublic: boolean) {
+  const navigate = useNavigate();
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    if (isPublic) return;
+    if (getSession()) setOk(true);
+    else void navigate({ to: "/login", replace: true });
+  }, [isPublic, navigate]);
+  return ok;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const authed = useStaffGuard(isPublic);
+
+  if (isPublic) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Outlet />
+        <Toaster position="top-right" />
+      </QueryClientProvider>
+    );
+  }
+
+  if (!authed) {
+    return <div className="min-h-screen bg-background" />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider>
+        <MobileNavCloser />
         <div className="flex min-h-screen w-full">
           <AdminSidebar />
           <SidebarInset className="min-w-0 flex-1 bg-background">

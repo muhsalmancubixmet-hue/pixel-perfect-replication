@@ -15,6 +15,7 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as DiscoveryRouteImport } from './routes/discovery'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as LocationsRouteImport } from './routes/locations'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MediaRouteImport } from './routes/media'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PaymentsRouteImport } from './routes/payments'
@@ -32,6 +33,8 @@ import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
 import { Route as CampaignsIdRouteImport } from './routes/campaigns.$id'
 import { Route as InfluencersIndexRouteImport } from './routes/influencers.index'
 import { Route as InfluencersIdRouteImport } from './routes/influencers.$id'
+import { Route as InviteAcceptRouteImport } from './routes/invite.accept'
+import { Route as MfaVerifyRouteImport } from './routes/mfa.verify'
 import { Route as RequirementsIndexRouteImport } from './routes/requirements.index'
 import { Route as RequirementsIdRouteImport } from './routes/requirements.$id'
 import { Route as SupportIndexRouteImport } from './routes/support.index'
@@ -65,6 +68,11 @@ const DomainsRoute = DomainsRouteImport.update({
 const LocationsRoute = LocationsRouteImport.update({
   id: '/locations',
   path: '/locations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MediaRoute = MediaRouteImport.update({
@@ -152,6 +160,16 @@ const InfluencersIdRoute = InfluencersIdRouteImport.update({
   path: '/influencers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InviteAcceptRoute = InviteAcceptRouteImport.update({
+  id: '/invite/accept',
+  path: '/invite/accept',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MfaVerifyRoute = MfaVerifyRouteImport.update({
+  id: '/mfa/verify',
+  path: '/mfa/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RequirementsIndexRoute = RequirementsIndexRouteImport.update({
   id: '/requirements/',
   path: '/requirements/',
@@ -180,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
@@ -194,6 +213,8 @@ export interface FileRoutesByFullPath {
   '/businesses/$id': typeof BusinessesIdRoute
   '/campaigns/$id': typeof CampaignsIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/mfa/verify': typeof MfaVerifyRoute
   '/requirements/$id': typeof RequirementsIdRoute
   '/support/$id': typeof SupportIdRoute
   '/businesses/': typeof BusinessesIndexRoute
@@ -209,6 +230,7 @@ export interface FileRoutesByTo {
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
@@ -223,6 +245,8 @@ export interface FileRoutesByTo {
   '/businesses/$id': typeof BusinessesIdRoute
   '/campaigns/$id': typeof CampaignsIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/mfa/verify': typeof MfaVerifyRoute
   '/requirements/$id': typeof RequirementsIdRoute
   '/support/$id': typeof SupportIdRoute
   '/businesses': typeof BusinessesIndexRoute
@@ -239,6 +263,7 @@ export interface FileRoutesById {
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
@@ -253,6 +278,8 @@ export interface FileRoutesById {
   '/businesses/$id': typeof BusinessesIdRoute
   '/campaigns/$id': typeof CampaignsIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/mfa/verify': typeof MfaVerifyRoute
   '/requirements/$id': typeof RequirementsIdRoute
   '/support/$id': typeof SupportIdRoute
   '/businesses/': typeof BusinessesIndexRoute
@@ -270,6 +297,7 @@ export interface FileRouteTypes {
     | '/discovery'
     | '/domains'
     | '/locations'
+    | '/login'
     | '/media'
     | '/notifications'
     | '/payments'
@@ -284,6 +312,8 @@ export interface FileRouteTypes {
     | '/businesses/$id'
     | '/campaigns/$id'
     | '/influencers/$id'
+    | '/invite/accept'
+    | '/mfa/verify'
     | '/requirements/$id'
     | '/support/$id'
     | '/businesses/'
@@ -299,6 +329,7 @@ export interface FileRouteTypes {
     | '/discovery'
     | '/domains'
     | '/locations'
+    | '/login'
     | '/media'
     | '/notifications'
     | '/payments'
@@ -313,6 +344,8 @@ export interface FileRouteTypes {
     | '/businesses/$id'
     | '/campaigns/$id'
     | '/influencers/$id'
+    | '/invite/accept'
+    | '/mfa/verify'
     | '/requirements/$id'
     | '/support/$id'
     | '/businesses'
@@ -328,6 +361,7 @@ export interface FileRouteTypes {
     | '/discovery'
     | '/domains'
     | '/locations'
+    | '/login'
     | '/media'
     | '/notifications'
     | '/payments'
@@ -342,6 +376,8 @@ export interface FileRouteTypes {
     | '/businesses/$id'
     | '/campaigns/$id'
     | '/influencers/$id'
+    | '/invite/accept'
+    | '/mfa/verify'
     | '/requirements/$id'
     | '/support/$id'
     | '/businesses/'
@@ -358,6 +394,7 @@ export interface RootRouteChildren {
   DiscoveryRoute: typeof DiscoveryRoute
   DomainsRoute: typeof DomainsRoute
   LocationsRoute: typeof LocationsRoute
+  LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
   NotificationsRoute: typeof NotificationsRoute
   PaymentsRoute: typeof PaymentsRoute
@@ -372,6 +409,8 @@ export interface RootRouteChildren {
   BusinessesIdRoute: typeof BusinessesIdRoute
   CampaignsIdRoute: typeof CampaignsIdRoute
   InfluencersIdRoute: typeof InfluencersIdRoute
+  InviteAcceptRoute: typeof InviteAcceptRoute
+  MfaVerifyRoute: typeof MfaVerifyRoute
   RequirementsIdRoute: typeof RequirementsIdRoute
   SupportIdRoute: typeof SupportIdRoute
   BusinessesIndexRoute: typeof BusinessesIndexRoute
@@ -423,6 +462,13 @@ declare module '@tanstack/react-router' {
       path: '/locations'
       fullPath: '/locations'
       preLoaderRoute: typeof LocationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/media': {
@@ -544,6 +590,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InfluencersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invite/accept': {
+      id: '/invite/accept'
+      path: '/invite/accept'
+      fullPath: '/invite/accept'
+      preLoaderRoute: typeof InviteAcceptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mfa/verify': {
+      id: '/mfa/verify'
+      path: '/mfa/verify'
+      fullPath: '/mfa/verify'
+      preLoaderRoute: typeof MfaVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/requirements/': {
       id: '/requirements/'
       path: '/requirements'
@@ -582,6 +642,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoveryRoute: DiscoveryRoute,
   DomainsRoute: DomainsRoute,
   LocationsRoute: LocationsRoute,
+  LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
   NotificationsRoute: NotificationsRoute,
   PaymentsRoute: PaymentsRoute,
@@ -596,6 +657,8 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessesIdRoute: BusinessesIdRoute,
   CampaignsIdRoute: CampaignsIdRoute,
   InfluencersIdRoute: InfluencersIdRoute,
+  InviteAcceptRoute: InviteAcceptRoute,
+  MfaVerifyRoute: MfaVerifyRoute,
   RequirementsIdRoute: RequirementsIdRoute,
   SupportIdRoute: SupportIdRoute,
   BusinessesIndexRoute: BusinessesIndexRoute,
