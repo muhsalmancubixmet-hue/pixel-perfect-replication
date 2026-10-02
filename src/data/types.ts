@@ -282,3 +282,33 @@ export interface AuditLog {
   device: string;
   result: "success" | "failed";
 }
+
+export interface CampaignBid {
+  id: string;
+  influencerId: string;
+  name: string;
+  avatar: string;
+  category: string;
+  followers: number;
+  fee: number;
+  currency: string;
+  pitch: string;
+  match: number;
+  status: "pending" | "shortlisted" | "accepted" | "rejected";
+}
+
+export interface CampaignBrief {
+  objective: string;
+  audience: string;
+  deliverables: string[];
+  escrow: "held in escrow" | "released" | "not funded";
+}
+
+export interface TicketMessage {
+  id: string;
+  from: "user" | "staff";
+  author: string;
+  body: string;
+  time: string;
+  attachment?: { name: string; size: string } | undefined;
+}

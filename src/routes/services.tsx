@@ -4,10 +4,10 @@ import { Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { mockAction } from "@/components/admin/ActionMenu";
+import { FormDialog, saved, type FieldDef } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { money, services as seedServices } from "@/data/mock";
+import { money, services as seedServices, socialPlatforms } from "@/data/mock";
 import type { ServiceType } from "@/data/types";
 
 export const Route = createFileRoute("/services")({
@@ -27,6 +27,14 @@ function ServicesPage() {
 
   const toggle = (id: string) =>
     setItems((s) => s.map((x) => (x.id === id ? { ...x, status: x.status === "active" ? "inactive" : "active" } : x)));
+  const [editing, setEditing] = useState<ServiceType | "new" | null>(null);
+  const current = editing && editing !== "new" ? editing : null;
+  const fields: FieldDef[] = [
+    { name: "name", label: "Service name", required: true },
+    { name: "platform", label: "Parent platform", type: "select", options: [...socialPlatforms.map((p) => p.name), "Any"], required: true },
+    { name: "avgPrice", label: "Benchmark avg price", type: "number", required: true },
+    { name: "deliverables", label: "Deliverables spec", type: "textarea", placeholder: "e.g. 1 × 30–60s vertical video, raw files, 2 revisions" },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
@@ -34,7 +42,7 @@ function ServicesPage() {
         title="Services"
         description="Service types creators can offer to businesses."
         actions={
-          <Button size="sm" onClick={mockAction("Add service", "opens service builder")}>
+          <Button size="sm" onClick={() => setEditing("new")}>
             <Plus className="size-4" /> Add service
           </Button>
         }
@@ -61,7 +69,7 @@ function ServicesPage() {
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={mockAction("Edit service", s.name)}>
+              <Button variant="ghost" size="sm" className="h-9 px-3 text-xs" onClick={() => setEditing(s)}>
                 Edit
               </Button>
               <Switch checked={s.status === "active"} onCheckedChange={() => toggle(s.id)} aria-label="Enabled" />
@@ -69,6 +77,21 @@ function ServicesPage() {
           </div>
         ))}
       </div>
+
+      <FormDialog
+        open={editing !== null}
+        onOpenChange={(o) => !o && setEditing(null)}
+        title={current ? `Edit ${current.name}` : "Add service"}
+        fields={fields}
+        initial={current ? { name: current.name, platform: current.platform, avgPrice: String(current.avgPrice), deliverables: "" } : {}}
+        submitLabel={current ? "Save changes" : "Add service"}
+        onSubmit={(v) => {
+          const patch = { name: String(v["name"]), platform: String(v["platform"]), avgPrice: Number(v["avgPrice"]) || 0 };
+          if (current) setItems((s) => s.map((x) => (x.id === current.id ? { ...x, ...patch } : x)));
+          else setItems((s) => [...s, { id: `SVC-${Date.now()}`, creators: 0, status: "active", ...patch }]);
+          saved(current ? "Service updated" : "Service added", patch.name);
+        }}
+      />
     </div>
   );
 }

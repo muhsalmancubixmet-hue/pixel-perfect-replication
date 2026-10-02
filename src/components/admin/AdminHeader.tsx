@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronDown, Plus, Share2, Tags, TrendingUp, UserPlus, Building2, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
+import { clearSession } from "@/lib/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,13 +28,14 @@ const QUICK_ACTIONS = [
 ] as const;
 
 export function AdminHeader() {
+  const navigate = useNavigate();
   const unread = notifications.filter((n) => n.status !== "draft").length;
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur-sm sm:px-4">
-      <SidebarTrigger className="shrink-0" />
+      <SidebarTrigger className="size-10 shrink-0 md:size-7" aria-label="Open menu" />
 
-      <div className="flex-1 md:flex-none">
+      <div className="md:flex-none">
         <GlobalSearch />
       </div>
 
@@ -60,7 +62,7 @@ export function AdminHeader() {
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+            <Button variant="ghost" size="icon" className="relative size-10" aria-label="Notifications">
               <Bell className="size-4.5" />
               <span className="num absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                 {unread}
@@ -113,7 +115,11 @@ export function AdminHeader() {
               <Link to="/audit-logs">Audit logs</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => toast.info("Sign out is not wired up in this prototype.")}>
+            <DropdownMenuItem onSelect={() => {
+                clearSession();
+                toast.success("Signed out");
+                void navigate({ to: "/login", replace: true });
+              }}>
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

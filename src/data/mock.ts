@@ -1,6 +1,9 @@
 import type {
   AuditLog,
   Business,
+  CampaignBid,
+  CampaignBrief,
+  TicketMessage,
   Campaign,
   Category,
   DomainRecord,
@@ -938,11 +941,11 @@ export function globalSearch(q: string): SearchResult[] {
   campaigns
     .filter((c) => c.title.toLowerCase().includes(term) || c.business.toLowerCase().includes(term))
     .slice(0, 5)
-    .forEach((c) => out.push({ group: "Campaigns", id: c.id, label: c.title, sub: `${c.business} · ${money(c.budget, c.currency)}`, to: "/campaigns" }));
+    .forEach((c) => out.push({ group: "Campaigns", id: c.id, label: c.title, sub: `${c.business} · ${money(c.budget, c.currency)}`, to: "/campaigns/$id", params: { id: c.id } }));
   requirements
     .filter((r) => r.title.toLowerCase().includes(term) || r.business.toLowerCase().includes(term))
     .slice(0, 4)
-    .forEach((r) => out.push({ group: "Requirements", id: r.id, label: r.title, sub: r.business, to: "/requirements" }));
+    .forEach((r) => out.push({ group: "Requirements", id: r.id, label: r.title, sub: r.business, to: "/requirements/$id", params: { id: r.id } }));
   websites
     .filter((w) => w.url.toLowerCase().includes(term) || w.creator.toLowerCase().includes(term))
     .slice(0, 4)
@@ -958,3 +961,89 @@ export function globalSearch(q: string): SearchResult[] {
 export const COUNTRY_OPTIONS = [...new Set(DEMO_PLACES.map((p) => p.country))].sort();
 export const CITY_OPTIONS = [...new Set(DEMO_PLACES.map((p) => p.city))].sort();
 export const LANGUAGE_OPTIONS = [...new Set(influencers.flatMap((i) => i.languages))].sort();
+
+
+/* ------------------------------------------------------------------ */
+/* Detail-page derived data (deterministic per entity)                 */
+/* ------------------------------------------------------------------ */
+
+const idNum = (id: string) => Number(id.replace(/\D/g, "")) || 1;
+
+export const getCampaign = (id: string) => campaigns.find((c) => c.id === id);
+export const getRequirement = (id: string) => requirements.find((r) => r.id === id);
+export const getTicket = (id: string) => tickets.find((t) => t.id === id);
+export const STAFF_NAMES = STAFF;
+
+const PITCHES = [
+  "My audience overlaps heavily with your target buyers — I can deliver 3 reels with strong hooks.",
+  "I've run similar launches for two brands this year with above-average saves and shares.",
+  "Happy to shoot on location and add a story series with swipe-up links.",
+  "I specialise in honest review formats that convert well for this category.",
+  "Can deliver in two languages to widen reach across your markets.",
+  "Offering a bundled package: one long-form video plus four shorts.",
+];
+
+export function campaignBrief(c: Campaign): CampaignBrief {
+  const r = rng(idNum(c.id) * 31 + 7);
+  return {
+    objective: pick(["Drive awareness for a new launch", "Increase store footfall", "Grow app installs", "Boost seasonal sales", "Build trust through authentic reviews"], r()),
+    audience: pick(["Urban 18–34, fashion-forward", "Young families, mid-income", "Food lovers in metro cities", "Students and early professionals", "Travel enthusiasts 25–45"], r()) + ` · ${c.location}`,
+    deliverables: [
+      `${1 + Math.floor(r() * 3)} × Instagram Reel (30–60s)`,
+      `${2 + Math.floor(r() * 4)} × Story frames with link`,
+      r() > 0.5 ? "1 × YouTube integration (60–90s)" : "1 × Static carousel post",
+      "Usage rights: 90 days organic",
+    ],
+    escrow: c.status === "completed" ? "released" : c.status === "draft" || c.status === "cancelled" ? "not funded" : "held in escrow",
+  };
+}
+
+export function campaignBids(c: Campaign): CampaignBid[] {
+  const r = rng(idNum(c.id) * 53 + 11);
+  const n = Math.max(3, Math.min(12, c.applications || 4));
+  return Array.from({ length: n }, (_, i) => {
+    const inf = at(influencers, r() * influencers.length + i);
+    return {
+      id: `${c.id}-BID-${i + 1}`,
+      influencerId: inf.id,
+      name: inf.name,
+      avatar: inf.avatar,
+      category: inf.categories[0] ?? c.category,
+      followers: inf.followers,
+      fee: Math.round((c.budget / Math.max(1, c.creators)) * (0.5 + r()) / 500) * 500,
+      currency: c.currency,
+      pitch: pick(PITCHES, r()),
+      match: 55 + Math.floor(r() * 44),
+      status: pick(["pending", "pending", "shortlisted", "accepted", "rejected"] as const, r()),
+    };
+  });
+}
+
+export function requirementBrief(req: Requirement) {
+  const r = rng(idNum(req.id) * 17 + 3);
+  return {
+    brief: `${req.business} is looking for ${req.creatorsNeeded} ${req.category.toLowerCase()} creators to produce authentic short-form content around ${req.location}. Content should feel native to each creator's style while clearly featuring the brand.`,
+    budgetMin: Math.round(req.budget * 0.7),
+    budgetMax: req.budget,
+    minFollowers: pick([5000, 10000, 25000, 50000], r()),
+    languages: pick([["English"], ["English", "Malayalam"], ["English", "Arabic"], ["English", "Hindi"]], r()),
+    radiusKm: pick([10, 25, 50, 100], r()),
+    interested: Array.from({ length: Math.max(2, Math.min(8, req.applications)) }, (_, i) => {
+      const inf = at(influencers, r() * influencers.length + i);
+      return { id: inf.id, name: inf.name, avatar: inf.avatar, followers: inf.followers, city: inf.location.city, date: dateStr(Math.floor(r() * 20)) };
+    }),
+  };
+}
+
+export function ticketThread(t: Ticket): { messages: TicketMessage[]; notes: { author: string; body: string; time: string }[] } {
+  const r = rng(idNum(t.id) * 13 + 5);
+  const messages: TicketMessage[] = [
+    { id: "m1", from: "user", author: t.user, body: `Hi team, ${t.subject.toLowerCase()}. Could you please take a look? This is blocking my work.`, time: `${t.created} 09:${10 + Math.floor(r() * 40)}`, attachment: r() > 0.4 ? { name: "screenshot.png", size: "284 KB" } : undefined },
+    { id: "m2", from: "staff", author: t.assignee, body: "Thanks for reaching out — I've picked this up. Can you confirm the email linked to your account and roughly when this started?", time: `${t.created} 11:${10 + Math.floor(r() * 40)}` },
+    { id: "m3", from: "user", author: t.user, body: "Same email as my profile. It started a couple of days ago after I updated my details.", time: `${t.created} 14:${10 + Math.floor(r() * 40)}` },
+  ];
+  return {
+    messages,
+    notes: [{ author: t.assignee, body: "Checked logs — looks related to last week's sync change. Monitoring.", time: t.created }],
+  };
+}

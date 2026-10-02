@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Building2, Download } from "lucide-react";
 
@@ -7,6 +8,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
+import { FormDialog, FormDrawer, ReasonDialog, saved, type FieldDef } from "@/components/admin/Dialogs";
 import { COUNTRY_OPTIONS, CITY_OPTIONS, businesses } from "@/data/mock";
 import type { Business } from "@/data/types";
 
@@ -25,6 +27,18 @@ export const Route = createFileRoute("/businesses/")({
 const TYPES = [...new Set(businesses.map((b) => b.type))].sort();
 
 function BusinessesPage() {
+  const [rows, setRows] = useState<Business[]>(businesses);
+  const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Business | null>(null);
+  const [toggling, setToggling] = useState<{ b: Business; to: Business["status"] } | null>(null);
+  const fields: FieldDef[] = [
+    { name: "name", label: "Company name", required: true },
+    { name: "type", label: "Business type", type: "select", options: TYPES, required: true },
+    { name: "hq", label: "HQ location", placeholder: "City, Country", required: true },
+    { name: "email", label: "Contact email", type: "email", required: true },
+    { name: "phone", label: "Phone", type: "tel" },
+    { name: "plan", label: "Initial plan", type: "select", options: ["Free", "Pro", "Agency"] },
+  ];
   const columns: Column<Business>[] = [
     {
       key: "business",
@@ -102,7 +116,7 @@ function BusinessesPage() {
             <Button variant="outline" size="sm" onClick={mockAction("Export started", "businesses.csv")}>
               <Download className="size-4" /> Export
             </Button>
-            <Button size="sm" onClick={mockAction("Add business", "opens business onboarding")}>
+            <Button size="sm" onClick={() => setAdding(true)}>
               <Building2 className="size-4" /> Add Business
             </Button>
           </>
@@ -110,7 +124,7 @@ function BusinessesPage() {
       />
 
       <DataTable
-        rows={businesses}
+        rows={rows}
         columns={columns}
         filters={filters}
         getId={(r) => r.id}
@@ -142,13 +156,53 @@ function BusinessesPage() {
           <ActionMenu
             items={[
               { label: "View", node: <Link to="/businesses/$id" params={{ id: r.id }}>View</Link> },
-              { label: "Edit", onSelect: mockAction("Edit business", r.name) },
+              { label: "Edit", onSelect: () => setEditing(r) },
               { label: "View Campaigns", node: <Link to="/campaigns">View Campaigns</Link> },
-              { label: "Activate", onSelect: mockAction("Account activated", r.name) },
-              { label: "Suspend", onSelect: mockAction("Account suspended", r.name), destructive: true, separatorBefore: true },
+              { label: "Activate", onSelect: () => setToggling({ b: r, to: "active" }) },
+              { label: "Suspend", onSelect: () => setToggling({ b: r, to: "suspended" }), destructive: true, separatorBefore: true },
             ]}
           />
         )}
+      />
+
+      <FormDialog
+        open={adding}
+        onOpenChange={setAdding}
+        title="Add business"
+        description="Manually onboard a brand account. An invite email is sent to the contact."
+        fields={fields}
+        initial={{ plan: "Free" }}
+        submitLabel="Create business"
+        onSubmit={(v) => saved("Business created", `${String(v["name"])} was invited to the Business App.`)}
+      />
+      <FormDrawer
+        open={Boolean(editing)}
+        onOpenChange={(o) => !o && setEditing(null)}
+        title={`Edit ${editing?.name ?? "business"}`}
+        fields={fields}
+        initial={
+          editing
+            ? { name: editing.name, type: editing.type, hq: `${editing.location.city}, ${editing.location.country}`, email: editing.email, phone: editing.phone, plan: editing.subscription.replace(/^Business /, "") }
+            : {}
+        }
+        onSubmit={(v) => {
+          if (!editing) return;
+          setRows((rs) => rs.map((b) => (b.id === editing.id ? { ...b, name: String(v["name"]), type: String(v["type"]), email: String(v["email"]), phone: String(v["phone"]) } : b)));
+          saved("Business updated", String(v["name"]));
+        }}
+      />
+      <ReasonDialog
+        open={Boolean(toggling)}
+        onOpenChange={(o) => !o && setToggling(null)}
+        title={toggling?.to === "suspended" ? `Suspend ${toggling.b.name}?` : `Activate ${toggling?.b.name ?? ""}?`}
+        description={toggling?.to === "suspended" ? "The business loses access to campaigns and messaging until reactivated." : "The business regains full access."}
+        confirmLabel={toggling?.to === "suspended" ? "Suspend account" : "Activate account"}
+        destructive={toggling?.to === "suspended"}
+        onConfirm={() => {
+          if (!toggling) return;
+          setRows((rs) => rs.map((b) => (b.id === toggling.b.id ? { ...b, status: toggling.to } : b)));
+          saved(toggling.to === "suspended" ? "Account suspended" : "Account activated", toggling.b.name);
+        }}
       />
     </div>
   );

@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Info, Loader2, TriangleAlert } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ConfirmDialog, saved } from "@/components/admin/Dialogs";
 import { domains } from "@/data/mock";
 import type { DomainRecord } from "@/data/types";
 
@@ -25,6 +26,8 @@ export const Route = createFileRoute("/domains")({
 
 function DomainsPage() {
   const [instructions, setInstructions] = useState<DomainRecord | null>(null);
+  const [diagnosing, setDiagnosing] = useState<DomainRecord | null>(null);
+  const [disconnecting, setDisconnecting] = useState<DomainRecord | null>(null);
 
   const columns: Column<DomainRecord>[] = [
     { key: "creator", header: "Creator", cell: (r) => <span className="text-sm font-medium">{r.creator}</span> },
@@ -72,10 +75,10 @@ function DomainsPage() {
         rowAction={(r) => (
           <ActionMenu
             items={[
-              { label: "Verify", onSelect: mockAction("Verification queued", r.domain) },
-              { label: "Retry", onSelect: mockAction("Retrying DNS check", r.domain) },
+              { label: "Verify", onSelect: () => setDiagnosing(r) },
+              { label: "Retry", onSelect: () => setDiagnosing(r) },
               { label: "View instructions", onSelect: () => setInstructions(r) },
-              { label: "Disconnect", onSelect: mockAction("Domain disconnected", r.domain), destructive: true, separatorBefore: true },
+              { label: "Disconnect", onSelect: () => setDisconnecting(r), destructive: true, separatorBefore: true },
             ]}
           />
         )}
@@ -120,6 +123,75 @@ function DomainsPage() {
           <Button onClick={mockAction("Instructions emailed", instructions?.creator ?? "")}>Email instructions</Button>
         </DialogContent>
       </Dialog>
+
+      <DnsDiagnostics domain={diagnosing} onClose={() => setDiagnosing(null)} />
+      <ConfirmDialog
+        open={Boolean(disconnecting)}
+        onOpenChange={(o) => !o && setDisconnecting(null)}
+        title={`Disconnect ${disconnecting?.domain ?? ""}?`}
+        description="The creator's website falls back to its influencers.com subdomain."
+        confirmLabel="Disconnect"
+        onConfirm={() => saved("Domain disconnected", disconnecting?.domain)}
+      />
     </div>
+  );
+}
+
+function DnsDiagnostics({ domain, onClose }: { domain: DomainRecord | null; onClose: () => void }) {
+  const [checking, setChecking] = useState(true);
+  const [run, setRun] = useState(0);
+  useEffect(() => {
+    if (!domain) return;
+    setChecking(true);
+    const t = setTimeout(() => setChecking(false), 1200);
+    return () => clearTimeout(t);
+  }, [domain, run]);
+  // Simulated: failed domains fail the apex check; pending ones fail CNAME.
+  const records = domain
+    ? [
+        { type: "A", host: "@", expected: "76.76.21.21", ok: domain.verification !== "failed", found: domain.verification === "failed" ? "185.199.108.153" : "76.76.21.21" },
+        { type: "CNAME", host: "www", expected: "sites.influencers.com", ok: domain.verification === "verified", found: domain.verification === "verified" ? "sites.influencers.com" : "— no record" },
+        { type: "TXT", host: "_influencers", expected: `verify=${domain.id.toLowerCase()}`, ok: domain.verification === "verified", found: domain.verification === "verified" ? `verify=${domain.id.toLowerCase()}` : "— no record" },
+      ]
+    : [];
+  const allOk = records.every((r) => r.ok);
+  return (
+    <Dialog open={Boolean(domain)} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>DNS diagnostics</DialogTitle>
+          <DialogDescription>Live lookup for {domain?.domain} (simulated).</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          {records.map((r) => (
+            <div key={r.type} className="flex items-start gap-3 rounded-lg border border-border p-3">
+              {checking ? (
+                <Loader2 className="mt-0.5 size-5 shrink-0 animate-spin text-muted-foreground" />
+              ) : r.ok ? (
+                <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
+              ) : (
+                <TriangleAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+              )}
+              <div className="num min-w-0 flex-1 text-xs">
+                <p className="text-sm font-semibold">
+                  {r.type} <span className="font-normal text-muted-foreground">{r.host}</span>
+                </p>
+                <p className="truncate text-muted-foreground">Expected: {r.expected}</p>
+                {!checking && <p className={r.ok ? "truncate text-success" : "truncate text-destructive"}>Found: {r.found}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {!checking && (
+          <p className={allOk ? "text-sm font-medium text-success" : "text-sm font-medium text-destructive"}>
+            {allOk ? "All records resolve correctly. SSL will be issued automatically." : "Some records are missing or wrong. Share the DNS instructions with the creator."}
+          </p>
+        )}
+        <DialogFooter className="gap-2">
+          <Button variant="outline" className="h-10" onClick={onClose}>Close</Button>
+          <Button className="h-10" disabled={checking} onClick={() => setRun((n) => n + 1)}>Re-run check</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

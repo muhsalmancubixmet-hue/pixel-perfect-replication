@@ -11,28 +11,34 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuditLogsRouteImport } from './routes/audit-logs'
-import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as DiscoveryRouteImport } from './routes/discovery'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as LocationsRouteImport } from './routes/locations'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MediaRouteImport } from './routes/media'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as RequirementsRouteImport } from './routes/requirements'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SocialPlatformsRouteImport } from './routes/social-platforms'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
-import { Route as SupportRouteImport } from './routes/support'
 import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as WebsitesRouteImport } from './routes/websites'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as BusinessesIdRouteImport } from './routes/businesses.$id'
+import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
+import { Route as CampaignsIdRouteImport } from './routes/campaigns.$id'
 import { Route as InfluencersIndexRouteImport } from './routes/influencers.index'
 import { Route as InfluencersIdRouteImport } from './routes/influencers.$id'
+import { Route as InviteAcceptRouteImport } from './routes/invite.accept'
+import { Route as MfaVerifyRouteImport } from './routes/mfa.verify'
+import { Route as RequirementsIndexRouteImport } from './routes/requirements.index'
+import { Route as RequirementsIdRouteImport } from './routes/requirements.$id'
+import { Route as SupportIndexRouteImport } from './routes/support.index'
+import { Route as SupportIdRouteImport } from './routes/support.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -42,11 +48,6 @@ const IndexRoute = IndexRouteImport.update({
 const AuditLogsRoute = AuditLogsRouteImport.update({
   id: '/audit-logs',
   path: '/audit-logs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CampaignsRoute = CampaignsRouteImport.update({
-  id: '/campaigns',
-  path: '/campaigns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesRoute = CategoriesRouteImport.update({
@@ -69,6 +70,11 @@ const LocationsRoute = LocationsRouteImport.update({
   path: '/locations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediaRoute = MediaRouteImport.update({
   id: '/media',
   path: '/media',
@@ -87,11 +93,6 @@ const PaymentsRoute = PaymentsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RequirementsRoute = RequirementsRouteImport.update({
-  id: '/requirements',
-  path: '/requirements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RolesRoute = RolesRouteImport.update({
@@ -119,11 +120,6 @@ const SubscriptionsRoute = SubscriptionsRouteImport.update({
   path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SupportRoute = SupportRouteImport.update({
-  id: '/support',
-  path: '/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const VerificationRoute = VerificationRouteImport.update({
   id: '/verification',
   path: '/verification',
@@ -144,6 +140,16 @@ const BusinessesIdRoute = BusinessesIdRouteImport.update({
   path: '/businesses/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
+  id: '/campaigns/',
+  path: '/campaigns/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsIdRoute = CampaignsIdRouteImport.update({
+  id: '/campaigns/$id',
+  path: '/campaigns/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InfluencersIndexRoute = InfluencersIndexRouteImport.update({
   id: '/influencers/',
   path: '/influencers/',
@@ -154,192 +160,264 @@ const InfluencersIdRoute = InfluencersIdRouteImport.update({
   path: '/influencers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InviteAcceptRoute = InviteAcceptRouteImport.update({
+  id: '/invite/accept',
+  path: '/invite/accept',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MfaVerifyRoute = MfaVerifyRouteImport.update({
+  id: '/mfa/verify',
+  path: '/mfa/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequirementsIndexRoute = RequirementsIndexRouteImport.update({
+  id: '/requirements/',
+  path: '/requirements/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequirementsIdRoute = RequirementsIdRouteImport.update({
+  id: '/requirements/$id',
+  path: '/requirements/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportIndexRoute = SupportIndexRouteImport.update({
+  id: '/support/',
+  path: '/support/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportIdRoute = SupportIdRouteImport.update({
+  id: '/support/$id',
+  path: '/support/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/audit-logs': typeof AuditLogsRoute
-  '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
-  '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
+  '/campaigns/$id': typeof CampaignsIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/mfa/verify': typeof MfaVerifyRoute
+  '/requirements/$id': typeof RequirementsIdRoute
+  '/support/$id': typeof SupportIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/campaigns/': typeof CampaignsIndexRoute
   '/influencers/': typeof InfluencersIndexRoute
+  '/requirements/': typeof RequirementsIndexRoute
+  '/support/': typeof SupportIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/audit-logs': typeof AuditLogsRoute
-  '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
-  '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
+  '/campaigns/$id': typeof CampaignsIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/mfa/verify': typeof MfaVerifyRoute
+  '/requirements/$id': typeof RequirementsIdRoute
+  '/support/$id': typeof SupportIdRoute
   '/businesses': typeof BusinessesIndexRoute
+  '/campaigns': typeof CampaignsIndexRoute
   '/influencers': typeof InfluencersIndexRoute
+  '/requirements': typeof RequirementsIndexRoute
+  '/support': typeof SupportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/audit-logs': typeof AuditLogsRoute
-  '/campaigns': typeof CampaignsRoute
   '/categories': typeof CategoriesRoute
   '/discovery': typeof DiscoveryRoute
   '/domains': typeof DomainsRoute
   '/locations': typeof LocationsRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/notifications': typeof NotificationsRoute
   '/payments': typeof PaymentsRoute
   '/reports': typeof ReportsRoute
-  '/requirements': typeof RequirementsRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/settings': typeof SettingsRoute
   '/social-platforms': typeof SocialPlatformsRoute
   '/subscriptions': typeof SubscriptionsRoute
-  '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/websites': typeof WebsitesRoute
   '/businesses/$id': typeof BusinessesIdRoute
+  '/campaigns/$id': typeof CampaignsIdRoute
   '/influencers/$id': typeof InfluencersIdRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/mfa/verify': typeof MfaVerifyRoute
+  '/requirements/$id': typeof RequirementsIdRoute
+  '/support/$id': typeof SupportIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/campaigns/': typeof CampaignsIndexRoute
   '/influencers/': typeof InfluencersIndexRoute
+  '/requirements/': typeof RequirementsIndexRoute
+  '/support/': typeof SupportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/audit-logs'
-    | '/campaigns'
     | '/categories'
     | '/discovery'
     | '/domains'
     | '/locations'
+    | '/login'
     | '/media'
     | '/notifications'
     | '/payments'
     | '/reports'
-    | '/requirements'
     | '/roles'
     | '/services'
     | '/settings'
     | '/social-platforms'
     | '/subscriptions'
-    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
+    | '/campaigns/$id'
     | '/influencers/$id'
+    | '/invite/accept'
+    | '/mfa/verify'
+    | '/requirements/$id'
+    | '/support/$id'
     | '/businesses/'
+    | '/campaigns/'
     | '/influencers/'
+    | '/requirements/'
+    | '/support/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/audit-logs'
-    | '/campaigns'
     | '/categories'
     | '/discovery'
     | '/domains'
     | '/locations'
+    | '/login'
     | '/media'
     | '/notifications'
     | '/payments'
     | '/reports'
-    | '/requirements'
     | '/roles'
     | '/services'
     | '/settings'
     | '/social-platforms'
     | '/subscriptions'
-    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
+    | '/campaigns/$id'
     | '/influencers/$id'
+    | '/invite/accept'
+    | '/mfa/verify'
+    | '/requirements/$id'
+    | '/support/$id'
     | '/businesses'
+    | '/campaigns'
     | '/influencers'
+    | '/requirements'
+    | '/support'
   id:
     | '__root__'
     | '/'
     | '/audit-logs'
-    | '/campaigns'
     | '/categories'
     | '/discovery'
     | '/domains'
     | '/locations'
+    | '/login'
     | '/media'
     | '/notifications'
     | '/payments'
     | '/reports'
-    | '/requirements'
     | '/roles'
     | '/services'
     | '/settings'
     | '/social-platforms'
     | '/subscriptions'
-    | '/support'
     | '/verification'
     | '/websites'
     | '/businesses/$id'
+    | '/campaigns/$id'
     | '/influencers/$id'
+    | '/invite/accept'
+    | '/mfa/verify'
+    | '/requirements/$id'
+    | '/support/$id'
     | '/businesses/'
+    | '/campaigns/'
     | '/influencers/'
+    | '/requirements/'
+    | '/support/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuditLogsRoute: typeof AuditLogsRoute
-  CampaignsRoute: typeof CampaignsRoute
   CategoriesRoute: typeof CategoriesRoute
   DiscoveryRoute: typeof DiscoveryRoute
   DomainsRoute: typeof DomainsRoute
   LocationsRoute: typeof LocationsRoute
+  LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
   NotificationsRoute: typeof NotificationsRoute
   PaymentsRoute: typeof PaymentsRoute
   ReportsRoute: typeof ReportsRoute
-  RequirementsRoute: typeof RequirementsRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
   SettingsRoute: typeof SettingsRoute
   SocialPlatformsRoute: typeof SocialPlatformsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
-  SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
   WebsitesRoute: typeof WebsitesRoute
   BusinessesIdRoute: typeof BusinessesIdRoute
+  CampaignsIdRoute: typeof CampaignsIdRoute
   InfluencersIdRoute: typeof InfluencersIdRoute
+  InviteAcceptRoute: typeof InviteAcceptRoute
+  MfaVerifyRoute: typeof MfaVerifyRoute
+  RequirementsIdRoute: typeof RequirementsIdRoute
+  SupportIdRoute: typeof SupportIdRoute
   BusinessesIndexRoute: typeof BusinessesIndexRoute
+  CampaignsIndexRoute: typeof CampaignsIndexRoute
   InfluencersIndexRoute: typeof InfluencersIndexRoute
+  RequirementsIndexRoute: typeof RequirementsIndexRoute
+  SupportIndexRoute: typeof SupportIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -356,13 +434,6 @@ declare module '@tanstack/react-router' {
       path: '/audit-logs'
       fullPath: '/audit-logs'
       preLoaderRoute: typeof AuditLogsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/campaigns': {
-      id: '/campaigns'
-      path: '/campaigns'
-      fullPath: '/campaigns'
-      preLoaderRoute: typeof CampaignsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories': {
@@ -393,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/media': {
       id: '/media'
       path: '/media'
@@ -419,13 +497,6 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/requirements': {
-      id: '/requirements'
-      path: '/requirements'
-      fullPath: '/requirements'
-      preLoaderRoute: typeof RequirementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/roles': {
@@ -463,13 +534,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/support': {
-      id: '/support'
-      path: '/support'
-      fullPath: '/support'
-      preLoaderRoute: typeof SupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/verification': {
       id: '/verification'
       path: '/verification'
@@ -498,6 +562,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaigns/': {
+      id: '/campaigns/'
+      path: '/campaigns'
+      fullPath: '/campaigns/'
+      preLoaderRoute: typeof CampaignsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/$id': {
+      id: '/campaigns/$id'
+      path: '/campaigns/$id'
+      fullPath: '/campaigns/$id'
+      preLoaderRoute: typeof CampaignsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/influencers/': {
       id: '/influencers/'
       path: '/influencers'
@@ -512,34 +590,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InfluencersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invite/accept': {
+      id: '/invite/accept'
+      path: '/invite/accept'
+      fullPath: '/invite/accept'
+      preLoaderRoute: typeof InviteAcceptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mfa/verify': {
+      id: '/mfa/verify'
+      path: '/mfa/verify'
+      fullPath: '/mfa/verify'
+      preLoaderRoute: typeof MfaVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/requirements/': {
+      id: '/requirements/'
+      path: '/requirements'
+      fullPath: '/requirements/'
+      preLoaderRoute: typeof RequirementsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/requirements/$id': {
+      id: '/requirements/$id'
+      path: '/requirements/$id'
+      fullPath: '/requirements/$id'
+      preLoaderRoute: typeof RequirementsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support/': {
+      id: '/support/'
+      path: '/support'
+      fullPath: '/support/'
+      preLoaderRoute: typeof SupportIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support/$id': {
+      id: '/support/$id'
+      path: '/support/$id'
+      fullPath: '/support/$id'
+      preLoaderRoute: typeof SupportIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuditLogsRoute: AuditLogsRoute,
-  CampaignsRoute: CampaignsRoute,
   CategoriesRoute: CategoriesRoute,
   DiscoveryRoute: DiscoveryRoute,
   DomainsRoute: DomainsRoute,
   LocationsRoute: LocationsRoute,
+  LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
   NotificationsRoute: NotificationsRoute,
   PaymentsRoute: PaymentsRoute,
   ReportsRoute: ReportsRoute,
-  RequirementsRoute: RequirementsRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
   SettingsRoute: SettingsRoute,
   SocialPlatformsRoute: SocialPlatformsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
-  SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
   WebsitesRoute: WebsitesRoute,
   BusinessesIdRoute: BusinessesIdRoute,
+  CampaignsIdRoute: CampaignsIdRoute,
   InfluencersIdRoute: InfluencersIdRoute,
+  InviteAcceptRoute: InviteAcceptRoute,
+  MfaVerifyRoute: MfaVerifyRoute,
+  RequirementsIdRoute: RequirementsIdRoute,
+  SupportIdRoute: SupportIdRoute,
   BusinessesIndexRoute: BusinessesIndexRoute,
+  CampaignsIndexRoute: CampaignsIndexRoute,
   InfluencersIndexRoute: InfluencersIndexRoute,
+  RequirementsIndexRoute: RequirementsIndexRoute,
+  SupportIndexRoute: SupportIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

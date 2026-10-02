@@ -14,3 +14,5 @@
 - Global-first data: locations use GeoPlace (country→region→district?→city→area) from src/data/geo.ts; Kerala is demo data only — never hardcode regions in filters/logic.
 - Money always via money(amount, currency) with the CURRENCIES registry in src/data/geo.ts; no hardcoded symbols.
 - Maps use the reusable WorldMap (Leaflet + OSM + markercluster), dynamically imported behind ClientOnly for SSR safety.
+- Staff auth is a prototype localStorage session (src/lib/auth.ts) checked in __root; public auth screens are listed in PUBLIC_PATHS — swap for Django auth later.
+- Row-action forms use the shared FormDialog/FormDrawer/ReasonDialog/ConfirmDialog in src/components/admin/Dialogs.tsx instead of placeholder toasts.

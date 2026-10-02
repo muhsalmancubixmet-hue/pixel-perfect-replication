@@ -113,7 +113,7 @@ function SubscriptionsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="MRR" value={money(mrr)} icon={Wallet} delta={11.2} />
         <StatCard label="Paid accounts" value={paidUsers.toLocaleString("en-IN")} icon={Users} delta={8.6} />
         <StatCard label="Plans live" value={String(plans.filter((p) => p.status === "active").length)} icon={CreditCard} />
