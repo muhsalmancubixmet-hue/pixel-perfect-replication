@@ -89,7 +89,7 @@ function MediaPage() {
     <div className="flex flex-col gap-4">
       <PageHeader title="Media" description="Portfolio, profile and website media across all creator accounts." />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Files" value={String(media.length)} icon={ImageIcon} delta={7.6} />
         <StatCard label="Images" value={String(images)} icon={ImageIcon} delta={5.1} />
         <StatCard label="Videos" value={String(videos)} icon={FileVideo} delta={12.9} />

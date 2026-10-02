@@ -64,7 +64,7 @@ function PaymentsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Collected" value={money(paid.reduce((a, p) => a + p.amount, 0))} icon={CheckCircle2} delta={10.3} />
         <StatCard label="Pending" value={money(pending.reduce((a, p) => a + p.amount, 0))} icon={Clock} delta={-4.2} />
         <StatCard label="Refunded" value={money(refunded.reduce((a, p) => a + p.amount, 0))} icon={ArrowDownRight} delta={1.8} />

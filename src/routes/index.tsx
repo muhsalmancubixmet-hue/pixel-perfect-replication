@@ -123,7 +123,7 @@ function Dashboard() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Influencers" value={compact(dashboardStats.totalInfluencers)} delta={12.4} icon={Users} hint="vs last month" />
         <StatCard label="Active Influencers" value={compact(dashboardStats.activeInfluencers)} delta={8.1} icon={BadgeCheck} hint="last 30 days" />
         <StatCard label="Total Businesses" value={compact(dashboardStats.totalBusinesses)} delta={6.7} icon={Building2} hint="vs last month" />
