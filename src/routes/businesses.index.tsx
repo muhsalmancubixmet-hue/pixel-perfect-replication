@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Building2, Download } from "lucide-react";
 
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FormDialog, FormDrawer, ReasonDialog, saved, type FieldDef } from "@/components/admin/Dialogs";
 import { COUNTRY_OPTIONS, CITY_OPTIONS, businesses } from "@/data/mock";
 import type { Business } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({
@@ -27,7 +28,44 @@ export const Route = createFileRoute("/businesses/")({
 const TYPES = [...new Set(businesses.map((b) => b.type))].sort();
 
 function BusinessesPage() {
-  const [rows, setRows] = useState<Business[]>(businesses);
+  const [rows, setRows] = useState<Business[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    adminApi.getBusinesses()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((b: any) => ({
+          id: String(b.id),
+          name: b.company_name || b.name || "Brand",
+          legalName: b.legal_name || b.name || "",
+          type: b.business_type || "Brand",
+          location: {
+            city: b.city || b.location?.city || "Kochi",
+            country: b.country || b.location?.country || "India",
+          },
+          contactName: b.contact_name || b.name || "Manager",
+          email: b.email || b.user?.email || "",
+          phone: b.phone || "",
+          campaigns: b.campaigns_count || 0,
+          subscription: b.subscription_plan || "Brand Free",
+          status: (b.status || "active").toLowerCase(),
+          joined: b.created_at ? new Date(b.created_at).toLocaleDateString() : "",
+        }));
+        setRows(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load live businesses:", err);
+        setRows([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
+
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Business | null>(null);
   const [toggling, setToggling] = useState<{ b: Business; to: Business["status"] } | null>(null);
@@ -110,7 +148,7 @@ function BusinessesPage() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Businesses"
-        description={`${businesses.length} brand accounts across all markets.`}
+        description={`${rows.length} brand accounts across all markets.`}
         actions={
           <>
             <Button variant="outline" size="sm" onClick={mockAction("Export started", "businesses.csv")}>
@@ -131,7 +169,7 @@ function BusinessesPage() {
           getId={(r) => r.id}
           searchPlaceholder="Search business, contact or city…"
           search={(r, t) =>
-            r.name.toLowerCase().includes(t) || r.contactName.toLowerCase().includes(t) || r.location.city.toLowerCase().includes(t)
+            r.name.toLowerCase().includes(t) || r.contactName.toLowerCase().includes(t) || (r.location?.city || "").toLowerCase().includes(t)
           }
           mobileCard={(r) => (
             <Link to="/businesses/$id" params={{ id: r.id }} className="block">
@@ -140,7 +178,7 @@ function BusinessesPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{r.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {r.type} · {r.location.city}, {r.location.countryCode}
+                    {r.type} · {r.location?.city || "Remote"}, {r.location?.countryCode || r.location?.country || "Global"}
                   </p>
                 </div>
               </div>
@@ -187,8 +225,16 @@ function BusinessesPage() {
             ? { name: editing.name, type: editing.type, hq: `${editing.location.city}, ${editing.location.country}`, email: editing.email, phone: editing.phone, plan: editing.subscription.replace(/^Business /, "") }
             : {}
         }
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!editing) return;
+          try {
+            await adminApi.moderateBusiness(editing.id, {
+              status: editing.status === "suspended" ? "SUSPENDED" : "ACTIVE",
+              verification_status: editing.verification === "verified" ? "VERIFIED" : "PENDING",
+            });
+          } catch (err) {
+            console.warn("Failed to update business on backend:", err);
+          }
           setRows((rs) => rs.map((b) => (b.id === editing.id ? { ...b, name: String(v["name"]), type: String(v["type"]), email: String(v["email"]), phone: String(v["phone"]) } : b)));
           saved("Business updated", String(v["name"]));
         }}
@@ -200,8 +246,16 @@ function BusinessesPage() {
         description={toggling?.to === "suspended" ? "The business loses access to campaigns and messaging until reactivated." : "The business regains full access."}
         confirmLabel={toggling?.to === "suspended" ? "Suspend account" : "Activate account"}
         destructive={toggling?.to === "suspended"}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!toggling) return;
+          const nextStatus = toggling.to === "suspended" ? "SUSPENDED" : "ACTIVE";
+          try {
+            await adminApi.moderateBusiness(toggling.b.id, {
+              status: nextStatus,
+            });
+          } catch (err) {
+            console.warn("Failed to toggle business status on backend:", err);
+          }
           setRows((rs) => rs.map((b) => (b.id === toggling.b.id ? { ...b, status: toggling.to } : b)));
           saved(toggling.to === "suspended" ? "Account suspended" : "Account activated", toggling.b.name);
         }}

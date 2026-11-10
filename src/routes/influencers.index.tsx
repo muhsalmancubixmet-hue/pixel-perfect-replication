@@ -12,8 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, FormDrawer, ReasonDialog, saved, type FieldDef } from "@/components/admin/Dialogs";
+import { toast } from "sonner";
 import { CATEGORY_NAMES, COUNTRY_OPTIONS, CITY_OPTIONS, compact, influencers } from "@/data/mock";
 import type { Influencer } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/influencers/")({
   head: () => ({
@@ -44,14 +46,14 @@ function InfluencersPage() {
         </Link>
       ),
     },
-    { key: "category", header: "Category", cell: (r) => <span className="text-xs">{r.categories.join(", ")}</span> },
+    { key: "category", header: "Category", cell: (r) => <span className="text-xs">{(Array.isArray(r.categories) ? r.categories : []).join(", ") || "General"}</span> },
     {
       key: "location",
       header: "Location",
       cell: (r) => (
         <span className="text-xs">
-          {r.location.city}
-          <span className="block text-muted-foreground">{r.location.country}</span>
+          {r.location?.city || "Mumbai"}
+          <span className="block text-muted-foreground">{r.location?.country || "India"}</span>
         </span>
       ),
     },
@@ -96,7 +98,48 @@ function InfluencersPage() {
     { key: "platform", label: "Social platform", options: PLATFORMS, match: (r, v) => r.platforms.includes(v) },
   ];
 
-  const [rows, setRows] = useState<Influencer[]>(influencers);
+  const [rows, setRows] = useState<Influencer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchInfluencers = () => {
+    adminApi.getInfluencers()
+      .then((res: any) => {
+        const raw = res.results || (Array.isArray(res) ? res : []);
+        const list = raw.map((i: any) => ({
+          ...i,
+          name: i.name || i.display_name || i.handle || "Creator",
+          categories: Array.isArray(i.categories) && i.categories.length > 0 ? i.categories : ["General"],
+          location: {
+            city: i.location?.city || i.primary_city || "Mumbai",
+            country: i.location?.country || "India",
+            countryCode: i.location?.countryCode || "IN",
+            lat: typeof i.location?.lat === "number" ? i.location.lat : 19.076,
+            lng: typeof i.location?.lng === "number" ? i.location.lng : 72.8777,
+            currency: i.location?.currency || "INR",
+            languages: i.location?.languages || ["English"],
+            district: i.location?.district || "",
+            region: i.location?.region || "",
+          },
+          followers: i.followers || 0,
+          platforms: Array.isArray(i.platforms) && i.platforms.length > 0 ? i.platforms : ["Instagram"],
+          verification: (i.verification || "unverified").toLowerCase(),
+          status: (i.status || "active").toLowerCase(),
+        }));
+        setRows(list);
+      })
+      .catch((err) => {
+        console.warn("Could not load live influencers:", err);
+        setRows([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchInfluencers();
+  }, []);
+
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Influencer | null>(null);
   const [verifying, setVerifying] = useState<Influencer | null>(null);
@@ -114,7 +157,7 @@ function InfluencersPage() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Influencers"
-        description={`${influencers.length} creator accounts in this sample set.`}
+        description={`${rows.length} creator accounts registered on platform.`}
         actions={
           <>
             <Button variant="outline" size="sm" onClick={mockAction("Export started", "influencers.csv")}>
@@ -135,7 +178,7 @@ function InfluencersPage() {
           getId={(r) => r.id}
           searchPlaceholder="Search by name, handle or city…"
           search={(r, t) =>
-            r.name.toLowerCase().includes(t) || r.handle.includes(t) || r.location.city.toLowerCase().includes(t)
+            r.name.toLowerCase().includes(t) || r.handle.includes(t) || (r.location?.city || "").toLowerCase().includes(t)
           }
           mobileCard={(r) => (
             <Link to="/influencers/$id" params={{ id: r.id }} className="block">
@@ -144,7 +187,7 @@ function InfluencersPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{r.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {r.categories[0]} · {r.location.city}, {r.location.countryCode}
+                    {(Array.isArray(r.categories) && r.categories[0]) || "General"} · {r.location?.city || "Mumbai"}, {r.location?.countryCode || r.location?.country || "IN"}
                   </p>
                 </div>
               </div>
@@ -179,7 +222,30 @@ function InfluencersPage() {
         fields={addFields}
         initial={{ tier: "Free" }}
         submitLabel="Create creator"
-        onSubmit={(v) => saved("Creator created", `${String(v["name"])} (${String(v["handle"])}) was invited.`)}
+        onSubmit={async (v) => {
+          try {
+            await adminApi.createInfluencer({
+              name: String(v["name"] || "").trim(),
+              handle: String(v["handle"] || "").trim(),
+              email: String(v["email"] || "").trim(),
+              category: String(v["category"] || ""),
+              tier: String(v["tier"] || "Free"),
+            });
+            toast.success("Creator created", {
+              description: `${String(v["name"])} (${String(v["handle"])}) was successfully onboarded.`,
+            });
+            setAdding(false);
+            fetchInfluencers();
+          } catch (err: any) {
+            const errorMsg =
+              err.response?.data?.handle?.[0] ||
+              err.response?.data?.email?.[0] ||
+              err.response?.data?.detail ||
+              err.message ||
+              "Could not create creator.";
+            toast.error("Failed to add influencer", { description: errorMsg });
+          }
+        }}
       />
       <FormDrawer
         open={Boolean(editing)}
@@ -187,8 +253,15 @@ function InfluencersPage() {
         title={`Edit ${editing?.name ?? "creator"}`}
         fields={addFields.filter((f) => f.name !== "email")}
         initial={editing ? { name: editing.name, handle: editing.handle, category: editing.categories[0] ?? "", tier: editing.subscription.replace(/^Influencer /, "") } : {}}
-        onSubmit={(v) => {
+        onSubmit={async (v) => {
           if (!editing) return;
+          try {
+            await adminApi.moderateInfluencer(editing.id, {
+              verification_status: editing.verification === "verified" ? "VERIFIED" : "PENDING",
+            });
+          } catch (err) {
+            console.warn("Failed to update influencer moderation on backend:", err);
+          }
           update(editing.id, { name: String(v["name"]), handle: String(v["handle"]) });
           saved("Creator updated", String(v["name"]));
         }}
@@ -197,7 +270,11 @@ function InfluencersPage() {
         creator={verifying}
         onClose={() => setVerifying(null)}
         onDecide={(c, d) => {
+          const nextStatus = d === "approve" ? "VERIFIED" : d === "reject" ? "REJECTED" : "PENDING";
           update(c.id, { verification: d === "approve" ? "verified" : d === "reject" ? "unverified" : "pending" });
+          void adminApi.moderateInfluencer(c.id, { verification_status: nextStatus }).catch((err) => {
+            console.warn("Failed to update verification status on backend:", err);
+          });
           saved(d === "approve" ? "Creator verified" : d === "reject" ? "Verification rejected" : "More information requested", c.name);
         }}
       />
@@ -209,7 +286,11 @@ function InfluencersPage() {
         destructive={toggling?.to === "suspended"}
         onConfirm={() => {
           if (!toggling) return;
+          const nextStatus = toggling.to === "suspended" ? "SUSPENDED" : "ACTIVE";
           update(toggling.i.id, { status: toggling.to });
+          void adminApi.moderateInfluencer(toggling.i.id, { status: nextStatus }).catch((err) => {
+            console.warn("Failed to update status on backend:", err);
+          });
           saved(toggling.to === "suspended" ? "Account suspended" : "Account activated", toggling.i.name);
         }}
       />
