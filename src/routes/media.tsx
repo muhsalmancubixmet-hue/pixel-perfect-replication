@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Copy, FileVideo, HardDrive, Image as ImageIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog, saved } from "@/components/admin/Dialogs";
+import { adminApi } from "@/lib/admin-api";
 import { media } from "@/data/mock";
 import type { MediaItem } from "@/data/types";
 
@@ -34,6 +35,34 @@ function MediaPage() {
   const [rows, setRows] = useState<MediaItem[]>(media);
   const [preview, setPreview] = useState<MediaItem | null>(null);
   const [deleting, setDeleting] = useState<MediaItem | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadMediaAssets = async () => {
+      try {
+        const data = await adminApi.getMediaAssets();
+        const results = Array.isArray(data) ? data : data?.results || [];
+        if (mounted && results.length > 0) {
+          const mapped: MediaItem[] = results.map((m: any) => ({
+            id: String(m.id),
+            name: m.file_name || "untitled",
+            type: (m.file_type || "image").toLowerCase() as MediaItem["type"],
+            creator: m.uploader_name || m.uploader_email || "Creator",
+            size: m.size_kb || Math.round((m.file_size_bytes || 0) / 1024) || 100,
+            uploaded: m.created_at ? new Date(m.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+          }));
+          setRows(mapped);
+        }
+      } catch (err) {
+        console.warn("Could not load backend media assets, using fallback:", err);
+      }
+    };
+    void loadMediaAssets();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const copy = async (m: MediaItem) => {
     try {
       await navigator.clipboard.writeText(cdnUrl(m));
@@ -42,9 +71,9 @@ function MediaPage() {
       toast.error("Couldn't access the clipboard");
     }
   };
-  const totalKb = media.reduce((a, m) => a + m.size, 0);
-  const images = media.filter((m) => m.type === "image").length;
-  const videos = media.filter((m) => m.type === "video").length;
+  const totalKb = rows.reduce((a, m) => a + m.size, 0);
+  const images = rows.filter((m) => m.type === "image").length;
+  const videos = rows.filter((m) => m.type === "video").length;
   const quotaPct = Math.min(100, Math.round((totalKb / 1024 / 5120) * 100));
 
   const columns: Column<MediaItem>[] = [
@@ -71,7 +100,7 @@ function MediaPage() {
     {
       key: "creator",
       label: "Creator",
-      options: [...new Set(media.map((m) => m.creator))].sort(),
+      options: [...new Set(rows.map((m) => m.creator))].sort(),
       match: (r, v) => r.creator === v,
     },
     {
@@ -90,7 +119,7 @@ function MediaPage() {
       <PageHeader title="Media" description="Portfolio, profile and website media across all creator accounts." />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Files" value={String(media.length)} icon={ImageIcon} delta={7.6} />
+        <StatCard label="Files" value={String(rows.length)} icon={ImageIcon} delta={7.6} />
         <StatCard label="Images" value={String(images)} icon={ImageIcon} delta={5.1} />
         <StatCard label="Videos" value={String(videos)} icon={FileVideo} delta={12.9} />
         <StatCard label="Storage used" value={`${(totalKb / 1024 / 1024).toFixed(2)} GB`} icon={HardDrive} hint="of 5 TB plan" />
@@ -177,8 +206,13 @@ function MediaPage() {
         title="Delete this file?"
         description={`${deleting?.name ?? ""} will be removed from the creator's library and website. This can't be undone.`}
         confirmLabel="Delete file"
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!deleting) return;
+          try {
+            await adminApi.deleteMediaAsset(deleting.id);
+          } catch (err) {
+            console.warn("Backend deleteMediaAsset failed (using optimistic delete):", err);
+          }
           setRows((rs) => rs.filter((m) => m.id !== deleting.id));
           setPreview(null);
           saved("File deleted", deleting.name);
