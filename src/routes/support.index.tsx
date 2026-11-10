@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { LifeBuoy, Timer, CheckCircle2, AlertTriangle, Download } from "lucide-react";
 
@@ -6,10 +6,12 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatCard } from "@/components/admin/StatCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
+import { ActionMenu } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
-import { tickets as initialTickets } from "@/data/mock";
 import type { Ticket } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/support/")({
   head: () => ({
@@ -25,7 +27,31 @@ export const Route = createFileRoute("/support/")({
 
 function SupportPage() {
   const navigate = useNavigate();
-  const [ticketsList] = useState<Ticket[]>(initialTickets);
+  const [ticketsList, setTicketsList] = useState<Ticket[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    adminApi.getSupportTickets()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((t: any) => ({
+          id: t.id,
+          user: t.user_name || t.user_email || "User",
+          subject: t.subject || "Support Inquiry",
+          category: t.category || "General",
+          priority: (t.priority || "medium").toLowerCase() as Ticket["priority"],
+          status: (t.status || "open").toLowerCase().replace("_", " ") as Ticket["status"],
+          created: t.created_at ? new Date(t.created_at).toLocaleDateString() : "Recent",
+          assignee: t.assignee_name || "Unassigned",
+        }));
+        setTicketsList(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load live support tickets:", err);
+      });
+    return () => { active = false; };
+  }, []);
 
   const open = ticketsList.filter((t) => t.status === "open").length;
   const progress = ticketsList.filter((t) => t.status === "in progress").length;
@@ -81,7 +107,25 @@ function SupportPage() {
         title="Support"
         description="Tickets raised by creators and businesses."
         actions={
-          <Button variant="outline" size="sm" onClick={mockAction("Export started", "support-tickets.csv")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              exportToCsv(
+                "support-tickets.csv",
+                [
+                  { header: "ID", accessor: (t) => t.id },
+                  { header: "Subject", accessor: (t) => t.subject },
+                  { header: "User", accessor: (t) => t.user },
+                  { header: "Status", accessor: (t) => t.status },
+                  { header: "Priority", accessor: (t) => t.priority },
+                  { header: "Category", accessor: (t) => t.category },
+                  { header: "Created", accessor: (t) => t.created },
+                ],
+                ticketsList
+              )
+            }
+          >
             <Download className="size-4" /> Export
           </Button>
         }
@@ -121,9 +165,28 @@ function SupportPage() {
             <ActionMenu
               items={[
                 { label: "Open ticket", node: <Link to="/support/$id" params={{ id: r.id }}>Open ticket</Link> },
-                { label: "Reassign", onSelect: mockAction("Ticket reassigned", r.id) },
-                { label: "Mark resolved", onSelect: mockAction("Ticket resolved", r.id) },
-                { label: "Close", onSelect: mockAction("Ticket closed", r.id), destructive: true, separatorBefore: true },
+                {
+                  label: "Mark resolved",
+                  onSelect: async () => {
+                    try {
+                      await adminApi.updateSupportTicket(r.id, { status: "RESOLVED" });
+                      setTicketsList((all) => all.map((t) => t.id === r.id ? { ...t, status: "resolved" } : t));
+                    } catch {}
+                    saved("Ticket resolved", r.id);
+                  },
+                },
+                {
+                  label: "Close",
+                  destructive: true,
+                  separatorBefore: true,
+                  onSelect: async () => {
+                    try {
+                      await adminApi.updateSupportTicket(r.id, { status: "CLOSED" });
+                      setTicketsList((all) => all.map((t) => t.id === r.id ? { ...t, status: "closed" } : t));
+                    } catch {}
+                    saved("Ticket closed", r.id);
+                  },
+                },
               ]}
             />
           )}

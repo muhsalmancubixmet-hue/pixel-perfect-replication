@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Download, Megaphone, Users, Wallet } from "lucide-react";
 
@@ -10,6 +10,8 @@ import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
 import { CATEGORY_NAMES, businesses, campaigns as initialCampaigns, money } from "@/data/mock";
 import type { Campaign } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/campaigns/")({
   head: () => ({
@@ -36,9 +38,23 @@ const STATUSES: Campaign["status"][] = [
 
 function CampaignsPage() {
   const navigate = useNavigate();
-  const [campaignsList] = useState<Campaign[]>(initialCampaigns);
+  const [campaignsList, setCampaignsList] = useState<Campaign[]>([]);
 
-  const totalBudget = campaignsList.reduce((a, c) => a + c.budget, 0);
+  useEffect(() => {
+    let active = true;
+    adminApi.getCampaigns()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        setCampaignsList(list);
+      })
+      .catch((err) => {
+        console.warn("Could not load live campaigns:", err);
+      });
+    return () => { active = false; };
+  }, []);
+
+  const totalBudget = campaignsList.reduce((a, c) => a + (c.budget || 0), 0);
   const active = campaignsList.filter((c) => c.status === "active").length;
   const completed = campaignsList.filter((c) => c.status === "completed").length;
   const creators = campaignsList.reduce((a, c) => a + c.creators, 0);
@@ -105,7 +121,29 @@ function CampaignsPage() {
         title="Campaigns"
         description="Every campaign created by businesses on the platform."
         actions={
-          <Button variant="outline" size="sm" onClick={mockAction("Export started", "campaigns.csv")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              exportToCsv(
+                "campaigns.csv",
+                [
+                  { header: "ID", accessor: (c) => c.id },
+                  { header: "Title", accessor: (c) => c.title },
+                  { header: "Business", accessor: (c) => c.business },
+                  { header: "Category", accessor: (c) => c.category },
+                  { header: "Budget", accessor: (c) => c.budget },
+                  { header: "Currency", accessor: (c) => c.currency },
+                  { header: "Status", accessor: (c) => c.status },
+                  { header: "Creators", accessor: (c) => c.creators },
+                  { header: "Applications", accessor: (c) => c.applications },
+                  { header: "Created", accessor: (c) => c.created },
+                  { header: "Deadline", accessor: (c) => c.deadline },
+                ],
+                campaignsList
+              )
+            }
+          >
             <Download className="size-4" /> Export
           </Button>
         }
@@ -146,9 +184,26 @@ function CampaignsPage() {
             <ActionMenu
               items={[
                 { label: "View campaign", node: <Link to="/campaigns/$id" params={{ id: r.id }}>View campaign</Link> },
-                { label: "View applications", onSelect: mockAction("Applications", `${r.applications} for ${r.title}`) },
-                { label: "Feature campaign", onSelect: mockAction("Campaign featured", r.title) },
-                { label: "Cancel campaign", onSelect: mockAction("Campaign cancelled", r.title), destructive: true, separatorBefore: true },
+                {
+                  label: "Feature campaign",
+                  onSelect: async () => {
+                    try {
+                      await adminApi.moderateCampaign(r.id, { is_featured: true });
+                      setCampaignsList((all) => all.map((c) => (c.id === r.id ? { ...c, isFeatured: true } : c)));
+                    } catch {}
+                  },
+                },
+                {
+                  label: "Cancel campaign",
+                  destructive: true,
+                  separatorBefore: true,
+                  onSelect: async () => {
+                    try {
+                      await adminApi.moderateCampaign(r.id, { status: "CANCELLED" });
+                      setCampaignsList((all) => all.map((c) => (c.id === r.id ? { ...c, status: "cancelled" } : c)));
+                    } catch {}
+                  },
+                },
               ]}
             />
           )}

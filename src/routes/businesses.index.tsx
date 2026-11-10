@@ -12,6 +12,7 @@ import { FormDialog, FormDrawer, ReasonDialog, saved, type FieldDef } from "@/co
 import { COUNTRY_OPTIONS, CITY_OPTIONS, businesses } from "@/data/mock";
 import type { Business } from "@/data/types";
 import { adminApi } from "@/lib/admin-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({
@@ -151,7 +152,28 @@ function BusinessesPage() {
         description={`${rows.length} brand accounts across all markets.`}
         actions={
           <>
-            <Button variant="outline" size="sm" onClick={mockAction("Export started", "businesses.csv")}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                exportToCsv(
+                  "businesses.csv",
+                  [
+                    { header: "ID", accessor: (b) => b.id },
+                    { header: "Name", accessor: (b) => b.name },
+                    { header: "Type", accessor: (b) => b.type },
+                    { header: "Email", accessor: (b) => b.email },
+                    { header: "Phone", accessor: (b) => b.phone },
+                    { header: "Status", accessor: (b) => b.status },
+                    { header: "Verification", accessor: (b) => b.verification },
+                    { header: "Subscription", accessor: (b) => b.subscription },
+                    { header: "City", accessor: (b) => b.location?.city || "" },
+                    { header: "Country", accessor: (b) => b.location?.country || "" },
+                  ],
+                  rows
+                )
+              }
+            >
               <Download className="size-4" /> Export
             </Button>
             <Button size="sm" onClick={() => setAdding(true)}>

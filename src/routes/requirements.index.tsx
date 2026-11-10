@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, ClipboardList, Download, Users, Wallet } from "lucide-react";
 
@@ -6,10 +6,13 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { StatCard } from "@/components/admin/StatCard";
-import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
+import { ActionMenu } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
-import { CATEGORY_NAMES, COUNTRY_OPTIONS, businesses, money, requirements as initialRequirements } from "@/data/mock";
+import { CATEGORY_NAMES, COUNTRY_OPTIONS, money } from "@/data/mock";
 import type { Requirement } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/requirements/")({
   head: () => ({
@@ -25,12 +28,39 @@ export const Route = createFileRoute("/requirements/")({
 
 function RequirementsPage() {
   const navigate = useNavigate();
-  const [requirementsList] = useState<Requirement[]>(initialRequirements);
+  const [requirementsList, setRequirementsList] = useState<Requirement[]>([]);
 
-  const totalBudget = requirementsList.reduce((a, r) => a + r.budget, 0);
+  useEffect(() => {
+    let active = true;
+    adminApi.getRequirements()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((r: any) => ({
+          id: r.id,
+          title: r.title,
+          business: r.business_name || r.business || "Business",
+          category: r.category_name || r.category || "General",
+          status: (r.status || "OPEN").toLowerCase() as Requirement["status"],
+          created: r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recent",
+          currency: r.currency || "INR",
+          location: r.location_text || r.location || "Remote",
+          budget: (r.max_budget_cents || r.budget_max_cents || 0) / 100,
+          creatorsNeeded: r.creators_needed || 1,
+          applications: r.applications_count || r.proposals_count || 0,
+        }));
+        setRequirementsList(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load live requirements:", err);
+      });
+    return () => { active = false; };
+  }, []);
+
+  const totalBudget = requirementsList.reduce((a, r) => a + (r.budget || 0), 0);
   const openCount = requirementsList.filter((r) => r.status === "open").length;
-  const totalApps = requirementsList.reduce((a, r) => a + r.applications, 0);
-  const totalNeeded = requirementsList.reduce((a, r) => a + r.creatorsNeeded, 0);
+  const totalApps = requirementsList.reduce((a, r) => a + (r.applications || 0), 0);
+  const totalNeeded = requirementsList.reduce((a, r) => a + (r.creatorsNeeded || 0), 0);
 
   const columns: Column<Requirement>[] = [
     {
@@ -61,7 +91,7 @@ function RequirementsPage() {
     { key: "status", label: "Status", options: ["open", "featured", "hidden", "closed"], match: (r, v) => r.status === v },
     { key: "category", label: "Category", options: CATEGORY_NAMES, match: (r, v) => r.category === v },
     { key: "location", label: "Country", options: COUNTRY_OPTIONS, match: (r, v) => r.location.endsWith(v) },
-    { key: "business", label: "Business", options: businesses.map((b) => b.name), match: (r, v) => r.business === v },
+    { key: "business", label: "Business", options: [...new Set(requirementsList.map((r) => r.business))], match: (r, v) => r.business === v },
   ];
 
   return (
@@ -70,7 +100,26 @@ function RequirementsPage() {
         title="Requirements"
         description="Business-created influencer requirements awaiting moderation."
         actions={
-          <Button variant="outline" size="sm" onClick={mockAction("Export started", "requirements.csv")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              exportToCsv(
+                "requirements.csv",
+                [
+                  { header: "ID", accessor: (r) => r.id },
+                  { header: "Title", accessor: (r) => r.title },
+                  { header: "Business", accessor: (r) => r.business },
+                  { header: "Category", accessor: (r) => r.category },
+                  { header: "Status", accessor: (r) => r.status },
+                  { header: "Budget", accessor: (r) => r.budget },
+                  { header: "Applications", accessor: (r) => r.applications },
+                  { header: "Created", accessor: (r) => r.created },
+                ],
+                requirementsList
+              )
+            }
+          >
             <Download className="size-4" /> Export
           </Button>
         }
@@ -109,10 +158,36 @@ function RequirementsPage() {
             <ActionMenu
               items={[
                 { label: "View requirement", node: <Link to="/requirements/$id" params={{ id: r.id }}>View requirement</Link> },
-                { label: "Feature", onSelect: mockAction("Requirement featured", r.title) },
-                { label: "Hide", onSelect: mockAction("Requirement hidden", r.title) },
-                { label: "Close", onSelect: mockAction("Requirement closed", r.title) },
-                { label: "Remove", onSelect: mockAction("Requirement removed", r.title), destructive: true, separatorBefore: true },
+                {
+                  label: "Feature",
+                  onSelect: async () => {
+                    try {
+                      await adminApi.moderateRequirement(r.id, { status: "FEATURED" });
+                      setRequirementsList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "featured" } : x)));
+                    } catch {}
+                    saved("Requirement featured", r.title);
+                  },
+                },
+                {
+                  label: "Hide",
+                  onSelect: async () => {
+                    try {
+                      await adminApi.moderateRequirement(r.id, { status: "HIDDEN" });
+                      setRequirementsList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "hidden" } : x)));
+                    } catch {}
+                    saved("Requirement hidden", r.title);
+                  },
+                },
+                {
+                  label: "Close",
+                  onSelect: async () => {
+                    try {
+                      await adminApi.moderateRequirement(r.id, { status: "CLOSED" });
+                      setRequirementsList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "closed" } : x)));
+                    } catch {}
+                    saved("Requirement closed", r.title);
+                  },
+                },
               ]}
             />
           )}

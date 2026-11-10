@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { CATEGORY_NAMES, COUNTRY_OPTIONS, CITY_OPTIONS, compact, influencers } from "@/data/mock";
 import type { Influencer } from "@/data/types";
 import { adminApi } from "@/lib/admin-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/influencers/")({
   head: () => ({
@@ -160,7 +161,28 @@ function InfluencersPage() {
         description={`${rows.length} creator accounts registered on platform.`}
         actions={
           <>
-            <Button variant="outline" size="sm" onClick={mockAction("Export started", "influencers.csv")}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                exportToCsv(
+                  "influencers.csv",
+                  [
+                    { header: "ID", accessor: (i) => i.id },
+                    { header: "Name", accessor: (i) => i.name },
+                    { header: "Handle", accessor: (i) => i.handle },
+                    { header: "Status", accessor: (i) => i.status },
+                    { header: "Verification", accessor: (i) => i.verification },
+                    { header: "Followers", accessor: (i) => i.followers },
+                    { header: "Engagement", accessor: (i) => i.engagement },
+                    { header: "Subscription", accessor: (i) => i.subscription },
+                    { header: "City", accessor: (i) => i.location?.city || "" },
+                    { header: "Country", accessor: (i) => i.location?.country || "" },
+                  ],
+                  rows
+                )
+              }
+            >
               <Download className="size-4" /> Export
             </Button>
             <Button size="sm" onClick={() => setAdding(true)}>
