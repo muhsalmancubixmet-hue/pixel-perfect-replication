@@ -70,34 +70,36 @@ function AuditLogsPage() {
         }
       />
 
-      <DataTable
-        rows={auditLogs}
-        columns={columns}
-        filters={filters}
-        getId={(r) => r.id}
-        pageSize={15}
-        searchPlaceholder="Search action, admin or entity ID…"
-        search={(r, t) =>
-          r.action.toLowerCase().includes(t) || r.admin.toLowerCase().includes(t) || r.entityId.toLowerCase().includes(t)
-        }
-        mobileCard={(r) => (
-          <>
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold">{r.action}</p>
-              <StatusBadge value={r.result === "success" ? "approved" : "failed"} className="ml-auto" />
-            </div>
-            <p className="num mt-1 text-xs text-muted-foreground">
-              {r.entity} · {r.entityId}
-            </p>
-            <p className="num text-xs text-muted-foreground">
-              {r.admin} · {r.datetime}
-            </p>
-            <p className="num text-[11px] text-muted-foreground">
-              {r.ip} · {r.device}
-            </p>
-          </>
-        )}
-      />
+      <div className="w-full overflow-x-auto">
+        <DataTable
+          rows={auditLogs}
+          columns={columns}
+          filters={filters}
+          getId={(r) => r.id}
+          pageSize={15}
+          searchPlaceholder="Search action, admin or entity ID…"
+          search={(r, t) =>
+            r.action.toLowerCase().includes(t) || r.admin.toLowerCase().includes(t) || r.entityId.toLowerCase().includes(t)
+          }
+          mobileCard={(r) => (
+            <>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold">{r.action}</p>
+                <StatusBadge value={r.result === "success" ? "approved" : "failed"} className="ml-auto" />
+              </div>
+              <p className="num mt-1 text-xs text-muted-foreground">
+                {r.entity} · {r.entityId}
+              </p>
+              <p className="num text-xs text-muted-foreground">
+                {r.admin} · {r.datetime}
+              </p>
+              <p className="num text-[11px] text-muted-foreground">
+                {r.ip} · {r.device}
+              </p>
+            </>
+          )}
+        />
+      </div>
     </div>
   );
 }

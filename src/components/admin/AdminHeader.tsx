@@ -17,6 +17,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { GlobalSearch } from "@/components/admin/GlobalSearch";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { notifications } from "@/data/mock";
+import { authService } from "@/lib/auth-service";
+
 
 const QUICK_ACTIONS = [
   { label: "Add Influencer", icon: UserPlus, to: "/influencers" },
@@ -32,14 +34,14 @@ export function AdminHeader() {
   const unread = notifications.filter((n) => n.status !== "draft").length;
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur-sm sm:px-4">
-      <SidebarTrigger className="size-10 shrink-0 md:size-7" aria-label="Open menu" />
+    <header className="sticky top-0 z-30 flex h-14 w-full min-w-0 items-center gap-1.5 sm:gap-2 border-b border-border bg-card/90 px-2 sm:px-4 backdrop-blur-sm">
+      <SidebarTrigger className="size-9 shrink-0 sm:size-10 md:size-7" aria-label="Open menu" />
 
-      <div className="md:flex-none">
+      <div className="shrink-0 md:flex-none">
         <GlobalSearch />
       </div>
 
-      <div className="ml-auto flex items-center gap-1.5">
+      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="sm" className="hidden gap-1.5 sm:flex">
@@ -62,8 +64,8 @@ export function AdminHeader() {
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative size-10" aria-label="Notifications">
-              <Bell className="size-4.5" />
+            <Button variant="ghost" size="icon" className="relative size-9 shrink-0 sm:size-10" aria-label="Notifications">
+              <Bell className="size-4 sm:size-4.5" />
               <span className="num absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                 {unread}
               </span>
@@ -94,7 +96,7 @@ export function AdminHeader() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-lg px-1.5 py-1 transition-colors hover:bg-muted">
+            <button className="flex shrink-0 items-center gap-1.5 rounded-lg p-1 sm:px-1.5 sm:py-1 transition-colors hover:bg-muted">
               <UserAvatar name="Mohammed Fadhil" size={28} />
               <span className="hidden text-left leading-tight lg:block">
                 <span className="block text-xs font-semibold">Mohammed Fadhil</span>
@@ -115,11 +117,14 @@ export function AdminHeader() {
               <Link to="/audit-logs">Audit logs</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => {
+            <DropdownMenuItem
+              onSelect={() => {
+                authService.LogOut(); 
                 clearSession();
                 toast.success("Signed out");
                 void navigate({ to: "/login", replace: true });
-              }}>
+              }}
+            >
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

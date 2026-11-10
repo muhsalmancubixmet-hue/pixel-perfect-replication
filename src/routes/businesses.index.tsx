@@ -123,47 +123,49 @@ function BusinessesPage() {
         }
       />
 
-      <DataTable
-        rows={rows}
-        columns={columns}
-        filters={filters}
-        getId={(r) => r.id}
-        searchPlaceholder="Search business, contact or city…"
-        search={(r, t) =>
-          r.name.toLowerCase().includes(t) || r.contactName.toLowerCase().includes(t) || r.location.city.toLowerCase().includes(t)
-        }
-        mobileCard={(r) => (
-          <Link to="/businesses/$id" params={{ id: r.id }} className="block">
-            <div className="flex items-center gap-2.5">
-              <UserAvatar name={r.name} size={36} />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{r.name}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {r.type} · {r.location.city}, {r.location.countryCode}
-                </p>
+      <div className="w-full overflow-x-auto">
+        <DataTable
+          rows={rows}
+          columns={columns}
+          filters={filters}
+          getId={(r) => r.id}
+          searchPlaceholder="Search business, contact or city…"
+          search={(r, t) =>
+            r.name.toLowerCase().includes(t) || r.contactName.toLowerCase().includes(t) || r.location.city.toLowerCase().includes(t)
+          }
+          mobileCard={(r) => (
+            <Link to="/businesses/$id" params={{ id: r.id }} className="block">
+              <div className="flex items-center gap-2.5">
+                <UserAvatar name={r.name} size={36} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{r.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {r.type} · {r.location.city}, {r.location.countryCode}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <StatusBadge value={r.status} />
-              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold">
-                {r.subscription}
-              </span>
-              <span className="num ml-auto text-xs text-muted-foreground">{r.campaigns} campaigns</span>
-            </div>
-          </Link>
-        )}
-        rowAction={(r) => (
-          <ActionMenu
-            items={[
-              { label: "View", node: <Link to="/businesses/$id" params={{ id: r.id }}>View</Link> },
-              { label: "Edit", onSelect: () => setEditing(r) },
-              { label: "View Campaigns", node: <Link to="/campaigns">View Campaigns</Link> },
-              { label: "Activate", onSelect: () => setToggling({ b: r, to: "active" }) },
-              { label: "Suspend", onSelect: () => setToggling({ b: r, to: "suspended" }), destructive: true, separatorBefore: true },
-            ]}
-          />
-        )}
-      />
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <StatusBadge value={r.status} />
+                <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold">
+                  {r.subscription}
+                </span>
+                <span className="num ml-auto text-xs text-muted-foreground">{r.campaigns} campaigns</span>
+              </div>
+            </Link>
+          )}
+          rowAction={(r) => (
+            <ActionMenu
+              items={[
+                { label: "View", node: <Link to="/businesses/$id" params={{ id: r.id }}>View</Link> },
+                { label: "Edit", onSelect: () => setEditing(r) },
+                { label: "View Campaigns", node: <Link to="/campaigns">View Campaigns</Link> },
+                { label: "Activate", onSelect: () => setToggling({ b: r, to: "active" }) },
+                { label: "Suspend", onSelect: () => setToggling({ b: r, to: "suspended" }), destructive: true, separatorBefore: true },
+              ]}
+            />
+          )}
+        />
+      </div>
 
       <FormDialog
         open={adding}

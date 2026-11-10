@@ -8,13 +8,6 @@ export interface StaffSession {
   mfa: boolean;
 }
 
-export const DEMO_SESSION: StaffSession = {
-  name: "Mohammed Fadhil",
-  email: "fadhil@influencers.com",
-  role: "Super Admin",
-  mfa: true,
-};
-
 export function getSession(): StaffSession | null {
   if (typeof window === "undefined") return null;
   try {

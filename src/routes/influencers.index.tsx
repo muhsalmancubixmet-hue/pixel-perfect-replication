@@ -127,47 +127,49 @@ function InfluencersPage() {
         }
       />
 
-      <DataTable
-        rows={rows}
-        columns={columns}
-        filters={filters}
-        getId={(r) => r.id}
-        searchPlaceholder="Search by name, handle or city…"
-        search={(r, t) =>
-          r.name.toLowerCase().includes(t) || r.handle.includes(t) || r.location.city.toLowerCase().includes(t)
-        }
-        mobileCard={(r) => (
-          <Link to="/influencers/$id" params={{ id: r.id }} className="block">
-            <div className="flex items-center gap-2.5">
-              <UserAvatar src={r.avatar} name={r.name} size={36} />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{r.name}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {r.categories[0]} · {r.location.city}, {r.location.countryCode}
-                </p>
+      <div className="w-full overflow-x-auto">
+        <DataTable
+          rows={rows}
+          columns={columns}
+          filters={filters}
+          getId={(r) => r.id}
+          searchPlaceholder="Search by name, handle or city…"
+          search={(r, t) =>
+            r.name.toLowerCase().includes(t) || r.handle.includes(t) || r.location.city.toLowerCase().includes(t)
+          }
+          mobileCard={(r) => (
+            <Link to="/influencers/$id" params={{ id: r.id }} className="block">
+              <div className="flex items-center gap-2.5">
+                <UserAvatar src={r.avatar} name={r.name} size={36} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{r.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {r.categories[0]} · {r.location.city}, {r.location.countryCode}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <StatusBadge value={r.status} />
-              <StatusBadge value={r.verification} />
-              <span className="num ml-auto text-xs font-semibold">{compact(r.followers)} followers</span>
-            </div>
-          </Link>
-        )}
-        rowAction={(r) => (
-          <ActionMenu
-            items={[
-              { label: "View", node: <Link to="/influencers/$id" params={{ id: r.id }}>View</Link> },
-              { label: "Edit", onSelect: () => setEditing(r) },
-              { label: "Verify", onSelect: () => setVerifying(r) },
-              { label: "Activate", onSelect: () => setToggling({ i: r, to: "active" }) },
-              { label: "View Website", onSelect: mockAction("Opening website", r.websiteUrl ?? "no website") },
-              { label: "View Public Profile", onSelect: mockAction("Opening public profile", r.name) },
-              { label: "Suspend", onSelect: () => setToggling({ i: r, to: "suspended" }), destructive: true, separatorBefore: true },
-            ]}
-          />
-        )}
-      />
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <StatusBadge value={r.status} />
+                <StatusBadge value={r.verification} />
+                <span className="num ml-auto text-xs font-semibold">{compact(r.followers)} followers</span>
+              </div>
+            </Link>
+          )}
+          rowAction={(r) => (
+            <ActionMenu
+              items={[
+                { label: "View", node: <Link to="/influencers/$id" params={{ id: r.id }}>View</Link> },
+                { label: "Edit", onSelect: () => setEditing(r) },
+                { label: "Verify", onSelect: () => setVerifying(r) },
+                { label: "Activate", onSelect: () => setToggling({ i: r, to: "active" }) },
+                { label: "View Website", onSelect: mockAction("Opening website", r.websiteUrl ?? "no website") },
+                { label: "View Public Profile", onSelect: mockAction("Opening public profile", r.name) },
+                { label: "Suspend", onSelect: () => setToggling({ i: r, to: "suspended" }), destructive: true, separatorBefore: true },
+              ]}
+            />
+          )}
+        />
+      </div>
 
       <FormDialog
         open={adding}

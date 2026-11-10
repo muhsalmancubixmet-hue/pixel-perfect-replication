@@ -71,35 +71,37 @@ function PaymentsPage() {
         <StatCard label="Transactions" value={String(payments.length)} icon={CheckCircle2} delta={6.9} />
       </div>
 
-      <DataTable
-        rows={payments}
-        columns={columns}
-        filters={filters}
-        getId={(r) => r.id}
-        searchPlaceholder="Search transaction or user…"
-        search={(r, t) => r.id.toLowerCase().includes(t) || r.user.toLowerCase().includes(t)}
-        mobileCard={(r) => (
-          <>
-            <div className="flex items-center gap-2">
-              <p className="num text-sm font-semibold">{r.id}</p>
-              <StatusBadge value={r.status} className="ml-auto" />
-            </div>
-            <p className="mt-1 truncate text-xs text-muted-foreground">{r.user}</p>
-            <p className="num mt-1 text-sm font-bold">
-              {money(r.amount, r.currency)} <span className="text-xs font-normal text-muted-foreground">· {r.type} · {r.method}</span>
-            </p>
-          </>
-        )}
-        rowAction={(r) => (
-          <ActionMenu
-            items={[
-              { label: "View receipt", onSelect: mockAction("Receipt", r.id) },
-              { label: "Send invoice", onSelect: mockAction("Invoice sent", r.user) },
-              { label: "Refund", onSelect: mockAction("Refund initiated", r.id), destructive: true, separatorBefore: true },
-            ]}
-          />
-        )}
-      />
+      <div className="w-full overflow-x-auto">
+        <DataTable
+          rows={payments}
+          columns={columns}
+          filters={filters}
+          getId={(r) => r.id}
+          searchPlaceholder="Search transaction or user…"
+          search={(r, t) => r.id.toLowerCase().includes(t) || r.user.toLowerCase().includes(t)}
+          mobileCard={(r) => (
+            <>
+              <div className="flex items-center gap-2">
+                <p className="num text-sm font-semibold">{r.id}</p>
+                <StatusBadge value={r.status} className="ml-auto" />
+              </div>
+              <p className="mt-1 truncate text-xs text-muted-foreground">{r.user}</p>
+              <p className="num mt-1 text-sm font-bold">
+                {money(r.amount, r.currency)} <span className="text-xs font-normal text-muted-foreground">· {r.type} · {r.method}</span>
+              </p>
+            </>
+          )}
+          rowAction={(r) => (
+            <ActionMenu
+              items={[
+                { label: "View receipt", onSelect: mockAction("Receipt", r.id) },
+                { label: "Send invoice", onSelect: mockAction("Invoice sent", r.user) },
+                { label: "Refund", onSelect: mockAction("Refund initiated", r.id), destructive: true, separatorBefore: true },
+              ]}
+            />
+          )}
+        />
+      </div>
     </div>
   );
 }

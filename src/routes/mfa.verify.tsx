@@ -4,7 +4,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AuthLayout } from "@/components/admin/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { DEMO_SESSION, setSession } from "@/lib/auth";
+import { getSession, setSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/mfa/verify")({
   head: () => ({
@@ -43,7 +43,13 @@ function MfaPage() {
           className="h-10 w-full"
           disabled={code.length < 6}
           onClick={() => {
-            setSession(DEMO_SESSION);
+            const currentSession = getSession();
+            if (!currentSession) {
+              void navigate({ to: "/login" });
+              return;
+            }
+            currentSession.mfa = true;
+            setSession(currentSession);
             void navigate({ to: "/" });
           }}
         >

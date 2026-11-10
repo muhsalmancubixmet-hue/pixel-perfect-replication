@@ -104,33 +104,35 @@ function MediaPage() {
         <Progress value={quotaPct} />
       </div>
 
-      <DataTable
-        rows={rows}
-        onRowClick={setPreview}
-        columns={columns}
-        filters={filters}
-        getId={(r) => r.id}
-        searchPlaceholder="Search file or creator…"
-        search={(r, t) => r.name.toLowerCase().includes(t) || r.creator.toLowerCase().includes(t)}
-        mobileCard={(r) => (
-          <>
-            <p className="num truncate text-sm font-semibold">{r.name}</p>
-            <p className="truncate text-xs text-muted-foreground">{r.creator}</p>
-            <p className="num mt-1 text-xs text-muted-foreground">
-              {r.type} · {mb(r.size)} · {r.uploaded}
-            </p>
-          </>
-        )}
-        rowAction={(r) => (
-          <ActionMenu
-            items={[
-              { label: "Preview", onSelect: () => setPreview(r) },
-              { label: "Copy CDN URL", onSelect: () => void copy(r) },
-              { label: "Delete", onSelect: () => setDeleting(r), destructive: true, separatorBefore: true },
-            ]}
-          />
-        )}
-      />
+      <div className="w-full overflow-x-auto">
+        <DataTable
+          rows={rows}
+          onRowClick={setPreview}
+          columns={columns}
+          filters={filters}
+          getId={(r) => r.id}
+          searchPlaceholder="Search file or creator…"
+          search={(r, t) => r.name.toLowerCase().includes(t) || r.creator.toLowerCase().includes(t)}
+          mobileCard={(r) => (
+            <>
+              <p className="num truncate text-sm font-semibold">{r.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{r.creator}</p>
+              <p className="num mt-1 text-xs text-muted-foreground">
+                {r.type} · {mb(r.size)} · {r.uploaded}
+              </p>
+            </>
+          )}
+          rowAction={(r) => (
+            <ActionMenu
+              items={[
+                { label: "Preview", onSelect: () => setPreview(r) },
+                { label: "Copy CDN URL", onSelect: () => void copy(r) },
+                { label: "Delete", onSelect: () => setDeleting(r), destructive: true, separatorBefore: true },
+              ]}
+            />
+          )}
+        />
+      </div>
 
       <Dialog open={Boolean(preview)} onOpenChange={(o) => !o && setPreview(null)}>
         <DialogContent className="sm:max-w-2xl">

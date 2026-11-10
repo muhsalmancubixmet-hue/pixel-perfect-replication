@@ -54,35 +54,37 @@ function DomainsPage() {
         DNS checks are simulated in this prototype. Actions show the flow admins will get once the backend is connected.
       </div>
 
-      <DataTable
-        rows={domains}
-        columns={columns}
-        filters={filters}
-        getId={(r) => r.id}
-        searchPlaceholder="Search domain or creator…"
-        search={(r, t) => r.domain.toLowerCase().includes(t) || r.creator.toLowerCase().includes(t)}
-        mobileCard={(r) => (
-          <>
-            <p className="num truncate text-sm font-semibold text-primary">{r.domain}</p>
-            <p className="truncate text-xs text-muted-foreground">{r.creator}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <StatusBadge value={r.verification} />
-              <StatusBadge value={r.ssl} />
-              <span className="ml-auto text-xs capitalize text-muted-foreground">{r.type}</span>
-            </div>
-          </>
-        )}
-        rowAction={(r) => (
-          <ActionMenu
-            items={[
-              { label: "Verify", onSelect: () => setDiagnosing(r) },
-              { label: "Retry", onSelect: () => setDiagnosing(r) },
-              { label: "View instructions", onSelect: () => setInstructions(r) },
-              { label: "Disconnect", onSelect: () => setDisconnecting(r), destructive: true, separatorBefore: true },
-            ]}
-          />
-        )}
-      />
+      <div className="w-full overflow-x-auto">
+        <DataTable
+          rows={domains}
+          columns={columns}
+          filters={filters}
+          getId={(r) => r.id}
+          searchPlaceholder="Search domain or creator…"
+          search={(r, t) => r.domain.toLowerCase().includes(t) || r.creator.toLowerCase().includes(t)}
+          mobileCard={(r) => (
+            <>
+              <p className="num truncate text-sm font-semibold text-primary">{r.domain}</p>
+              <p className="truncate text-xs text-muted-foreground">{r.creator}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <StatusBadge value={r.verification} />
+                <StatusBadge value={r.ssl} />
+                <span className="ml-auto text-xs capitalize text-muted-foreground">{r.type}</span>
+              </div>
+            </>
+          )}
+          rowAction={(r) => (
+            <ActionMenu
+              items={[
+                { label: "Verify", onSelect: () => setDiagnosing(r) },
+                { label: "Retry", onSelect: () => setDiagnosing(r) },
+                { label: "View instructions", onSelect: () => setInstructions(r) },
+                { label: "Disconnect", onSelect: () => setDisconnecting(r), destructive: true, separatorBefore: true },
+              ]}
+            />
+          )}
+        />
+      </div>
 
       <Dialog open={Boolean(instructions)} onOpenChange={(o) => !o && setInstructions(null)}>
         <DialogContent>

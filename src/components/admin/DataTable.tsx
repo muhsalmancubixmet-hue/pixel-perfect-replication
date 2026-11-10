@@ -124,7 +124,7 @@ export function DataTable<T>({
   );
 
   return (
-    <div className="panel overflow-hidden">
+    <div className="panel w-full overflow-hidden">
       <div className="flex flex-col gap-2 border-b border-border p-3 lg:flex-row lg:items-center">
         {search && (
           <div className="relative flex-1">
@@ -198,7 +198,7 @@ export function DataTable<T>({
       </div>
 
       {/* Desktop table */}
-      <div className="hidden overflow-x-auto md:block">
+      <div className="w-full overflow-x-auto hidden md:block">
         <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50 text-left">

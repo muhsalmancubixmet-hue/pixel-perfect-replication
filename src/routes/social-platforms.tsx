@@ -107,44 +107,46 @@ function SocialPlatformsPage() {
         </TabsList>
 
         <TabsContent value="platforms" className="mt-3">
-          <DataTable
-            rows={socialPlatforms}
-            columns={platformColumns}
-            getId={(r) => r.id}
-            pageSize={10}
-            searchPlaceholder="Search platform…"
-            search={(r, t) => r.name.toLowerCase().includes(t)}
-            filters={[
-              { key: "status", label: "Status", options: ["active", "inactive"], match: (r, v) => r.status === v },
-              { key: "oauth", label: "OAuth", options: ["supported", "not supported"], match: (r, v) => (v === "supported" ? r.oauth : !r.oauth) },
-            ]}
-            mobileCard={(r) => (
-              <>
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className="grid size-8 place-items-center rounded-lg text-[11px] font-bold text-white"
-                    style={{ background: r.color }}
-                  >
-                    {r.name.slice(0, 2)}
-                  </span>
-                  <p className="text-sm font-semibold">{r.name}</p>
-                  <StatusBadge value={r.status} className="ml-auto" />
-                </div>
-                <p className="num mt-2 text-xs text-muted-foreground">
-                  {compact(r.activeCreators)} creators · OAuth {r.oauth ? "yes" : "no"} · API {r.api ? "yes" : "no"}
-                </p>
-              </>
-            )}
-            rowAction={(r) => (
-              <ActionMenu
-                items={[
-                  { label: "Edit", onSelect: mockAction("Edit platform", r.name) },
-                  { label: "Configure", onSelect: () => setConfigure(r) },
-                  { label: r.status === "active" ? "Disable" : "Enable", onSelect: mockAction(r.status === "active" ? "Platform disabled" : "Platform enabled", r.name) },
-                ]}
-              />
-            )}
-          />
+          <div className="w-full overflow-x-auto">
+            <DataTable
+              rows={socialPlatforms}
+              columns={platformColumns}
+              getId={(r) => r.id}
+              pageSize={10}
+              searchPlaceholder="Search platform…"
+              search={(r, t) => r.name.toLowerCase().includes(t)}
+              filters={[
+                { key: "status", label: "Status", options: ["active", "inactive"], match: (r, v) => r.status === v },
+                { key: "oauth", label: "OAuth", options: ["supported", "not supported"], match: (r, v) => (v === "supported" ? r.oauth : !r.oauth) },
+              ]}
+              mobileCard={(r) => (
+                <>
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className="grid size-8 place-items-center rounded-lg text-[11px] font-bold text-white"
+                      style={{ background: r.color }}
+                    >
+                      {r.name.slice(0, 2)}
+                    </span>
+                    <p className="text-sm font-semibold">{r.name}</p>
+                    <StatusBadge value={r.status} className="ml-auto" />
+                  </div>
+                  <p className="num mt-2 text-xs text-muted-foreground">
+                    {compact(r.activeCreators)} creators · OAuth {r.oauth ? "yes" : "no"} · API {r.api ? "yes" : "no"}
+                  </p>
+                </>
+              )}
+              rowAction={(r) => (
+                <ActionMenu
+                  items={[
+                    { label: "Edit", onSelect: mockAction("Edit platform", r.name) },
+                    { label: "Configure", onSelect: () => setConfigure(r) },
+                    { label: r.status === "active" ? "Disable" : "Enable", onSelect: mockAction(r.status === "active" ? "Platform disabled" : "Platform enabled", r.name) },
+                  ]}
+                />
+              )}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="requests" className="mt-3">
@@ -152,33 +154,35 @@ function SocialPlatformsPage() {
             Creators can request networks we don't support yet. Approving one creates a new platform without touching the
             creator architecture.
           </p>
-          <DataTable
-            rows={platformRequests}
-            columns={requestColumns}
-            filters={requestFilters}
-            getId={(r) => r.id}
-            searchPlaceholder="Search request…"
-            search={(r, t) => r.platform.toLowerCase().includes(t) || r.requestedBy.toLowerCase().includes(t)}
-            mobileCard={(r) => (
-              <>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold">{r.platform}</p>
-                  <StatusBadge value={r.status} className="ml-auto" />
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">{r.requestedBy}</p>
-                <p className="num truncate text-xs text-primary">{r.profileUrl}</p>
-              </>
-            )}
-            rowAction={(r) => (
-              <ActionMenu
-                items={[
-                  { label: "View Request", onSelect: mockAction("Request details", `${r.platform} · ${r.requestedBy}`) },
-                  { label: "Approve", onSelect: () => setApprove(r) },
-                  { label: "Reject", onSelect: mockAction("Request rejected", r.platform), destructive: true, separatorBefore: true },
-                ]}
-              />
-            )}
-          />
+          <div className="w-full overflow-x-auto">
+            <DataTable
+              rows={platformRequests}
+              columns={requestColumns}
+              filters={requestFilters}
+              getId={(r) => r.id}
+              searchPlaceholder="Search request…"
+              search={(r, t) => r.platform.toLowerCase().includes(t) || r.requestedBy.toLowerCase().includes(t)}
+              mobileCard={(r) => (
+                <>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold">{r.platform}</p>
+                    <StatusBadge value={r.status} className="ml-auto" />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{r.requestedBy}</p>
+                  <p className="num truncate text-xs text-primary">{r.profileUrl}</p>
+                </>
+              )}
+              rowAction={(r) => (
+                <ActionMenu
+                  items={[
+                    { label: "View Request", onSelect: mockAction("Request details", `${r.platform} · ${r.requestedBy}`) },
+                    { label: "Approve", onSelect: () => setApprove(r) },
+                    { label: "Reject", onSelect: mockAction("Request rejected", r.platform), destructive: true, separatorBefore: true },
+                  ]}
+                />
+              )}
+            />
+          </div>
         </TabsContent>
       </Tabs>
 

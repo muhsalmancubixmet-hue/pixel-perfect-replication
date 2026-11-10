@@ -69,35 +69,37 @@ function WebsitesPage() {
         <StatCard label="Visitors (30d)" value={compact(visitors)} icon={MousePointerClick} delta={18.2} />
       </div>
 
-      <DataTable
-        rows={websites}
-        columns={columns}
-        filters={filters}
-        getId={(r) => r.id}
-        searchPlaceholder="Search creator or URL…"
-        search={(r, t) => r.creator.toLowerCase().includes(t) || r.url.toLowerCase().includes(t)}
-        mobileCard={(r) => (
-          <>
-            <p className="truncate text-sm font-semibold">{r.creator}</p>
-            <p className="num truncate text-xs text-primary">{r.url}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <StatusBadge value={r.status} />
-              <span className="text-xs text-muted-foreground">{r.template}</span>
-              <span className="num ml-auto text-xs font-semibold">{compact(r.visitors)} visits</span>
-            </div>
-          </>
-        )}
-        rowAction={(r) => (
-          <ActionMenu
-            items={[
-              { label: "Preview", onSelect: mockAction("Preview website", r.url) },
-              { label: "Edit", onSelect: mockAction("Opening editor", r.url) },
-              { label: "View analytics", onSelect: mockAction("Website analytics", r.url) },
-              { label: "Suspend", onSelect: mockAction("Website suspended", r.url), destructive: true, separatorBefore: true },
-            ]}
-          />
-        )}
-      />
+      <div className="w-full overflow-x-auto">
+        <DataTable
+          rows={websites}
+          columns={columns}
+          filters={filters}
+          getId={(r) => r.id}
+          searchPlaceholder="Search creator or URL…"
+          search={(r, t) => r.creator.toLowerCase().includes(t) || r.url.toLowerCase().includes(t)}
+          mobileCard={(r) => (
+            <>
+              <p className="truncate text-sm font-semibold">{r.creator}</p>
+              <p className="num truncate text-xs text-primary">{r.url}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <StatusBadge value={r.status} />
+                <span className="text-xs text-muted-foreground">{r.template}</span>
+                <span className="num ml-auto text-xs font-semibold">{compact(r.visitors)} visits</span>
+              </div>
+            </>
+          )}
+          rowAction={(r) => (
+            <ActionMenu
+              items={[
+                { label: "Preview", onSelect: mockAction("Preview website", r.url) },
+                { label: "Edit", onSelect: mockAction("Opening editor", r.url) },
+                { label: "View analytics", onSelect: mockAction("Website analytics", r.url) },
+                { label: "Suspend", onSelect: mockAction("Website suspended", r.url), destructive: true, separatorBefore: true },
+              ]}
+            />
+          )}
+        />
+      </div>
     </div>
   );
 }

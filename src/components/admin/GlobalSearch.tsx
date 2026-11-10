@@ -40,9 +40,9 @@ export function GlobalSearch() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Search platform"
-        className="flex size-10 items-center justify-center gap-2 rounded-lg border border-border bg-muted/60 text-sm text-muted-foreground transition-colors hover:bg-muted md:h-9 md:w-80 md:justify-start md:px-3"
+        className="flex size-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-muted/60 text-sm text-muted-foreground transition-colors hover:bg-muted sm:size-10 md:h-9 md:w-80 md:shrink md:justify-start md:px-3"
       >
-        <Search className="size-4" />
+        <Search className="size-4 shrink-0" />
         <span className="hidden flex-1 text-left md:inline">Search platform…</span>
         <kbd className="hidden rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium md:inline">
           ⌘K

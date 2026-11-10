@@ -19,6 +19,8 @@ import { PUBLIC_PATHS, getSession } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { authService } from "@/lib/auth-service";
+
 
 function NotFoundComponent() {
   return (
@@ -111,7 +113,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="min-w-0 overflow-x-hidden">
         {children}
         <Scripts />
       </body>
@@ -133,8 +135,11 @@ function useStaffGuard(isPublic: boolean) {
   const [ok, setOk] = useState(false);
   useEffect(() => {
     if (isPublic) return;
-    if (getSession()) setOk(true);
-    else void navigate({ to: "/login", replace: true });
+   if (authService.isAuthenticated() || getSession()) {
+      setOk(true);
+    } else {
+      void navigate({ to: "/login", replace: true });
+    }
   }, [isPublic, navigate]);
   return ok;
 }
@@ -148,7 +153,9 @@ function RootComponent() {
   if (isPublic) {
     return (
       <QueryClientProvider client={queryClient}>
-        <Outlet />
+        <div className="min-h-screen w-full min-w-0 overflow-x-hidden">
+          <Outlet />
+        </div>
         <Toaster position="top-right" />
       </QueryClientProvider>
     );
@@ -162,11 +169,11 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <SidebarProvider>
         <MobileNavCloser />
-        <div className="flex min-h-screen w-full">
+        <div className="flex min-h-screen w-full min-w-0 overflow-x-hidden">
           <AdminSidebar />
-          <SidebarInset className="min-w-0 flex-1 bg-background">
+          <SidebarInset className="min-w-0 flex-1 overflow-x-hidden bg-background">
             <AdminHeader />
-            <main className="flex-1 p-3 sm:p-4 lg:p-6">
+            <main className="min-w-0 flex-1 overflow-x-hidden p-3 sm:p-4 lg:p-6">
               {/* Required: nested routes render here. */}
               <Outlet />
             </main>
