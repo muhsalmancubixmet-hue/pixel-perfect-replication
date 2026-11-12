@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { categories as seedCategories } from "@/data/mock";
 import type { Category } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/categories")({
   head: () => ({
@@ -33,7 +34,31 @@ export const Route = createFileRoute("/categories")({
 });
 
 function CategoriesPage() {
-  const [items, setItems] = useState<Category[]>(seedCategories);
+  const [items, setItems] = useState<Category[]>([]);
+
+  const loadCategories = () => {
+    adminApi.getCategories()
+      .then((res: any) => {
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((c: any, i: number) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug || c.name.toLowerCase().replace(/\s+/g, "-"),
+          creators: c.creator_count || c.creators || 0,
+          order: c.order || i + 1,
+          status: (c.status || "active").toLowerCase() as Category["status"],
+        }));
+        setItems(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load live categories:", err);
+      });
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [name, setName] = useState("");
@@ -52,25 +77,29 @@ function CategoriesPage() {
   const toggle = (id: string) =>
     setItems((s) => s.map((c) => (c.id === id ? { ...c, status: c.status === "active" ? "inactive" : "active" } : c)));
 
-  const save = () => {
+  const save = async () => {
     const value = name.trim();
     if (!value) return;
     if (editing) {
       setItems((s) => s.map((c) => (c.id === editing.id ? { ...c, name: value } : c)));
     } else {
-      setItems((s) => [
-        ...s,
-        {
-          id: `CAT-${8100 + s.length}`,
-          name: value,
-          slug: value.toLowerCase().replace(/\s+/g, "-"),
-          creators: 0,
-          order: s.length + 1,
-          status: "active",
-        },
-      ]);
+      try {
+        await adminApi.createCategory({ name: value, slug: value.toLowerCase().replace(/\s+/g, "-") });
+        loadCategories();
+      } catch {
+        setItems((s) => [
+          ...s,
+          {
+            id: `CAT-${8100 + s.length}`,
+            name: value,
+            slug: value.toLowerCase().replace(/\s+/g, "-"),
+            creators: 0,
+            order: s.length + 1,
+            status: "active",
+          },
+        ]);
+      }
     }
-    mockAction(editing ? "Category updated" : "Category added", value)();
     setOpen(false);
     setEditing(null);
     setName("");

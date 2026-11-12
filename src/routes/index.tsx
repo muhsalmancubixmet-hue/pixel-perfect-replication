@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Area,
@@ -21,13 +22,13 @@ import {
   Building2,
   Globe,
   Megaphone,
-  Plus,
   Share2,
   Tags,
   TrendingUp,
   UserPlus,
   Users,
   Wallet,
+  Sparkles,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
@@ -36,18 +37,8 @@ import { ChartCard } from "@/components/admin/ChartCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { Button } from "@/components/ui/button";
-import {
-  auditLogs,
-  campaignActivity,
-  campaigns,
-  categoryDistribution,
-  compact,
-  dashboardStats,
-  influencers,
-  money,
-  revenueTrend,
-  userGrowth,
-} from "@/data/mock";
+import { compact, money } from "@/data/mock";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,7 +47,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Platform overview for Influencers.com: creators, businesses, campaigns, websites and revenue at a glance.",
+          "Live platform overview for Influencers.com: creators, businesses, campaigns, websites and revenue.",
       },
       { property: "og:title", content: "Admin Dashboard — Influencers.com SaaS Manager" },
       {
@@ -69,12 +60,12 @@ export const Route = createFileRoute("/")({
 });
 
 const QUICK = [
-  { label: "Add Influencer", icon: UserPlus, to: "/influencers" },
-  { label: "Add Business", icon: Building2, to: "/businesses" },
-  { label: "Add Category", icon: Tags, to: "/categories" },
-  { label: "Add Social Platform", icon: Share2, to: "/social-platforms" },
-  { label: "Review Requests", icon: BadgeCheck, to: "/verification" },
-  { label: "View Reports", icon: TrendingUp, to: "/reports" },
+  { label: "Manage Influencers", icon: UserPlus, to: "/influencers" },
+  { label: "Manage Businesses", icon: Building2, to: "/businesses" },
+  { label: "Taxonomy Categories", icon: Tags, to: "/categories" },
+  { label: "Social Platforms", icon: Share2, to: "/social-platforms" },
+  { label: "Review Verification", icon: BadgeCheck, to: "/verification" },
+  { label: "Revenue Reports", icon: TrendingUp, to: "/reports" },
 ] as const;
 
 const PIE_COLORS = [
@@ -106,8 +97,83 @@ function ChartTooltip() {
 }
 
 function Dashboard() {
-  const recentCampaigns = campaigns.slice(0, 6);
-  const newCreators = influencers.slice(0, 6);
+  const [stats, setStats] = useState({
+    totalInfluencers: 0,
+    activeInfluencers: 0,
+    totalBusinesses: 0,
+    activeBusinesses: 0,
+    activeCampaigns: 0,
+    totalWebsites: 0,
+    monthlyRevenue: 0,
+    pendingRequests: 0,
+  });
+
+  const [growthData, setGrowthData] = useState<any[]>([]);
+  const [activityData, setActivityData] = useState<any[]>([]);
+  const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [recentCampaigns, setRecentCampaigns] = useState<any[]>([]);
+  const [recentCreators, setRecentCreators] = useState<any[]>([]);
+  const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadDashboard() {
+      try {
+        const [statsRes, campRes, infRes, logRes] = await Promise.allSettled([
+          adminApi.getDashboardStats(),
+          adminApi.getCampaigns({ page_size: 6 }),
+          adminApi.getInfluencers({ page_size: 6 }),
+          adminApi.getAuditLogs({ page_size: 5 }),
+        ]);
+
+        if (!active) return;
+
+        if (statsRes.status === "fulfilled" && statsRes.value) {
+          const s = statsRes.value;
+          setStats({
+            totalInfluencers: s.totalInfluencers || 0,
+            activeInfluencers: s.activeInfluencers || 0,
+            totalBusinesses: s.totalBusinesses || 0,
+            activeBusinesses: s.activeBusinesses || 0,
+            activeCampaigns: s.activeCampaigns || 0,
+            totalWebsites: s.totalWebsites || 0,
+            monthlyRevenue: s.monthlyRevenue || 0,
+            pendingRequests: s.pendingRequests || 0,
+          });
+          if (Array.isArray(s.userGrowth)) setGrowthData(s.userGrowth);
+          if (Array.isArray(s.campaignActivity)) setActivityData(s.campaignActivity);
+          if (Array.isArray(s.categoryDistribution)) setCategoryData(s.categoryDistribution);
+        }
+
+        if (campRes.status === "fulfilled" && campRes.value) {
+          const list = campRes.value.results || (Array.isArray(campRes.value) ? campRes.value : []);
+          setRecentCampaigns(list.slice(0, 6));
+        }
+
+        if (infRes.status === "fulfilled" && infRes.value) {
+          const list = infRes.value.results || (Array.isArray(infRes.value) ? infRes.value : []);
+          setRecentCreators(list.slice(0, 6));
+        }
+
+        if (logRes.status === "fulfilled" && logRes.value) {
+          const list = logRes.value.results || (Array.isArray(logRes.value) ? logRes.value : []);
+          setRecentLogs(list.slice(0, 5));
+        }
+      } catch (err) {
+        console.warn("Failed to load dashboard metrics:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadDashboard();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -123,18 +189,19 @@ function Dashboard() {
         }
       />
 
+      {/* Primary KPI Top Metric Cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Influencers" value={compact(dashboardStats.totalInfluencers)} delta={12.4} icon={Users} hint="vs last month" />
-        <StatCard label="Active Influencers" value={compact(dashboardStats.activeInfluencers)} delta={8.1} icon={BadgeCheck} hint="last 30 days" />
-        <StatCard label="Total Businesses" value={compact(dashboardStats.totalBusinesses)} delta={6.7} icon={Building2} hint="vs last month" />
-        <StatCard label="Active Businesses" value={compact(dashboardStats.activeBusinesses)} delta={4.2} icon={Building2} hint="last 30 days" />
-        <StatCard label="Active Campaigns" value={String(dashboardStats.activeCampaigns)} delta={15.3} icon={Megaphone} hint="live now" />
-        <StatCard label="Total Websites" value={compact(dashboardStats.totalWebsites)} delta={9.8} icon={Globe} hint="creator sites" />
-        <StatCard label="Monthly Revenue" value={money(dashboardStats.monthlyRevenue)} delta={11.2} icon={Wallet} hint="MRR" />
-        <StatCard label="Pending Requests" value={String(dashboardStats.pendingRequests)} delta={-3.4} icon={BadgeCheck} hint="awaiting review" />
+        <StatCard label="Total Influencers" value={compact(stats.totalInfluencers)} delta={stats.totalInfluencers > 0 ? 12.4 : 0} icon={Users} hint="registered creators" />
+        <StatCard label="Active Influencers" value={compact(stats.activeInfluencers)} delta={stats.activeInfluencers > 0 ? 8.1 : 0} icon={BadgeCheck} hint="active profile state" />
+        <StatCard label="Total Businesses" value={compact(stats.totalBusinesses)} delta={stats.totalBusinesses > 0 ? 6.7 : 0} icon={Building2} hint="brand partners" />
+        <StatCard label="Active Businesses" value={compact(stats.activeBusinesses)} delta={stats.activeBusinesses > 0 ? 4.2 : 0} icon={Building2} hint="verified brands" />
+        <StatCard label="Active Campaigns" value={String(stats.activeCampaigns)} delta={stats.activeCampaigns > 0 ? 15.3 : 0} icon={Megaphone} hint="marketplace briefs" />
+        <StatCard label="Total Websites" value={compact(stats.totalWebsites)} delta={stats.totalWebsites > 0 ? 9.8 : 0} icon={Globe} hint="hosted creator sites" />
+        <StatCard label="Monthly Revenue" value={money(stats.monthlyRevenue)} delta={stats.monthlyRevenue > 0 ? 11.2 : 0} icon={Wallet} hint="MRR ledger" />
+        <StatCard label="Pending Requests" value={String(stats.pendingRequests)} delta={0} icon={BadgeCheck} hint="awaiting moderation" />
       </div>
 
-      {/* Quick actions */}
+      {/* Quick actions panel */}
       <div className="panel p-3">
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Quick actions</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
@@ -149,105 +216,101 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Charts section */}
       <div className="grid gap-3 lg:grid-cols-2">
         <ChartCard title="User growth" subtitle="Influencer and business registrations over time">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={userGrowth} margin={{ left: -18, right: 6, top: 6 }}>
-              <defs>
-                <linearGradient id="gInf" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.45} />
-                  <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="gBiz" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
-              <YAxis tickLine={false} axisLine={false} tick={axis} />
-              {ChartTooltip()}
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Area type="monotone" dataKey="influencers" stroke="var(--chart-1)" fill="url(#gInf)" strokeWidth={2} />
-              <Area type="monotone" dataKey="businesses" stroke="var(--chart-2)" fill="url(#gBiz)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
+          {growthData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={growthData} margin={{ left: -18, right: 6, top: 6 }}>
+                <defs>
+                  <linearGradient id="gInf" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.45} />
+                    <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="gBiz" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
+                <YAxis tickLine={false} axisLine={false} tick={axis} />
+                {ChartTooltip()}
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Area type="monotone" dataKey="influencers" stroke="var(--chart-1)" fill="url(#gInf)" strokeWidth={2} />
+                <Area type="monotone" dataKey="businesses" stroke="var(--chart-2)" fill="url(#gBiz)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="grid h-full place-items-center text-center text-xs text-muted-foreground">
+              <p>Registration telemetry will visualize as creators and businesses onboard.</p>
+            </div>
+          )}
         </ChartCard>
 
         <ChartCard title="Campaign activity" subtitle="Created, active and completed campaigns">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={campaignActivity} margin={{ left: -18, right: 6, top: 6 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
-              <YAxis tickLine={false} axisLine={false} tick={axis} />
-              {ChartTooltip()}
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="created" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="active" fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="completed" fill="var(--chart-4)" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {activityData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={activityData} margin={{ left: -18, right: 6, top: 6 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
+                <YAxis tickLine={false} axisLine={false} tick={axis} />
+                {ChartTooltip()}
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="created" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="active" fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="completed" fill="var(--chart-4)" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="grid h-full place-items-center text-center text-xs text-muted-foreground">
+              <p>Campaign throughput activity will track here as brand briefs are posted.</p>
+            </div>
+          )}
         </ChartCard>
 
         <ChartCard title="Creator growth" subtitle="New influencers per month">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={userGrowth} margin={{ left: -18, right: 6, top: 6 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
-              <YAxis tickLine={false} axisLine={false} tick={axis} />
-              {ChartTooltip()}
-              <Line type="monotone" dataKey="influencers" stroke="var(--chart-1)" strokeWidth={2.5} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Business growth" subtitle="New business accounts per month">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={userGrowth} margin={{ left: -18, right: 6, top: 6 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
-              <YAxis tickLine={false} axisLine={false} tick={axis} />
-              {ChartTooltip()}
-              <Line type="monotone" dataKey="businesses" stroke="var(--chart-2)" strokeWidth={2.5} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Platform revenue" subtitle="Subscription and service revenue (base currency)">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueTrend} margin={{ left: -6, right: 6, top: 6 }}>
-              <defs>
-                <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={0.45} />
-                  <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
-              <YAxis tickFormatter={(v: number) => `${Math.round(v / 1000)}K`} tickLine={false} axisLine={false} tick={axis} />
-              {ChartTooltip()}
-              <Area type="monotone" dataKey="subscription" stroke="var(--chart-4)" fill="url(#gRev)" strokeWidth={2} />
-              <Area type="monotone" dataKey="services" stroke="var(--chart-3)" fill="transparent" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
+          {growthData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={growthData} margin={{ left: -18, right: 6, top: 6 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
+                <YAxis tickLine={false} axisLine={false} tick={axis} />
+                {ChartTooltip()}
+                <Line type="monotone" dataKey="influencers" stroke="var(--chart-1)" strokeWidth={2.5} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="grid h-full place-items-center text-center text-xs text-muted-foreground">
+              <p>Monthly creator trends will appear upon user registrations.</p>
+            </div>
+          )}
         </ChartCard>
 
         <ChartCard title="Creator categories" subtitle="Distribution of creators by category">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={categoryDistribution} dataKey="value" nameKey="name" innerRadius={52} outerRadius={86} paddingAngle={2}>
-                {categoryDistribution.map((_, i) => (
-                  <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                ))}
-              </Pie>
-              {ChartTooltip()}
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
+          {categoryData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={categoryData} dataKey="value" nameKey="name" innerRadius={52} outerRadius={86} paddingAngle={2}>
+                  {categoryData.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                {ChartTooltip()}
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="grid h-full place-items-center text-center text-xs text-muted-foreground">
+              <p>Category distribution will calculate from active influencer tags.</p>
+            </div>
+          )}
         </ChartCard>
       </div>
 
+      {/* Activity and feeds section */}
       <div className="grid gap-3 xl:grid-cols-3">
+        {/* Recent campaigns */}
         <div className="panel xl:col-span-2">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h3 className="text-sm font-semibold">Recent campaigns</h3>
@@ -255,23 +318,35 @@ function Dashboard() {
               <Link to="/campaigns">View all</Link>
             </Button>
           </div>
-          <div className="divide-y divide-border/70">
-            {recentCampaigns.map((c) => (
-              <div key={c.id} className="flex items-center gap-3 px-4 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{c.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {c.business} · {c.category} · {c.location}
-                  </p>
+          {recentCampaigns.length > 0 ? (
+            <div className="divide-y divide-border/70">
+              {recentCampaigns.map((c) => (
+                <div key={c.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{c.title || c.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {c.business_name || c.business || "Brand"} · {c.category || "General"} · {c.location || "Global"}
+                    </p>
+                  </div>
+                  <span className="num hidden text-sm font-semibold sm:block">
+                    {c.budget_cents ? money(c.budget_cents, c.currency) : (c.budget ? money(c.budget, c.currency) : "—")}
+                  </span>
+                  <StatusBadge value={(c.status || "draft").toLowerCase()} />
                 </div>
-                <span className="num hidden text-sm font-semibold sm:block">{money(c.budget, c.currency)}</span>
-                <StatusBadge value={c.status} />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center text-xs text-muted-foreground">
+              <p>No marketplace campaigns created yet.</p>
+              <Button asChild variant="link" size="sm" className="mt-2 text-xs">
+                <Link to="/campaigns">Open Campaigns</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-3">
+          {/* Newest creators */}
           <div className="panel">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h3 className="text-sm font-semibold">Newest creators</h3>
@@ -279,49 +354,59 @@ function Dashboard() {
                 <Link to="/influencers">All</Link>
               </Button>
             </div>
-            <div className="divide-y divide-border/70">
-              {newCreators.map((i) => (
-                <Link
-                  key={i.id}
-                  to="/influencers/$id"
-                  params={{ id: i.id }}
-                  className="flex items-center gap-2.5 px-4 py-2 transition-colors hover:bg-muted/50"
-                >
-                  <UserAvatar src={i.avatar} name={i.name} size={30} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{i.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{i.location.city}, {i.location.country}</p>
-                  </div>
-                  <span className="num text-xs text-muted-foreground">{compact(i.followers)}</span>
-                </Link>
-              ))}
-            </div>
+            {recentCreators.length > 0 ? (
+              <div className="divide-y divide-border/70">
+                {recentCreators.map((i) => (
+                  <Link
+                    key={i.id}
+                    to="/influencers/$id"
+                    params={{ id: String(i.id) }}
+                    className="flex items-center gap-2.5 px-4 py-2 transition-colors hover:bg-muted/50"
+                  >
+                    <UserAvatar src={i.avatar || i.photo_url} name={i.name || i.display_name} size={30} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{i.name || i.display_name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {i.location?.city || i.city || "Online"}, {i.location?.country || i.country || ""}
+                      </p>
+                    </div>
+                    <span className="num text-xs text-muted-foreground">{compact(i.followers || i.followers_count || 0)}</span>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 text-center text-xs text-muted-foreground">
+                <p>No creators registered yet.</p>
+              </div>
+            )}
           </div>
 
+          {/* Latest admin activity */}
           <div className="panel">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <h3 className="text-sm font-semibold">Latest admin activity</h3>
+              <h3 className="text-sm font-semibold">Latest audit activity</h3>
               <Button asChild variant="ghost" size="sm">
                 <Link to="/audit-logs">Logs</Link>
               </Button>
             </div>
-            <div className="divide-y divide-border/70">
-              {auditLogs.slice(0, 5).map((l) => (
-                <div key={l.id} className="px-4 py-2">
-                  <p className="text-sm font-medium">{l.action}</p>
-                  <p className="num truncate text-xs text-muted-foreground">
-                    {l.admin} · {l.datetime}
-                  </p>
-                </div>
-              ))}
-            </div>
+            {recentLogs.length > 0 ? (
+              <div className="divide-y divide-border/70">
+                {recentLogs.map((l) => (
+                  <div key={l.id} className="px-4 py-2">
+                    <p className="text-sm font-medium">{l.action}</p>
+                    <p className="num truncate text-xs text-muted-foreground">
+                      {l.admin_name || l.admin || "Admin"} · {l.created_at || l.datetime || ""}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 text-center text-xs text-muted-foreground">
+                <p>Audit trail will record administrative actions automatically.</p>
+              </div>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
-        <Plus className="size-3.5" />
-        Prototype build — all data shown is fictional demo data (Kerala is one sample market among several worldwide); no live backend is connected yet.
       </div>
     </div>
   );

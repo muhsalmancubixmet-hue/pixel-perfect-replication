@@ -1,11 +1,11 @@
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { Check, Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatCard } from "@/components/admin/StatCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { mockAction } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,9 +19,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { money, plans as seedPlans } from "@/data/mock";
+import { money } from "@/data/mock";
 import type { Plan } from "@/data/types";
 import { CreditCard, Users, Wallet } from "lucide-react";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/subscriptions")({
   head: () => ({
@@ -44,6 +45,9 @@ function PlanGrid({
   onToggle: (id: string) => void;
   onEdit: (p: Plan) => void;
 }) {
+  if (items.length === 0) {
+    return <div className="panel col-span-3 p-8 text-center text-sm text-muted-foreground">No plans configured yet.</div>;
+  }
   return (
     <div className="grid gap-3 lg:grid-cols-3">
       {items.map((p) => (
@@ -60,7 +64,7 @@ function PlanGrid({
           </div>
 
           <ul className="mt-3 flex flex-1 flex-col gap-1.5">
-            {p.features.map((f) => (
+            {(p.features || []).map((f) => (
               <li key={f} className="flex items-start gap-2 text-xs">
                 <Check className="mt-0.5 size-3.5 shrink-0 text-success" />
                 {f}
@@ -92,8 +96,34 @@ function PlanGrid({
 }
 
 function SubscriptionsPage() {
-  const [plans, setPlans] = useState<Plan[]>(seedPlans);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [editing, setEditing] = useState<Plan | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    adminApi.getBillingPlans()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          audience: (p.account_type === "INFLUENCER" || p.audience === "Influencer") ? "Influencer" : "Business",
+          price: (p.price_cents || 0) / 100,
+          currency: p.currency || "INR",
+          interval: "monthly",
+          status: (p.status || "active").toLowerCase() as Plan["status"],
+          features: Array.isArray(p.features) ? p.features : ["Standard platform access"],
+          activeUsers: p.active_subscriptions_count || p.activeUsers || 0,
+          monthlyRevenue: ((p.price_cents || 0) * (p.active_subscriptions_count || 0)) / 100,
+        }));
+        setPlans(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load billing plans:", err);
+      });
+    return () => { active = false; };
+  }, []);
 
   const toggle = (id: string) =>
     setPlans((s) => s.map((p) => (p.id === id ? { ...p, status: p.status === "active" ? "inactive" : "active" } : p)));
@@ -107,7 +137,7 @@ function SubscriptionsPage() {
         title="Subscriptions"
         description="Plans, limits and revenue for creators and businesses."
         actions={
-          <Button size="sm" onClick={mockAction("Add plan", "opens plan builder")}>
+          <Button size="sm" onClick={() => saved("Add plan", "opens plan builder")}>
             <Plus className="size-4" /> Add plan
           </Button>
         }
@@ -162,7 +192,7 @@ function SubscriptionsPage() {
           <DialogFooter>
             <Button
               onClick={() => {
-                mockAction("Plan updated", `${editing?.audience} ${editing?.name}`)();
+                saved("Plan updated", `${editing?.audience} ${editing?.name}`);
                 setEditing(null);
               }}
             >

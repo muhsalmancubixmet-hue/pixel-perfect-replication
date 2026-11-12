@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Lock, Zap } from "lucide-react";
+import { Lock, Eye, EyeOff } from "lucide-react";
 
 import { AuthLayout } from "@/components/admin/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,8 @@ function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,59 +37,21 @@ function LoginPage() {
     try {
       await authService.Login({ email, password });
 
-      window.location.href = '/'
-    } catch(error:any) {
+      window.location.href = '/';
+    } catch(error: any) {
       console.error('login failed:', error);
       setErrorMessage(
-        error.response?.data?.detail || 'invalid email or password. please check credentials.'
+        error.response?.data?.detail || error.message || 'Invalid email or password. Please check credentials.'
       );
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
 
-
-  const handleDemoLogin = async () => {
-    setLoading(true);
-    setErrorMessage('');
-  
-  
-  try {
-    await authService.Login ({
-      email: 'salman@gmail.com',
-      password: 'salman'
-    });
-
-    navigate({ to: '/'});
-    } catch (error: any) {
-      setErrorMessage('Demo login failed. django!!')
-    }finally{
-      setLoading(false);
-    }
-  
-  
-  }
-
-
-  /*const demo = () => {
-    setSession(DEMO_SESSION);
-    void navigate({ to: "/" });
-  };*/
-
   return (
     <AuthLayout title="Sign in to the admin console" subtitle="Use your corporate @influencers.com account.">
-      <Button
-        onClick={handleDemoLogin} disabled={loading}
-        className="h-auto min-h-12 w-full min-w-0 box-border whitespace-normal py-3 px-3 text-xs sm:text-sm font-bold shadow-md text-center leading-snug"
-      >
-        <Zap className="mr-1.5 inline size-4 shrink-0" /> One-Click Demo Access (Enter as Super Admin - Mohammed Fadhil)
-      </Button>
-
-      <div className="my-5 flex w-full min-w-0 box-border items-center gap-3 text-[11px] uppercase text-muted-foreground">
-        <span className="h-px flex-1 bg-border" /> or sign in with email <span className="h-px flex-1 bg-border" />
-      </div>
-      {errorMessage && <div className="text-xs text-destructive bg-destructive/10 p-2.5 rounded-md">{errorMessage}</div>}
-      <form onSubmit={handleLogin}>
+      {errorMessage && <div className="mb-4 text-xs text-destructive bg-destructive/10 p-2.5 rounded-md">{errorMessage}</div>}
+      <form onSubmit={handleLogin} className="space-y-4">
         <div className="grid w-full min-w-0 box-border gap-1.5">
           <Label htmlFor="email">Corporate email</Label>
           <Input
@@ -96,6 +59,7 @@ function LoginPage() {
             type="email"
             className="h-10 w-full min-w-0 box-border"
             required
+            autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="name@influencers.com"
@@ -103,16 +67,26 @@ function LoginPage() {
         </div>
         <div className="grid w-full min-w-0 box-border gap-1.5">
           <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            className="h-10 w-full min-w-0 box-border"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              className="h-10 w-full min-w-0 box-border pr-10"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
         </div>
-        <Button type="submit" variant="outline" disabled={loading} className="h-10 w-full min-w-0 box-border">
+        <Button type="submit" disabled={loading} className="h-10 w-full min-w-0 box-border font-bold">
           {loading ? "Signing in..." : "Continue"}
         </Button>
       </form>

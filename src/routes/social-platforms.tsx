@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Settings2 } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
+import { ActionMenu } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,8 +20,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { compact, platformRequests, socialPlatforms } from "@/data/mock";
+import { compact } from "@/data/mock";
 import type { PlatformRequest, SocialPlatform } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/social-platforms")({
   head: () => ({
@@ -38,8 +40,56 @@ export const Route = createFileRoute("/social-platforms")({
 });
 
 function SocialPlatformsPage() {
+  const [platformsList, setPlatformsList] = useState<SocialPlatform[]>([]);
+  const [requestsList, setRequestsList] = useState<PlatformRequest[]>([]);
   const [configure, setConfigure] = useState<SocialPlatform | null>(null);
   const [approve, setApprove] = useState<PlatformRequest | null>(null);
+
+  // Add platform state
+  const [addPlatformOpen, setAddPlatformOpen] = useState(false);
+  const [newPlatformName, setNewPlatformName] = useState("");
+  const [newPlatformColor, setNewPlatformColor] = useState("#4F46E5");
+  const [newPlatformOAuth, setNewPlatformOAuth] = useState(false);
+  const [newPlatformApi, setNewPlatformApi] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+
+  const loadData = () => {
+    Promise.allSettled([
+      adminApi.getSocialPlatforms(),
+      adminApi.getPlatformRequests(),
+    ]).then(([pRes, rRes]) => {
+      if (pRes.status === "fulfilled") {
+        const val = pRes.value?.results || (Array.isArray(pRes.value) ? pRes.value : []);
+        const mapped = val.map((p: any) => ({
+          id: p.id || p.code || p.name.toLowerCase(),
+          name: p.name,
+          color: p.color || "#4F46E5",
+          status: (p.status || "active").toLowerCase() as SocialPlatform["status"],
+          oauth: Boolean(p.oauth_enabled ?? p.oauth ?? true),
+          api: Boolean(p.api_enabled ?? p.api ?? true),
+          activeCreators: p.active_creators_count || p.activeCreators || 0,
+          created: p.created_at ? new Date(p.created_at).toLocaleDateString() : "Recent",
+        }));
+        setPlatformsList(mapped);
+      }
+      if (rRes.status === "fulfilled") {
+        const val = rRes.value?.results || (Array.isArray(rRes.value) ? rRes.value : []);
+        const mappedReq = val.map((r: any) => ({
+          id: r.id,
+          platform: r.platform_name || r.platform,
+          requestedBy: r.requester_name || r.requestedBy || "Creator",
+          votes: r.votes_count || r.votes || 1,
+          status: (r.status || "pending").toLowerCase() as PlatformRequest["status"],
+          requestedAt: r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recent",
+        }));
+        setRequestsList(mappedReq);
+      }
+    });
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const platformColumns: Column<SocialPlatform>[] = [
     {
@@ -89,7 +139,7 @@ function SocialPlatformsPage() {
         title="Social platforms"
         description="Centralised control of every network creators can connect."
         actions={
-          <Button size="sm" onClick={mockAction("Add platform", "opens platform builder")}>
+          <Button size="sm" onClick={() => setAddPlatformOpen(true)}>
             <Plus className="size-4" /> Add Social Platform
           </Button>
         }
@@ -101,7 +151,7 @@ function SocialPlatformsPage() {
           <TabsTrigger value="requests">
             Requests
             <span className="num ml-1.5 rounded-full bg-warning/25 px-1.5 text-[10px] font-bold text-warning-foreground">
-              {platformRequests.filter((r) => r.status === "pending").length}
+              {requestsList.filter((r) => r.status === "pending").length}
             </span>
           </TabsTrigger>
         </TabsList>
@@ -109,7 +159,7 @@ function SocialPlatformsPage() {
         <TabsContent value="platforms" className="mt-3">
           <div className="w-full overflow-x-auto">
             <DataTable
-              rows={socialPlatforms}
+              rows={platformsList}
               columns={platformColumns}
               getId={(r) => r.id}
               pageSize={10}
@@ -139,9 +189,18 @@ function SocialPlatformsPage() {
               rowAction={(r) => (
                 <ActionMenu
                   items={[
-                    { label: "Edit", onSelect: mockAction("Edit platform", r.name) },
                     { label: "Configure", onSelect: () => setConfigure(r) },
-                    { label: r.status === "active" ? "Disable" : "Enable", onSelect: mockAction(r.status === "active" ? "Platform disabled" : "Platform enabled", r.name) },
+                    {
+                      label: r.status === "active" ? "Disable" : "Enable",
+                      onSelect: async () => {
+                        const newStatus = r.status === "active" ? "inactive" : "active";
+                        try {
+                          await adminApi.updateSocialPlatform(r.id, { is_active: newStatus === "active" });
+                        } catch {}
+                        setPlatformsList((all) => all.map((p) => p.id === r.id ? { ...p, status: newStatus } : p));
+                        saved(newStatus === "active" ? "Platform enabled" : "Platform disabled", r.name);
+                      },
+                    },
                   ]}
                 />
               )}
@@ -156,7 +215,7 @@ function SocialPlatformsPage() {
           </p>
           <div className="w-full overflow-x-auto">
             <DataTable
-              rows={platformRequests}
+              rows={requestsList}
               columns={requestColumns}
               filters={requestFilters}
               getId={(r) => r.id}
@@ -175,9 +234,19 @@ function SocialPlatformsPage() {
               rowAction={(r) => (
                 <ActionMenu
                   items={[
-                    { label: "View Request", onSelect: mockAction("Request details", `${r.platform} · ${r.requestedBy}`) },
                     { label: "Approve", onSelect: () => setApprove(r) },
-                    { label: "Reject", onSelect: mockAction("Request rejected", r.platform), destructive: true, separatorBefore: true },
+                    {
+                      label: "Reject",
+                      destructive: true,
+                      separatorBefore: true,
+                      onSelect: async () => {
+                        try {
+                          await adminApi.reviewPlatformRequest(r.id, { status: "REJECTED" });
+                          setRequestsList((all) => all.map((x) => x.id === r.id ? { ...x, status: "rejected" } : x));
+                        } catch {}
+                        saved("Request rejected", r.platform);
+                      },
+                    },
                   ]}
                 />
               )}
@@ -216,7 +285,7 @@ function SocialPlatformsPage() {
           <DialogFooter>
             <Button
               onClick={() => {
-                mockAction("Platform configuration saved", configure?.name ?? "")();
+                saved("Platform configuration saved", configure?.name ?? "");
                 setConfigure(null);
               }}
             >
@@ -255,12 +324,114 @@ function SocialPlatformsPage() {
           </div>
           <DialogFooter>
             <Button
-              onClick={() => {
-                mockAction("Platform approved and created", approve?.platform ?? "")();
-                setApprove(null);
+              onClick={async () => {
+                if (approve) {
+                  try {
+                    await adminApi.reviewPlatformRequest(approve.id, { status: "APPROVED" });
+                    await adminApi.createSocialPlatform({
+                      name: approve.platform,
+                      color_code: "#6366f1",
+                    });
+                    saved("Platform approved and created", approve.platform);
+                    setApprove(null);
+                    loadData();
+                  } catch (err: any) {
+                    const msg = err?.response?.data?.detail || "Could not approve request";
+                    saved("Failed to approve", msg);
+                  }
+                }
               }}
             >
               Approve and create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Social Platform Dialog */}
+      <Dialog open={addPlatformOpen} onOpenChange={setAddPlatformOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Social Platform</DialogTitle>
+            <DialogDescription>
+              Register a new platform that creators and brands can connect to their accounts.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="new-pname">Platform Name</Label>
+              <Input
+                id="new-pname"
+                value={newPlatformName}
+                onChange={(e) => setNewPlatformName(e.target.value)}
+                placeholder="e.g. Threads, Bluesky, Snapchat"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="new-pcolor">Brand Hex Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={newPlatformColor}
+                  onChange={(e) => setNewPlatformColor(e.target.value)}
+                  className="size-9 cursor-pointer rounded border border-border p-0.5 bg-transparent"
+                />
+                <Input
+                  id="new-pcolor"
+                  value={newPlatformColor}
+                  onChange={(e) => setNewPlatformColor(e.target.value)}
+                  placeholder="#4F46E5"
+                  className="font-mono text-xs"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+              <div>
+                <p className="text-sm font-medium">OAuth Integration</p>
+                <p className="text-xs text-muted-foreground">Support automated OAuth token connection</p>
+              </div>
+              <Switch checked={newPlatformOAuth} onCheckedChange={setNewPlatformOAuth} />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+              <div>
+                <p className="text-sm font-medium">Metrics API Sync</p>
+                <p className="text-xs text-muted-foreground">Sync live follower counts and engagement</p>
+              </div>
+              <Switch checked={newPlatformApi} onCheckedChange={setNewPlatformApi} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              disabled={addLoading}
+              onClick={async () => {
+                if (!newPlatformName.trim()) {
+                  saved("Validation", "Platform name is required.");
+                  return;
+                }
+                setAddLoading(true);
+                try {
+                  await adminApi.createSocialPlatform({
+                    name: newPlatformName.trim(),
+                    color_code: newPlatformColor || "#4F46E5",
+                    supports_oauth: newPlatformOAuth,
+                    supports_api: newPlatformApi,
+                  });
+                  saved("Platform created", newPlatformName);
+                  setAddPlatformOpen(false);
+                  setNewPlatformName("");
+                  setNewPlatformColor("#4F46E5");
+                  setNewPlatformOAuth(false);
+                  setNewPlatformApi(false);
+                  loadData();
+                } catch (err: any) {
+                  const msg = err?.response?.data?.detail || err?.response?.data?.name?.[0] || "Failed to create platform";
+                  saved("Create failed", msg);
+                } finally {
+                  setAddLoading(false);
+                }
+              }}
+            >
+              {addLoading ? "Creating..." : "Create platform"}
             </Button>
           </DialogFooter>
         </DialogContent>

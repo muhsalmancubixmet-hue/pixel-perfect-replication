@@ -69,6 +69,7 @@ export function WorldMap({ markers, center, onSelect, className }: WorldMapProps
       iconSize: [14, 14],
     });
     markers.forEach((m) => {
+      if (typeof m.lat !== "number" || typeof m.lng !== "number" || isNaN(m.lat) || isNaN(m.lng)) return;
       const mk = L.marker([m.lat, m.lng], { icon, title: m.title });
       const div = document.createElement("div");
       div.style.minWidth = "140px";

@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronDown, Plus, Share2, Tags, TrendingUp, UserPlus, Building2, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
-import { clearSession } from "@/lib/auth";
+import { clearSession, getSession } from "@/lib/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +17,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { GlobalSearch } from "@/components/admin/GlobalSearch";
 import { UserAvatar } from "@/components/admin/UserAvatar";
-import { notifications } from "@/data/mock";
 import { authService } from "@/lib/auth-service";
-
+import { adminApi } from "@/lib/admin-api";
+import type { NotificationItem } from "@/data/types";
 
 const QUICK_ACTIONS = [
   { label: "Add Influencer", icon: UserPlus, to: "/influencers" },
@@ -31,7 +32,35 @@ const QUICK_ACTIONS = [
 
 export function AdminHeader() {
   const navigate = useNavigate();
-  const unread = notifications.filter((n) => n.status !== "draft").length;
+  const [notifs, setNotifs] = useState<NotificationItem[]>([]);
+  const session = getSession() || {
+    name: "Admin Staff",
+    email: "admin@influencers.com",
+    role: "Administrator",
+    mfa: true,
+  };
+
+  useEffect(() => {
+    let active = true;
+    adminApi.getNotifications()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        setNotifs(list.map((n: any) => ({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          audience: n.audience || "All users",
+          schedule: n.created_at ? new Date(n.created_at).toLocaleDateString() : "Recent",
+          status: (n.status || "sent").toLowerCase() as NotificationItem["status"],
+          kind: (n.kind || "system").toLowerCase() as NotificationItem["kind"],
+        })));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const unread = notifs.filter((n) => n.status !== "draft").length;
 
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full min-w-0 items-center gap-1.5 sm:gap-2 border-b border-border bg-card/90 px-2 sm:px-4 backdrop-blur-sm">
@@ -66,9 +95,11 @@ export function AdminHeader() {
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="relative size-9 shrink-0 sm:size-10" aria-label="Notifications">
               <Bell className="size-4 sm:size-4.5" />
-              <span className="num absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
-                {unread}
-              </span>
+              {unread > 0 && (
+                <span className="num absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                  {unread}
+                </span>
+              )}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 p-0">
@@ -76,15 +107,19 @@ export function AdminHeader() {
               <p className="text-sm font-semibold">Notifications</p>
             </div>
             <div className="max-h-80 overflow-y-auto">
-              {notifications.slice(0, 5).map((n) => (
-                <div key={n.id} className="border-b border-border/70 px-3 py-2.5 last:border-0">
-                  <p className="text-sm font-medium">{n.title}</p>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.message}</p>
-                  <p className="num mt-1 text-[11px] text-muted-foreground">
-                    {n.audience} · {n.schedule}
-                  </p>
-                </div>
-              ))}
+              {notifs.length === 0 ? (
+                <div className="p-4 text-center text-xs text-muted-foreground">No unread notifications</div>
+              ) : (
+                notifs.slice(0, 5).map((n) => (
+                  <div key={n.id} className="border-b border-border/70 px-3 py-2.5 last:border-0">
+                    <p className="text-sm font-medium">{n.title}</p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.message}</p>
+                    <p className="num mt-1 text-[11px] text-muted-foreground">
+                      {n.audience} · {n.schedule}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
             <div className="p-2">
               <Button asChild variant="outline" size="sm" className="w-full">
@@ -97,15 +132,15 @@ export function AdminHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex shrink-0 items-center gap-1.5 rounded-lg p-1 sm:px-1.5 sm:py-1 transition-colors hover:bg-muted">
-              <UserAvatar name="Mohammed Fadhil" size={28} />
+              <UserAvatar name={session.name} size={28} />
               <span className="hidden text-left leading-tight lg:block">
-                <span className="block text-xs font-semibold">Mohammed Fadhil</span>
-                <span className="block text-[11px] text-muted-foreground">Super Admin</span>
+                <span className="block text-xs font-semibold">{session.name}</span>
+                <span className="block text-[11px] text-muted-foreground">{session.role}</span>
               </span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
-            <DropdownMenuLabel>fadhil@influencers.com</DropdownMenuLabel>
+            <DropdownMenuLabel>{session.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link to="/settings">Platform settings</Link>

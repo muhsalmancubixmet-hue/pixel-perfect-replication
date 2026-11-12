@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { PageHeader, EmptyState } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
-import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { verifications as seed } from "@/data/mock";
 import type { VerificationItem } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/verification")({
   head: () => ({
@@ -48,13 +49,27 @@ function Queue({
           </div>
           <StatusBadge value={v.status} />
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => onDecide(v.id, "approved", "Verification approved")}>
+            <Button
+              size="sm"
+              disabled={v.status === "approved"}
+              onClick={() => onDecide(v.id, "approved", "Verification approved")}
+            >
               Approve
             </Button>
-            <Button size="sm" variant="outline" onClick={() => onDecide(v.id, "info requested", "More information requested")}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={v.status === "info requested"}
+              onClick={() => onDecide(v.id, "info requested", "More information requested")}
+            >
               Request info
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => onDecide(v.id, "rejected", "Verification rejected")}>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={v.status === "rejected"}
+              onClick={() => onDecide(v.id, "rejected", "Verification rejected")}
+            >
               Reject
             </Button>
           </div>
@@ -67,10 +82,46 @@ function Queue({
 function VerificationPage() {
   const [items, setItems] = useState<VerificationItem[]>(seed);
 
-  const decide = (id: string, status: VerificationItem["status"], label: string) => {
+  const loadQueue = async () => {
+    try {
+      const res = await adminApi.getVerificationQueue();
+      if (Array.isArray(res) && res.length > 0) {
+        setItems(res as VerificationItem[]);
+      }
+    } catch (err) {
+      console.warn("Could not load live verification queue, showing initial queue:", err);
+    }
+  };
+
+  useEffect(() => {
+    void loadQueue();
+  }, []);
+
+  const decide = async (id: string, status: VerificationItem["status"], label: string) => {
     const item = items.find((i) => i.id === id);
-    setItems((s) => s.map((i) => (i.id === id ? { ...i, status } : i)));
-    mockAction(label, item?.user ?? "")();
+    if (!item) return;
+
+    try {
+      if (item.kind === "creator") {
+        await adminApi.moderateInfluencer(id, {
+          verification_status: status === "approved" ? "VERIFIED" : status === "rejected" ? "REJECTED" : "PENDING",
+        });
+      } else if (item.kind === "business") {
+        await adminApi.moderateBusiness(id, {
+          verification_status: status === "approved" ? "VERIFIED" : status === "rejected" ? "REJECTED" : "PENDING",
+        });
+      } else if (item.kind === "social") {
+        await adminApi.reviewPlatformRequest(id, {
+          status: status === "approved" ? "APPROVED" : status === "rejected" ? "REJECTED" : "PENDING",
+        });
+      }
+
+      setItems((s) => s.map((i) => (i.id === id ? { ...i, status } : i)));
+      toast.success(`${label}: ${item.user}`);
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || err.message || "Action failed";
+      toast.error(`Failed to update ${item.user}`, { description: msg });
+    }
   };
 
   const byKind = (kind: VerificationItem["kind"]) => items.filter((i) => i.kind === kind);

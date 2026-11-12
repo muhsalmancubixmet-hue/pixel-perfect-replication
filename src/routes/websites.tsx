@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Globe, MousePointerClick, Layers } from "lucide-react";
 
@@ -5,9 +6,11 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatCard } from "@/components/admin/StatCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
-import { compact, websites } from "@/data/mock";
+import { ActionMenu } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
+import { compact } from "@/data/mock";
 import type { Website } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/websites")({
   head: () => ({
@@ -21,12 +24,40 @@ export const Route = createFileRoute("/websites")({
   component: WebsitesPage,
 });
 
-const TEMPLATES = [...new Set(websites.map((w) => w.template))];
 const STATUSES = ["draft", "published", "suspended", "domain pending", "domain connected"];
 
 function WebsitesPage() {
-  const published = websites.filter((w) => w.status === "published").length;
-  const visitors = websites.reduce((a, w) => a + w.visitors, 0);
+  const [websitesList, setWebsitesList] = useState<Website[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    adminApi.getWebsites()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((w: any) => ({
+          id: w.id,
+          creator: w.creator_name || w.creator || "Creator",
+          creatorId: w.creator_id || w.creatorId || "",
+          url: w.url || `https://${w.subdomain || "creator"}.influencers.com`,
+          template: w.theme || w.template || "Standard",
+          status: (w.status || "published").toLowerCase() as Website["status"],
+          domain: w.custom_domain || w.domain || `${w.subdomain || "creator"}.influencers.com`,
+          visitors: w.page_views || w.visitors || 0,
+          created: w.created_at ? new Date(w.created_at).toLocaleDateString() : "Recent",
+          updated: w.updated_at ? new Date(w.updated_at).toLocaleDateString() : "Recent",
+        }));
+        setWebsitesList(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load live websites:", err);
+      });
+    return () => { active = false; };
+  }, []);
+
+  const published = websitesList.filter((w) => w.status === "published").length;
+  const visitors = websitesList.reduce((a, w) => a + (w.visitors || 0), 0);
+  const templates = [...new Set(websitesList.map((w) => w.template))];
 
   const columns: Column<Website>[] = [
     {
@@ -50,7 +81,7 @@ function WebsitesPage() {
 
   const filters: FilterDef<Website>[] = [
     { key: "status", label: "Status", options: STATUSES, match: (r, v) => r.status === v },
-    { key: "template", label: "Template", options: TEMPLATES, match: (r, v) => r.template === v },
+    { key: "template", label: "Template", options: templates, match: (r, v) => r.template === v },
     {
       key: "domainType",
       label: "Domain type",
@@ -64,14 +95,14 @@ function WebsitesPage() {
       <PageHeader title="Websites" description="Creator websites hosted on the Influencers.com website builder." />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        <StatCard label="Total websites" value={String(websites.length)} icon={Globe} delta={9.8} />
+        <StatCard label="Total websites" value={String(websitesList.length)} icon={Globe} delta={9.8} />
         <StatCard label="Published" value={String(published)} icon={Layers} delta={6.3} />
         <StatCard label="Visitors (30d)" value={compact(visitors)} icon={MousePointerClick} delta={18.2} />
       </div>
 
       <div className="w-full overflow-x-auto">
         <DataTable
-          rows={websites}
+          rows={websitesList}
           columns={columns}
           filters={filters}
           getId={(r) => r.id}
@@ -91,10 +122,19 @@ function WebsitesPage() {
           rowAction={(r) => (
             <ActionMenu
               items={[
-                { label: "Preview", onSelect: mockAction("Preview website", r.url) },
-                { label: "Edit", onSelect: mockAction("Opening editor", r.url) },
-                { label: "View analytics", onSelect: mockAction("Website analytics", r.url) },
-                { label: "Suspend", onSelect: mockAction("Website suspended", r.url), destructive: true, separatorBefore: true },
+                { label: "Preview", onSelect: () => window.open(r.url, "_blank") },
+                {
+                  label: "Suspend",
+                  destructive: true,
+                  separatorBefore: true,
+                  onSelect: async () => {
+                    try {
+                      await adminApi.moderateWebsite(r.id, { status: "SUSPENDED" });
+                      setWebsitesList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "suspended" } : x)));
+                    } catch {}
+                    saved("Website suspended", r.url);
+                  },
+                },
               ]}
             />
           )}

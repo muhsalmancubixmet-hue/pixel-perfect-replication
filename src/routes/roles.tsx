@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { UserPlus } from "lucide-react";
 
@@ -6,8 +6,9 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { FormDialog, saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
-import { adminStaff, permissionMatrix, roles } from "@/data/mock";
+import { permissionMatrix, roles } from "@/data/mock";
 import { cn } from "@/lib/utils";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/roles")({
   head: () => ({
@@ -30,12 +31,74 @@ const TONE: Record<string, string> = {
   None: "bg-destructive/8 text-destructive",
 };
 
-type Staff = (typeof adminStaff)[number] & { active: boolean };
+type Staff = {
+  name: string;
+  email: string;
+  role: string;
+  lastActive: string;
+  active: boolean;
+};
+
+type PendingInvite = {
+  id: string;
+  email: string;
+  role: string;
+  expiresAt: string;
+};
 
 function RolesPage() {
-  const [staff, setStaff] = useState<Staff[]>(adminStaff.map((s) => ({ ...s, active: true })));
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [inviting, setInviting] = useState(false);
   const [editing, setEditing] = useState<Staff | null>(null);
+
+  const loadData = async () => {
+    try {
+      const [staffRes, invitesRes] = await Promise.allSettled([
+        adminApi.getStaff(),
+        adminApi.getStaffInvitations(),
+      ]);
+
+      if (staffRes.status === "fulfilled") {
+        const list = staffRes.value?.results || (Array.isArray(staffRes.value) ? staffRes.value : []);
+        const mapped = list.map((s: any) => {
+          const userObj = s.user || {};
+          const roleObj = s.role_template || {};
+          const fullName = [userObj.first_name, userObj.last_name].filter(Boolean).join(" ");
+          return {
+            name: fullName || userObj.email || s.name || s.email,
+            email: userObj.email || s.email,
+            role: roleObj.name || s.role_name || s.role || "Admin",
+            lastActive: userObj.last_login
+              ? new Date(userObj.last_login).toLocaleDateString()
+              : (s.last_active_at ? new Date(s.last_active_at).toLocaleDateString() : "Never"),
+            active: Boolean(s.is_active ?? true),
+          };
+        });
+        setStaff(mapped);
+      }
+
+      if (invitesRes.status === "fulfilled") {
+        const list = Array.isArray(invitesRes.value) ? invitesRes.value : (invitesRes.value?.results || []);
+        const pending = list
+          .filter((inv: any) => !inv.is_accepted)
+          .map((inv: any) => ({
+            id: String(inv.id),
+            email: inv.email,
+            role: inv.role_name || "Admin",
+            expiresAt: inv.expires_at ? new Date(inv.expires_at).toLocaleDateString() : "7 days",
+          }));
+        setPendingInvites(pending);
+      }
+    } catch (err) {
+      console.warn("Could not load staff members or invitations:", err);
+    }
+  };
+
+  useEffect(() => {
+    void loadData();
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -83,27 +146,57 @@ function RolesPage() {
       </div>
 
       <div className="panel">
-        <div className="border-b border-border px-4 py-3">
-          <h3 className="text-sm font-semibold">Admin team</h3>
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h3 className="text-sm font-semibold">Admin team ({staff.length})</h3>
         </div>
         <div className="divide-y divide-border/70">
-          {staff.map((s) => (
-            <div key={s.email} className="flex items-center gap-3 px-4 py-2.5">
-              <UserAvatar name={s.name} size={34} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{s.name}</p>
-                <p className="num truncate text-xs text-muted-foreground">{s.email}</p>
-              </div>
-              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold">{s.role}</span>
-              {!s.active && <span className="text-[11px] font-semibold text-destructive">Inactive</span>}
-              <span className="hidden text-xs text-muted-foreground sm:block">{s.lastActive}</span>
-              <Button variant="ghost" size="sm" className="h-9 px-3 text-xs" onClick={() => setEditing(s)}>
-                Edit
-              </Button>
+          {staff.length === 0 ? (
+            <div className="p-6 text-center text-sm text-muted-foreground">
+              No staff members found.
             </div>
-          ))}
+          ) : (
+            staff.map((s) => (
+              <div key={s.email} className="flex items-center gap-3 px-4 py-2.5">
+                <UserAvatar name={s.name} size={34} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{s.name}</p>
+                  <p className="num truncate text-xs text-muted-foreground">{s.email}</p>
+                </div>
+                <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold">{s.role}</span>
+                {!s.active && <span className="text-[11px] font-semibold text-destructive">Inactive</span>}
+                <span className="hidden text-xs text-muted-foreground sm:block">Last active: {s.lastActive}</span>
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-xs" onClick={() => setEditing(s)}>
+                  Edit
+                </Button>
+              </div>
+            ))
+          )}
         </div>
       </div>
+
+      {pendingInvites.length > 0 && (
+        <div className="panel">
+          <div className="border-b border-border px-4 py-3">
+            <h3 className="text-sm font-semibold text-warning">Pending Invitations ({pendingInvites.length})</h3>
+          </div>
+          <div className="divide-y divide-border/70">
+            {pendingInvites.map((inv) => (
+              <div key={inv.id} className="flex items-center gap-3 px-4 py-2.5">
+                <div className="size-8 rounded-full bg-warning/10 text-warning grid place-items-center text-xs font-bold">
+                  @
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{inv.email}</p>
+                  <p className="num truncate text-xs text-muted-foreground">Expires: {inv.expiresAt}</p>
+                </div>
+                <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
+                  Pending ({inv.role})
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <FormDialog
         open={inviting}
@@ -117,9 +210,20 @@ function RolesPage() {
         ]}
         initial={{ role: "Support" }}
         submitLabel="Send invite"
-        onSubmit={(v) => {
-          setStaff((s) => [...s, { name: String(v["name"]), email: String(v["email"]), role: String(v["role"]), lastActive: "Invited", active: true }]);
-          saved("Invite sent", String(v["email"]));
+        onSubmit={async (v) => {
+          try {
+            await adminApi.inviteStaff({
+              email: String(v["email"]),
+              role_template_id: String(v["role"]),
+              first_name: String(v["name"]),
+            });
+            saved("Invite sent", String(v["email"]));
+            setInviting(false);
+            void loadData();
+          } catch (err: any) {
+            const msg = err?.response?.data?.detail || err?.message || "Failed to invite staff member";
+            saved("Invite failed", msg);
+          }
         }}
       />
       <FormDialog

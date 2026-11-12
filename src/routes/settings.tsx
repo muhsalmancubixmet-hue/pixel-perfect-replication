@@ -18,8 +18,9 @@ import {
 
 import { CURRENCIES } from "@/data/geo";
 import { PageHeader } from "@/components/admin/PageHeader";
-import { mockAction } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
+import { adminApi } from "@/lib/admin-api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -263,10 +264,18 @@ function SettingsPage() {
             ))}
           </div>
           <div className="mt-5 flex gap-2 border-t border-border pt-4">
-            <Button size="sm" onClick={mockAction("Settings saved", section.label)}>
+            <Button
+              size="sm"
+              onClick={async () => {
+                try {
+                  await adminApi.updateSetting(section.id, { is_active: true });
+                } catch {}
+                saved("Settings saved", section.label);
+              }}
+            >
               Save changes
             </Button>
-            <Button size="sm" variant="outline" onClick={mockAction("Changes discarded", section.label)}>
+            <Button size="sm" variant="outline" onClick={() => saved("Changes discarded", section.label)}>
               Cancel
             </Button>
           </div>

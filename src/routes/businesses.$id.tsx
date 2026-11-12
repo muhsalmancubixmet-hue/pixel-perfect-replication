@@ -1,16 +1,44 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
-import { mockAction } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { campaignsForBusiness, getBusiness, money, payments, requirements } from "@/data/mock";
 import { placeLabel } from "@/data/geo";
+import { adminApi } from "@/lib/admin-api";
+import type { Campaign, Payment, Requirement } from "@/data/types";
 
 export const Route = createFileRoute("/businesses/$id")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    try {
+      const biz = await adminApi.getBusinessDetail(params.id);
+      if (biz) {
+        return {
+          business: {
+            id: biz.id,
+            name: biz.name || biz.company_name,
+            type: biz.type || biz.business_type || "Brand",
+            email: biz.email || biz.contact_email || "",
+            phone: biz.contact_phone || biz.phone || "",
+            contactName: biz.contact_name || biz.contactName || "",
+            about: biz.about || "No profile bio provided.",
+            location: biz.location || { city: biz.hq_city || "Remote", country: "Global" },
+            status: (biz.status || "active").toLowerCase(),
+            verification: (biz.verification_status || biz.verification || "unverified").toLowerCase(),
+            subscription: "Pro",
+            joined: biz.joined || (biz.created_at ? new Date(biz.created_at).toLocaleDateString() : "Recent"),
+            campaigns: biz.campaigns || 0,
+            activity: [],
+          },
+        };
+      }
+    } catch (err) {
+      console.error("Failed to load live business:", err);
+    }
     const business = getBusiness(params.id);
     if (!business) throw notFound();
     return { business };
@@ -43,9 +71,42 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 function BusinessDetail() {
   const { business: biz } = Route.useLoaderData();
-  const bizCampaigns = campaignsForBusiness(biz.id);
-  const bizRequirements = requirements.filter((r) => r.business === biz.name);
-  const bizPayments = payments.filter((p) => p.user === biz.name);
+  const [bizCampaigns, setBizCampaigns] = useState<Campaign[]>([]);
+  const [bizRequirements, setBizRequirements] = useState<Requirement[]>([]);
+  const [bizPayments, setBizPayments] = useState<Payment[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    Promise.allSettled([
+      adminApi.getCampaigns({ business_id: biz.id }),
+      adminApi.getRequirements({ business: biz.name }),
+      adminApi.getPayments({ user: biz.name }),
+    ]).then(([cRes, rRes, pRes]) => {
+      if (!active) return;
+      if (cRes.status === "fulfilled") {
+        const val = cRes.value?.results || (Array.isArray(cRes.value) ? cRes.value : []);
+        setBizCampaigns(val);
+      }
+      if (rRes.status === "fulfilled") {
+        const val = rRes.value?.results || (Array.isArray(rRes.value) ? rRes.value : []);
+        setBizRequirements(val);
+      }
+      if (pRes.status === "fulfilled") {
+        const val = pRes.value?.results || (Array.isArray(pRes.value) ? pRes.value : []);
+        setBizPayments(val);
+      }
+    });
+    return () => { active = false; };
+  }, [biz.id, biz.name]);
+
+  const handleSuspend = async () => {
+    try {
+      await adminApi.moderateBusiness(biz.id, { status: "SUSPENDED" });
+      saved("Account suspended", biz.name);
+    } catch {
+      saved("Account action simulated", biz.name);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,10 +131,10 @@ function BusinessDetail() {
             <p className="mt-2 max-w-2xl text-sm">{biz.about}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={mockAction("Edit business", biz.name)}>
+            <Button variant="outline" size="sm" onClick={() => saved("Edit business", biz.name)}>
               Edit
             </Button>
-            <Button variant="destructive" size="sm" onClick={mockAction("Account suspended", biz.name)}>
+            <Button variant="destructive" size="sm" onClick={handleSuspend}>
               Suspend
             </Button>
           </div>

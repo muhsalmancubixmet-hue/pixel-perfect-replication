@@ -9,11 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { campaignBids, campaignBrief, compact, getCampaign, money } from "@/data/mock";
 import type { Campaign, CampaignBid } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 const STATUSES: Campaign["status"][] = ["draft", "published", "applications", "shortlisted", "active", "content submitted", "completed", "cancelled"];
 
 export const Route = createFileRoute("/campaigns/$id")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    try {
+      const live = await adminApi.getCampaignDetail(params.id);
+      if (live) {
+        return { campaign: live as Campaign };
+      }
+    } catch (err) {
+      console.error("Failed to load live campaign:", err);
+    }
     const campaign = getCampaign(params.id);
     if (!campaign) throw notFound();
     return { campaign };
@@ -94,8 +103,13 @@ function CampaignDetail() {
           <span className="text-xs text-muted-foreground">Status</span>
           <Select
             value={status}
-            onValueChange={(v) => {
+            onValueChange={async (v) => {
               setStatus(v as Campaign["status"]);
+              try {
+                await adminApi.moderateCampaign(campaign.id, { status: v.toUpperCase() });
+              } catch (err) {
+      console.error("Failed to load live campaign:", err);
+    }
               saved("Campaign status changed", v);
             }}
           >

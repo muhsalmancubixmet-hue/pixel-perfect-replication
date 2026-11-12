@@ -12,14 +12,56 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { STAFF_NAMES, businesses, getTicket, ticketThread } from "@/data/mock";
 import type { Ticket, TicketMessage } from "@/data/types";
 import { cn } from "@/lib/utils";
+import { adminApi } from "@/lib/admin-api";
 
 const STATUSES: Ticket["status"][] = ["open", "in progress", "waiting", "resolved", "closed"];
 
 export const Route = createFileRoute("/support/$id")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    try {
+      const data = await adminApi.getSupportTicketDetail(params.id);
+      if (data && data.id) {
+        let rawMsgs: any[] = [];
+        try {
+          rawMsgs = await adminApi.getSupportTicketMessages(params.id);
+        } catch {
+          // ignore
+        }
+        const ticket: Ticket = {
+          id: data.id,
+          user: data.user_name || data.user_email || "Platform User",
+          subject: data.subject || "Support Inquiry",
+          category: data.category || "General",
+          priority: (data.priority ? data.priority.toLowerCase() : "medium") as Ticket["priority"],
+          status: (data.status ? data.status.toLowerCase().replace("_", " ") : "open") as Ticket["status"],
+          created: data.created_at ? new Date(data.created_at).toLocaleDateString() : "Recent",
+          assignee: data.assignee_name || "Mohammed Fadhil",
+        };
+        const messages: TicketMessage[] = (Array.isArray(rawMsgs) ? rawMsgs : [])
+          .filter((m: any) => !m.is_internal_note)
+          .map((m: any) => ({
+            id: m.id,
+            from: m.author_name?.includes("Admin") || m.author_name?.includes("Fadhil") ? "staff" : "user",
+            author: m.author_name || "Support",
+            body: m.body,
+            time: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now",
+          }));
+        const notes = (Array.isArray(rawMsgs) ? rawMsgs : [])
+          .filter((m: any) => m.is_internal_note)
+          .map((m: any) => ({
+            author: m.author_name || "Staff",
+            body: m.body,
+            time: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now",
+          }));
+        return { ticket, initialMessages: messages, initialNotes: notes };
+      }
+    } catch (err) {
+      console.error("Failed to load live support ticket:", err);
+      // fallback to mock
+    }
     const ticket = getTicket(params.id);
     if (!ticket) throw notFound();
-    return { ticket };
+    return { ticket, initialMessages: [], initialNotes: [] };
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Ticket unavailable — SaaS Manager" }, { name: "robots", content: "noindex" }] };
@@ -39,18 +81,27 @@ export const Route = createFileRoute("/support/$id")({
 });
 
 function TicketConsole() {
-  const { ticket } = Route.useLoaderData();
+  const { ticket, initialMessages, initialNotes } = Route.useLoaderData();
   const thread = ticketThread(ticket);
   const isBusiness = businesses.some((b) => b.name === ticket.user);
   const [status, setStatus] = useState(ticket.status);
   const [assignee, setAssignee] = useState(ticket.assignee);
-  const [messages, setMessages] = useState<TicketMessage[]>(thread.messages);
-  const [notes, setNotes] = useState(thread.notes);
+  const [messages, setMessages] = useState<TicketMessage[]>(
+    initialMessages && initialMessages.length > 0 ? initialMessages : thread.messages
+  );
+  const [notes, setNotes] = useState(
+    initialNotes && initialNotes.length > 0 ? initialNotes : thread.notes
+  );
   const [reply, setReply] = useState("");
   const [note, setNote] = useState("");
 
-  const send = () => {
+  const send = async () => {
     if (!reply.trim()) return;
+    try {
+      await adminApi.sendSupportTicketMessage(ticket.id, { body: reply, is_internal_note: false });
+    } catch {
+      // handled
+    }
     setMessages((m) => [...m, { id: `m${m.length + 1}`, from: "staff", author: "Mohammed Fadhil", body: reply, time: "Just now" }]);
     setReply("");
     saved("Reply sent", ticket.user);
@@ -80,8 +131,14 @@ function TicketConsole() {
         </div>
         <Select
           value={status}
-          onValueChange={(v) => {
-            setStatus(v as Ticket["status"]);
+          onValueChange={async (v) => {
+            const newStatus = v as Ticket["status"];
+            try {
+              await adminApi.updateSupportTicket(ticket.id, { status: newStatus.toUpperCase().replace(" ", "_") });
+            } catch {
+              // fallback
+            }
+            setStatus(newStatus);
             saved("Status updated", v);
           }}
         >
@@ -195,7 +252,12 @@ function TicketConsole() {
                 variant="outline"
                 className="h-10"
                 disabled={!note.trim()}
-                onClick={() => {
+                onClick={async () => {
+                  try {
+                    await adminApi.sendSupportTicketMessage(ticket.id, { body: note, is_internal_note: true });
+                  } catch {
+                    // fallback
+                  }
                   setNotes((ns) => [...ns, { author: "Mohammed Fadhil", body: note, time: "Just now" }]);
                   setNote("");
                 }}

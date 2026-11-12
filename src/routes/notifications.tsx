@@ -1,18 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Send } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { mockAction } from "@/components/admin/ActionMenu";
+import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { notifications } from "@/data/mock";
 import type { NotificationItem } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({
@@ -55,17 +55,52 @@ function List({ items }: { items: NotificationItem[] }) {
 }
 
 function NotificationsPage() {
+  const [notifsList, setNotifsList] = useState<NotificationItem[]>([]);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [audience, setAudience] = useState<string>(AUDIENCES[0]!);
   const [schedule, setSchedule] = useState("");
 
-  const send = () => {
-    if (!title.trim() || !message.trim()) return;
-    mockAction(schedule ? "Announcement scheduled" : "Announcement sent", `${title} → ${audience}`)();
-    setTitle("");
-    setMessage("");
-    setSchedule("");
+  const loadNotifications = () => {
+    adminApi.getNotifications()
+      .then((res: any) => {
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((n: any) => ({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          audience: n.audience || "All users",
+          schedule: n.created_at ? new Date(n.created_at).toLocaleDateString() : "Now",
+          status: (n.status || "sent").toLowerCase() as NotificationItem["status"],
+          kind: (n.kind || "system").toLowerCase() as NotificationItem["kind"],
+        }));
+        setNotifsList(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load notifications:", err);
+      });
+  };
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const send = async () => {
+    if (!title.trim() || !message.trim()) {
+      saved("Validation", "Both title and message are required.");
+      return;
+    }
+    try {
+      await adminApi.createNotification({ title: title.trim(), message: message.trim(), audience, kind: "SYSTEM" });
+      saved(schedule ? "Announcement scheduled" : "Announcement sent", `${title} → ${audience}`);
+      setTitle("");
+      setMessage("");
+      setSchedule("");
+      loadNotifications();
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "Could not dispatch announcement";
+      saved("Dispatch failed", msg);
+    }
   };
 
   return (
@@ -82,11 +117,11 @@ function NotificationsPage() {
             <TabsTrigger value="verification">Verification</TabsTrigger>
           </TabsList>
           <TabsContent value="all" className="mt-3">
-            <List items={notifications} />
+            <List items={notifsList} />
           </TabsContent>
           {(["system", "user", "campaign", "verification"] as const).map((k) => (
             <TabsContent key={k} value={k} className="mt-3">
-              <List items={notifications.filter((n) => n.kind === k)} />
+              <List items={notifsList.filter((n) => n.kind === k)} />
             </TabsContent>
           ))}
         </Tabs>

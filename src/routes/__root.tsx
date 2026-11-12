@@ -129,15 +129,16 @@ function MobileNavCloser() {
   return null;
 }
 
-/** Prototype session guard: sends visitors without a staff session to /login. */
+/** Strict session guard: sends visitors without verified staff credentials to /login. */
 function useStaffGuard(isPublic: boolean) {
   const navigate = useNavigate();
   const [ok, setOk] = useState(false);
   useEffect(() => {
     if (isPublic) return;
-   if (authService.isAuthenticated() || getSession()) {
+    if (authService.isAuthenticated()) {
       setOk(true);
     } else {
+      authService.LogOut();
       void navigate({ to: "/login", replace: true });
     }
   }, [isPublic, navigate]);

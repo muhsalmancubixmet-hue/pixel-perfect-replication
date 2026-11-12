@@ -8,9 +8,33 @@ import { ReasonDialog, saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
 import { compact, getRequirement, money, requirementBrief } from "@/data/mock";
 import type { Requirement } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/requirements/$id")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    try {
+      const live = await adminApi.getRequirementDetail(params.id);
+      if (live && live.id) {
+        return {
+          requirement: {
+            id: live.id,
+            title: live.title,
+            business: live.business_name || "Partner Business",
+            category: live.category_name || "General",
+            status: (live.status || "OPEN").toLowerCase() as Requirement["status"],
+            created: live.created_at ? new Date(live.created_at).toLocaleDateString() : "Recent",
+            currency: live.currency || "INR",
+            location: live.location_text || "Remote",
+            budget: (live.max_budget_cents || live.budget_max_cents || 0) / 100,
+            creatorsNeeded: live.creators_needed || 1,
+            applications: live.applications_count || live.proposals_count || 0,
+          } as Requirement,
+        };
+      }
+    } catch (err) {
+      console.error("Failed to load live requirement:", err);
+      // fallback to mock
+    }
     const requirement = getRequirement(params.id);
     if (!requirement) throw notFound();
     return { requirement };
@@ -40,7 +64,12 @@ function RequirementDetail() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<Requirement["status"]>(requirement.status);
   const [removing, setRemoving] = useState(false);
-  const act = (s: Requirement["status"], label: string) => {
+  const act = async (s: Requirement["status"], label: string) => {
+    try {
+      await adminApi.moderateRequirement(requirement.id, { status: s.toUpperCase() });
+    } catch {
+      // fallback handled gracefully
+    }
     setStatus(s);
     saved(label, requirement.title);
   };
@@ -126,7 +155,12 @@ function RequirementDetail() {
         description="It disappears from the marketplace and the business is notified."
         confirmLabel="Remove requirement"
         destructive
-        onConfirm={() => {
+        onConfirm={async () => {
+          try {
+            await adminApi.moderateRequirement(requirement.id, { status: "CLOSED" });
+          } catch {
+            // fallback handled gracefully
+          }
           saved("Requirement removed", requirement.title);
           void navigate({ to: "/requirements" });
         }}

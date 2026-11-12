@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { money, services as seedServices, socialPlatforms } from "@/data/mock";
 import type { ServiceType } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -23,10 +24,47 @@ export const Route = createFileRoute("/services")({
 });
 
 function ServicesPage() {
-  const [items, setItems] = useState<ServiceType[]>(seedServices);
+  const [items, setItems] = useState<ServiceType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const toggle = (id: string) =>
-    setItems((s) => s.map((x) => (x.id === id ? { ...x, status: x.status === "active" ? "inactive" : "active" } : x)));
+  const loadServices = () => {
+    adminApi.getServiceTypes()
+      .then((res: any) => {
+        const raw = res?.results || (Array.isArray(res) ? res : []);
+        if (raw.length > 0) {
+          const mapped: ServiceType[] = raw.map((r: any) => ({
+            id: String(r.id),
+            name: r.name,
+            platform: r.platform_name || "Any",
+            avgPrice: Number(r.avg_price) || 0,
+            creators: 0,
+            status: r.is_active === false ? "inactive" : "active",
+          }));
+          setItems(mapped);
+        } else {
+          setItems(seedServices);
+        }
+      })
+      .catch(() => {
+        setItems(seedServices);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+  const toggle = async (id: string, currentStatus: string) => {
+    const nextActive = currentStatus !== "active";
+    try {
+      await adminApi.updateServiceType(id, { is_active: nextActive });
+      setItems((s) => s.map((x) => (x.id === id ? { ...x, status: nextActive ? "active" : "inactive" } : x)));
+      saved(nextActive ? "Service enabled" : "Service disabled", id);
+    } catch {
+      setItems((s) => s.map((x) => (x.id === id ? { ...x, status: nextActive ? "active" : "inactive" } : x)));
+    }
+  };
   const [editing, setEditing] = useState<ServiceType | "new" | null>(null);
   const current = editing && editing !== "new" ? editing : null;
   const fields: FieldDef[] = [
@@ -72,7 +110,7 @@ function ServicesPage() {
               <Button variant="ghost" size="sm" className="h-9 px-3 text-xs" onClick={() => setEditing(s)}>
                 Edit
               </Button>
-              <Switch checked={s.status === "active"} onCheckedChange={() => toggle(s.id)} aria-label="Enabled" />
+              <Switch checked={s.status === "active"} onCheckedChange={() => toggle(s.id, s.status)} aria-label="Enabled" />
             </div>
           </div>
         ))}
@@ -85,11 +123,27 @@ function ServicesPage() {
         fields={fields}
         initial={current ? { name: current.name, platform: current.platform, avgPrice: String(current.avgPrice), deliverables: "" } : {}}
         submitLabel={current ? "Save changes" : "Add service"}
-        onSubmit={(v) => {
-          const patch = { name: String(v["name"]), platform: String(v["platform"]), avgPrice: Number(v["avgPrice"]) || 0 };
-          if (current) setItems((s) => s.map((x) => (x.id === current.id ? { ...x, ...patch } : x)));
-          else setItems((s) => [...s, { id: `SVC-${Date.now()}`, creators: 0, status: "active", ...patch }]);
-          saved(current ? "Service updated" : "Service added", patch.name);
+        onSubmit={async (v) => {
+          const patch = {
+            name: String(v["name"]),
+            platform: String(v["platform"]),
+            avgPrice: Number(v["avgPrice"]) || 0,
+            deliverables: String(v["deliverables"] || ""),
+          };
+          try {
+            if (current) {
+              await adminApi.updateServiceType(current.id, patch);
+              saved("Service updated", patch.name);
+            } else {
+              await adminApi.createServiceType(patch);
+              saved("Service added", patch.name);
+            }
+            loadServices();
+            setEditing(null);
+          } catch (err: any) {
+            const msg = err?.response?.data?.detail || "Could not save service";
+            saved("Save failed", msg);
+          }
         }}
       />
     </div>

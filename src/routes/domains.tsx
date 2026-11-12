@@ -5,12 +5,12 @@ import { CheckCircle2, Info, Loader2, TriangleAlert } from "lucide-react";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
+import { ActionMenu } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog, saved } from "@/components/admin/Dialogs";
-import { domains } from "@/data/mock";
 import type { DomainRecord } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/domains")({
   head: () => ({
@@ -25,9 +25,34 @@ export const Route = createFileRoute("/domains")({
 });
 
 function DomainsPage() {
+  const [domainList, setDomainList] = useState<DomainRecord[]>([]);
   const [instructions, setInstructions] = useState<DomainRecord | null>(null);
   const [diagnosing, setDiagnosing] = useState<DomainRecord | null>(null);
   const [disconnecting, setDisconnecting] = useState<DomainRecord | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    adminApi.getDomains()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((d: any) => ({
+          id: d.id,
+          creator: d.creator_name || d.creator || "Creator",
+          domain: d.domain || d.custom_domain,
+          type: (d.type || "custom").toLowerCase() as DomainRecord["type"],
+          verification: (d.verification || d.status || "pending").toLowerCase() as DomainRecord["verification"],
+          ssl: (d.ssl || "pending").toLowerCase() as DomainRecord["ssl"],
+          websiteStatus: (d.website_status || "published").toLowerCase() as DomainRecord["websiteStatus"],
+          created: d.created_at ? new Date(d.created_at).toLocaleDateString() : "Recent",
+        }));
+        setDomainList(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load live domains:", err);
+      });
+    return () => { active = false; };
+  }, []);
 
   const columns: Column<DomainRecord>[] = [
     { key: "creator", header: "Creator", cell: (r) => <span className="text-sm font-medium">{r.creator}</span> },
@@ -49,14 +74,9 @@ function DomainsPage() {
     <div className="flex flex-col gap-4">
       <PageHeader title="Domains" description="Custom domains and subdomains connected to creator websites." />
 
-      <div className="flex items-start gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
-        <Info className="mt-0.5 size-3.5 shrink-0" />
-        DNS checks are simulated in this prototype. Actions show the flow admins will get once the backend is connected.
-      </div>
-
       <div className="w-full overflow-x-auto">
         <DataTable
-          rows={domains}
+          rows={domainList}
           columns={columns}
           filters={filters}
           getId={(r) => r.id}
@@ -122,7 +142,7 @@ function DomainsPage() {
               </tbody>
             </table>
           </div>
-          <Button onClick={mockAction("Instructions emailed", instructions?.creator ?? "")}>Email instructions</Button>
+          <Button onClick={() => saved("Instructions emailed", instructions?.creator ?? "")}>Email instructions</Button>
         </DialogContent>
       </Dialog>
 

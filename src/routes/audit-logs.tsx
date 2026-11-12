@@ -1,13 +1,14 @@
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Download, Monitor } from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column, type FilterDef } from "@/components/admin/DataTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { auditLogs } from "@/data/mock";
+import { saved } from "@/components/admin/Dialogs";
 import type { AuditLog } from "@/data/types";
+import { adminApi } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/audit-logs")({
   head: () => ({
@@ -22,6 +23,33 @@ export const Route = createFileRoute("/audit-logs")({
 });
 
 function AuditLogsPage() {
+  const [logsList, setLogsList] = useState<AuditLog[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    adminApi.getAuditLogs()
+      .then((res: any) => {
+        if (!active) return;
+        const list = res?.results || (Array.isArray(res) ? res : []);
+        const mapped = list.map((l: any) => ({
+          id: l.id,
+          datetime: l.created_at ? new Date(l.created_at).toLocaleString() : "Recent",
+          admin: l.admin_name || l.admin_email || "System Admin",
+          action: l.action || "Action",
+          entity: l.target_model || l.entity || "Entity",
+          entityId: l.target_object_id || l.entityId || "N/A",
+          ip: l.ip_address || l.ip || "127.0.0.1",
+          device: l.user_agent ? l.user_agent.slice(0, 20) : "Browser",
+          result: (l.status === "FAILED" ? "failed" : "success") as AuditLog["result"],
+        }));
+        setLogsList(mapped);
+      })
+      .catch((err) => {
+        console.warn("Could not load live audit logs:", err);
+      });
+    return () => { active = false; };
+  }, []);
+
   const columns: Column<AuditLog>[] = [
     { key: "datetime", header: "Date / time", cell: (r) => <span className="num text-xs font-medium">{r.datetime}</span> },
     { key: "admin", header: "Admin", cell: (r) => <span className="num text-xs">{r.admin}</span> },
@@ -43,9 +71,9 @@ function AuditLogsPage() {
   ];
 
   const filters: FilterDef<AuditLog>[] = [
-    { key: "admin", label: "Admin", options: [...new Set(auditLogs.map((l) => l.admin))], match: (r, v) => r.admin === v },
-    { key: "action", label: "Action", options: [...new Set(auditLogs.map((l) => l.action))], match: (r, v) => r.action === v },
-    { key: "entity", label: "Entity", options: [...new Set(auditLogs.map((l) => l.entity))], match: (r, v) => r.entity === v },
+    { key: "admin", label: "Admin", options: [...new Set(logsList.map((l) => l.admin))], match: (r, v) => r.admin === v },
+    { key: "action", label: "Action", options: [...new Set(logsList.map((l) => l.action))], match: (r, v) => r.action === v },
+    { key: "entity", label: "Entity", options: [...new Set(logsList.map((l) => l.entity))], match: (r, v) => r.entity === v },
     { key: "result", label: "Result", options: ["success", "failed"], match: (r, v) => r.result === v },
     {
       key: "date",
@@ -58,13 +86,42 @@ function AuditLogsPage() {
     },
   ];
 
+  const handleExportCsv = () => {
+    if (!logsList || logsList.length === 0) {
+      saved("Export notice", "No audit logs available to export.");
+      return;
+    }
+    const headers = ["Timestamp", "Admin", "Action", "Entity", "Entity ID", "IP Address", "Device / User-Agent", "Status"];
+    const rows = logsList.map((l) => [
+      `"${String(l.datetime).replace(/"/g, '""')}"`,
+      `"${String(l.admin).replace(/"/g, '""')}"`,
+      `"${String(l.action).replace(/"/g, '""')}"`,
+      `"${String(l.entity).replace(/"/g, '""')}"`,
+      `"${String(l.entityId).replace(/"/g, '""')}"`,
+      `"${String(l.ip).replace(/"/g, '""')}"`,
+      `"${String(l.device).replace(/"/g, '""')}"`,
+      `"${String(l.result).replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    saved("Export successful", "audit-logs.csv downloaded");
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Audit logs"
         description="Accountability trail for every administrative action."
         actions={
-          <Button variant="outline" size="sm" onClick={mockAction("Export started", "audit-logs.csv")}>
+          <Button variant="outline" size="sm" onClick={handleExportCsv}>
             <Download className="size-4" /> Export
           </Button>
         }
@@ -72,7 +129,7 @@ function AuditLogsPage() {
 
       <div className="w-full overflow-x-auto">
         <DataTable
-          rows={auditLogs}
+          rows={logsList}
           columns={columns}
           filters={filters}
           getId={(r) => r.id}
