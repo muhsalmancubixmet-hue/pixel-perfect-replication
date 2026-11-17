@@ -8,7 +8,13 @@ import { UserAvatar } from "@/components/admin/UserAvatar";
 import { LocationSearch, type PickedLocation } from "@/components/admin/LocationSearch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CATEGORY_NAMES, COUNTRY_OPTIONS, LANGUAGE_OPTIONS, compact } from "@/data/mock";
@@ -17,13 +23,19 @@ import { cn } from "@/lib/utils";
 import type { Influencer, SocialPlatform } from "@/data/types";
 import { adminApi } from "@/lib/admin-api";
 
-const WorldMap = lazy(() => import("@/components/admin/WorldMap").then((m) => ({ default: m.WorldMap })));
+const WorldMap = lazy(() =>
+  import("@/components/admin/WorldMap").then((m) => ({ default: m.WorldMap })),
+);
 
 export const Route = createFileRoute("/discovery")({
   head: () => ({
     meta: [
       { title: "Creator Map — Influencers.com SaaS Manager" },
-      { name: "description", content: "Discover influencers anywhere in the world with a global map, radius search and filters." },
+      {
+        name: "description",
+        content:
+          "Discover influencers anywhere in the world with a global map, radius search and filters.",
+      },
       { property: "og:title", content: "Creator Map — Influencers.com SaaS Manager" },
       { property: "og:description", content: "Discover influencers anywhere in the world." },
       { property: "og:type", content: "website" },
@@ -31,8 +43,14 @@ export const Route = createFileRoute("/discovery")({
     ],
     links: [
       { rel: "stylesheet", href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" },
-      { rel: "stylesheet", href: "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" },
-      { rel: "stylesheet", href: "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" },
+      {
+        rel: "stylesheet",
+        href: "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css",
+      },
     ],
   }),
   component: DiscoveryPage,
@@ -78,7 +96,10 @@ function FilterSelect({
   );
 }
 
-const anyOf = (label: string, list: string[]) => [{ v: ANY, l: `Any ${label}` }, ...list.map((x) => ({ v: x, l: x }))];
+const anyOf = (label: string, list: string[]) => [
+  { v: ANY, l: `Any ${label}` },
+  ...list.map((x) => ({ v: x, l: x })),
+];
 
 function DiscoveryPage() {
   const [influencersList, setInfluencersList] = useState<Influencer[]>([]);
@@ -97,52 +118,69 @@ function DiscoveryPage() {
 
   useEffect(() => {
     let active = true;
-    Promise.allSettled([
-      adminApi.getInfluencers(),
-      adminApi.getSocialPlatforms(),
-    ]).then(([iRes, pRes]) => {
-      if (!active) return;
-      if (iRes.status === "fulfilled") {
-        const raw = iRes.value?.results || (Array.isArray(iRes.value) ? iRes.value : []);
-        const list = raw.map((item: any) => ({
-          ...item,
-          id: String(item.id),
-          name: item.name || item.display_name || item.handle || "Creator",
-          avatar: item.avatar || item.photo_url || "",
-          categories: Array.isArray(item.categories) && item.categories.length > 0 ? item.categories : ["General"],
-          location: {
-            city: item.location?.city || item.primary_city || "Mumbai",
-            country: item.location?.country || "India",
-            countryCode: item.location?.countryCode || "IN",
-            lat: typeof item.location?.lat === "number" ? item.location.lat : 19.0760,
-            lng: typeof item.location?.lng === "number" ? item.location.lng : 72.8777,
-            currency: item.location?.currency || "INR",
-            languages: item.location?.languages || ["English"],
-            district: item.location?.district || "",
-            region: item.location?.region || "",
-          },
-          serviceLocations: Array.isArray(item.serviceLocations) && item.serviceLocations.length > 0 ? item.serviceLocations : ["Worldwide"],
-          languages: Array.isArray(item.languages) && item.languages.length > 0 ? item.languages : ["English"],
-          platforms: Array.isArray(item.platforms) && item.platforms.length > 0 ? item.platforms : ["Instagram"],
-          followers: item.followers || 0,
-          engagement: typeof item.engagement === "number" ? item.engagement : 3.5,
-          verification: (item.verification || "unverified").toLowerCase(),
-        }));
-        setInfluencersList(list);
-      }
-      if (pRes.status === "fulfilled") {
-        const list = pRes.value?.results || (Array.isArray(pRes.value) ? pRes.value : []);
-        setPlatformsList(list);
-      }
-    });
-    return () => { active = false; };
+    Promise.allSettled([adminApi.getInfluencers(), adminApi.getSocialPlatforms()]).then(
+      ([iRes, pRes]) => {
+        if (!active) return;
+        if (iRes.status === "fulfilled") {
+          const raw = iRes.value?.results || (Array.isArray(iRes.value) ? iRes.value : []);
+          const list = raw.map((item: any) => ({
+            ...item,
+            id: String(item.id),
+            name: item.name || item.display_name || item.handle || "Creator",
+            avatar: item.avatar || item.photo_url || "",
+            categories:
+              Array.isArray(item.categories) && item.categories.length > 0
+                ? item.categories
+                : ["General"],
+            location: {
+              city: item.location?.city || item.primary_city || "Mumbai",
+              country: item.location?.country || "India",
+              countryCode: item.location?.countryCode || "IN",
+              lat: typeof item.location?.lat === "number" ? item.location.lat : 19.076,
+              lng: typeof item.location?.lng === "number" ? item.location.lng : 72.8777,
+              currency: item.location?.currency || "INR",
+              languages: item.location?.languages || ["English"],
+              district: item.location?.district || "",
+              region: item.location?.region || "",
+            },
+            serviceLocations:
+              Array.isArray(item.serviceLocations) && item.serviceLocations.length > 0
+                ? item.serviceLocations
+                : ["Worldwide"],
+            languages:
+              Array.isArray(item.languages) && item.languages.length > 0
+                ? item.languages
+                : ["English"],
+            platforms:
+              Array.isArray(item.platforms) && item.platforms.length > 0
+                ? item.platforms
+                : ["Instagram"],
+            followers: item.followers || 0,
+            engagement: typeof item.engagement === "number" ? item.engagement : 3.5,
+            verification: (item.verification || "unverified").toLowerCase(),
+          }));
+          setInfluencersList(list);
+        }
+        if (pRes.status === "fulfilled") {
+          const list = pRes.value?.results || (Array.isArray(pRes.value) ? pRes.value : []);
+          setPlatformsList(list);
+        }
+      },
+    );
+    return () => {
+      active = false;
+    };
   }, []);
 
   const results = useMemo(
     () =>
       influencersList.filter(
         (i) =>
-          (!loc || (i.location && typeof i.location.lat === "number" && typeof i.location.lng === "number" && distanceKm(loc, i.location) <= Number(radius))) &&
+          (!loc ||
+            (i.location &&
+              typeof i.location.lat === "number" &&
+              typeof i.location.lng === "number" &&
+              distanceKm(loc, i.location) <= Number(radius))) &&
           (country === ANY || i.location?.country === country) &&
           (category === ANY || (i.categories || []).includes(category)) &&
           (language === ANY || (i.languages || []).includes(language)) &&
@@ -156,7 +194,14 @@ function DiscoveryPage() {
   const markers = useMemo(
     () =>
       results
-        .filter((i) => i.location && typeof i.location.lat === "number" && typeof i.location.lng === "number" && !isNaN(i.location.lat) && !isNaN(i.location.lng))
+        .filter(
+          (i) =>
+            i.location &&
+            typeof i.location.lat === "number" &&
+            typeof i.location.lng === "number" &&
+            !isNaN(i.location.lat) &&
+            !isNaN(i.location.lng),
+        )
         .map((i) => ({
           id: i.id,
           lat: i.location.lat,
@@ -174,17 +219,45 @@ function DiscoveryPage() {
         <Label className="text-xs text-muted-foreground">Location</Label>
         <LocationSearch value={loc} onChange={setLoc} />
       </div>
-      <FilterSelect label="Radius" value={radius} onChange={setRadius} options={RADII.map((r) => ({ v: r, l: `${r} km` }))} />
-      <FilterSelect label="Country" value={country} onChange={setCountry} options={anyOf("country", COUNTRY_OPTIONS)} />
-      <FilterSelect label="Category" value={category} onChange={setCategory} options={anyOf("category", CATEGORY_NAMES)} />
-      <FilterSelect label="Language" value={language} onChange={setLanguage} options={anyOf("language", LANGUAGE_OPTIONS)} />
+      <FilterSelect
+        label="Radius"
+        value={radius}
+        onChange={setRadius}
+        options={RADII.map((r) => ({ v: r, l: `${r} km` }))}
+      />
+      <FilterSelect
+        label="Country"
+        value={country}
+        onChange={setCountry}
+        options={anyOf("country", COUNTRY_OPTIONS)}
+      />
+      <FilterSelect
+        label="Category"
+        value={category}
+        onChange={setCategory}
+        options={anyOf("category", CATEGORY_NAMES)}
+      />
+      <FilterSelect
+        label="Language"
+        value={language}
+        onChange={setLanguage}
+        options={anyOf("language", LANGUAGE_OPTIONS)}
+      />
       <FilterSelect
         label="Social platform"
         value={platform}
         onChange={setPlatform}
-        options={anyOf("platform", platformsList.filter((p: any) => p.status === "active").map((p: any) => p.name))}
+        options={anyOf(
+          "platform",
+          platformsList.filter((p: any) => p.status === "active").map((p: any) => p.name),
+        )}
       />
-      <FilterSelect label="Followers" value={followers} onChange={setFollowers} options={FOLLOWERS} />
+      <FilterSelect
+        label="Followers"
+        value={followers}
+        onChange={setFollowers}
+        options={FOLLOWERS}
+      />
       <FilterSelect
         label="Verification"
         value={verified}
@@ -202,7 +275,12 @@ function DiscoveryPage() {
   const map = (
     <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
       <Suspense fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
-        <WorldMap markers={markers} center={center} onSelect={setSelected} className="h-full w-full" />
+        <WorldMap
+          markers={markers}
+          center={center}
+          onSelect={setSelected}
+          className="h-full w-full"
+        />
       </Suspense>
     </ClientOnly>
   );
@@ -226,10 +304,12 @@ function DiscoveryPage() {
               {i.verification === "verified" && <BadgeCheck className="size-3.5 text-primary" />}
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              {(Array.isArray(i.categories) ? i.categories : ["General"]).join(", ")} · {i.location?.city ? placeLabel(i.location) : "Global"}
+              {(Array.isArray(i.categories) ? i.categories : ["General"]).join(", ")} ·{" "}
+              {i.location?.city ? placeLabel(i.location) : "Global"}
             </p>
             <p className="truncate text-[11px] text-muted-foreground">
-              Available: {(Array.isArray(i.serviceLocations) ? i.serviceLocations : ["Worldwide"]).join(" · ")}
+              Available:{" "}
+              {(Array.isArray(i.serviceLocations) ? i.serviceLocations : ["Worldwide"]).join(" · ")}
             </p>
           </div>
           <div className="text-right">
@@ -258,26 +338,43 @@ function DiscoveryPage() {
             onValueChange={(v) => v && setView(v as typeof view)}
             className="hidden rounded-md border border-border md:flex"
           >
-            <ToggleGroupItem value="list" aria-label="List view"><List className="size-4" /></ToggleGroupItem>
-            <ToggleGroupItem value="split" aria-label="Split view"><Columns2 className="size-4" /></ToggleGroupItem>
-            <ToggleGroupItem value="map" aria-label="Map view"><MapIcon className="size-4" /></ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="List view">
+              <List className="size-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="split" aria-label="Split view">
+              <Columns2 className="size-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="map" aria-label="Map view">
+              <MapIcon className="size-4" />
+            </ToggleGroupItem>
           </ToggleGroup>
         }
       />
 
       {/* Mobile controls */}
       <div className="flex items-center gap-2 md:hidden">
-        <div className="flex-1"><LocationSearch value={loc} onChange={setLoc} /></div>
+        <div className="flex-1">
+          <LocationSearch value={loc} onChange={setLoc} />
+        </div>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Filters"><SlidersHorizontal className="size-4" /></Button>
+            <Button variant="outline" size="icon" aria-label="Filters">
+              <SlidersHorizontal className="size-4" />
+            </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-            <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
             <div className="p-4">{filters}</div>
           </SheetContent>
         </Sheet>
-        <Button variant="outline" size="icon" aria-label="Toggle map" onClick={() => setMobileMap((m) => !m)}>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Toggle map"
+          onClick={() => setMobileMap((m) => !m)}
+        >
           {mobileMap ? <List className="size-4" /> : <MapIcon className="size-4" />}
         </Button>
       </div>
@@ -289,7 +386,11 @@ function DiscoveryPage() {
 
       {/* Mobile body */}
       <div className="md:hidden">
-        {mobileMap ? <div className="h-[65vh] overflow-hidden rounded-lg border border-border">{map}</div> : list}
+        {mobileMap ? (
+          <div className="h-[65vh] overflow-hidden rounded-lg border border-border">{map}</div>
+        ) : (
+          list
+        )}
       </div>
 
       {/* Desktop body */}
@@ -297,11 +398,20 @@ function DiscoveryPage() {
         <aside className="panel h-fit p-4">{filters}</aside>
         <div className={cn("grid gap-4", view === "split" && "xl:grid-cols-[1fr_380px]")}>
           {view !== "list" && (
-            <div className={cn("overflow-hidden rounded-lg border border-border", view === "map" ? "h-[680px]" : "h-[560px]")}>
+            <div
+              className={cn(
+                "overflow-hidden rounded-lg border border-border",
+                view === "map" ? "h-[680px]" : "h-[560px]",
+              )}
+            >
               {map}
             </div>
           )}
-          {view !== "map" && <div className={cn(view === "split" && "xl:max-h-[560px] xl:overflow-y-auto")}>{list}</div>}
+          {view !== "map" && (
+            <div className={cn(view === "split" && "xl:max-h-[560px] xl:overflow-y-auto")}>
+              {list}
+            </div>
+          )}
         </div>
       </div>
     </div>

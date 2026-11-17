@@ -40,7 +40,13 @@ export const Route = createFileRoute("/requirements/$id")({
     return { requirement };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Requirement unavailable — SaaS Manager" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData)
+      return {
+        meta: [
+          { title: "Requirement unavailable — SaaS Manager" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     const title = `${loaderData.requirement.id} moderation — SaaS Manager`;
     const description = `Moderate “${loaderData.requirement.title}” posted by ${loaderData.requirement.business}.`;
     return {
@@ -76,7 +82,10 @@ function RequirementDetail() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link to="/requirements" className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+      <Link
+        to="/requirements"
+        className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="size-3.5" /> All requirements
       </Link>
 
@@ -92,13 +101,28 @@ function RequirementDetail() {
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          <Button variant="outline" className="h-10" disabled={status === "featured"} onClick={() => act("featured", "Featured on marketplace")}>
+          <Button
+            variant="outline"
+            className="h-10"
+            disabled={status === "featured"}
+            onClick={() => act("featured", "Featured on marketplace")}
+          >
             <Star className="size-4" /> Feature on Marketplace
           </Button>
-          <Button variant="outline" className="h-10" disabled={status === "hidden"} onClick={() => act("hidden", "Hidden from feed")}>
+          <Button
+            variant="outline"
+            className="h-10"
+            disabled={status === "hidden"}
+            onClick={() => act("hidden", "Hidden from feed")}
+          >
             <EyeOff className="size-4" /> Hide from Feed
           </Button>
-          <Button variant="outline" className="h-10" disabled={status === "closed"} onClick={() => act("closed", "Submissions closed")}>
+          <Button
+            variant="outline"
+            className="h-10"
+            disabled={status === "closed"}
+            onClick={() => act("closed", "Submissions closed")}
+          >
             <Lock className="size-4" /> Close Submissions
           </Button>
           <Button variant="destructive" className="h-10" onClick={() => setRemoving(true)}>
@@ -113,7 +137,10 @@ function RequirementDetail() {
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{d.brief}</p>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["Budget range", `${money(d.budgetMin, requirement.currency)} – ${money(d.budgetMax, requirement.currency)}`],
+              [
+                "Budget range",
+                `${money(d.budgetMin, requirement.currency)} – ${money(d.budgetMax, requirement.currency)}`,
+              ],
               ["Creators needed", String(requirement.creatorsNeeded)],
               ["Location", `${requirement.location} · ${d.radiusKm} km`],
               ["Min. followers", compact(d.minFollowers)],
@@ -133,7 +160,12 @@ function RequirementDetail() {
           </div>
           <div className="divide-y divide-border/70">
             {d.interested.map((c) => (
-              <Link key={c.id + c.date} to="/influencers/$id" params={{ id: c.id }} className="flex min-h-[52px] items-center gap-3 px-4 py-2.5 hover:bg-muted/40">
+              <Link
+                key={c.id + c.date}
+                to="/influencers/$id"
+                params={{ id: c.id }}
+                className="flex min-h-[52px] items-center gap-3 px-4 py-2.5 hover:bg-muted/40"
+              >
                 <UserAvatar src={c.avatar} name={c.name} size={32} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{c.name}</p>

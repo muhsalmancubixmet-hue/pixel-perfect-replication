@@ -123,18 +123,138 @@ export const roles = [
 ] as const;
 
 export const permissionMatrix: { area: string; levels: Record<string, string> }[] = [
-  { area: "Influencers", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "View", Support: "View", Finance: "None", "Content Manager": "Manage" } },
-  { area: "Businesses", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "View", Support: "View", Finance: "View", "Content Manager": "None" } },
-  { area: "Campaigns", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "Moderate", Support: "View", Finance: "None", "Content Manager": "Moderate" } },
-  { area: "Requirements", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "Moderate", Support: "View", Finance: "None", "Content Manager": "Moderate" } },
-  { area: "Websites", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "Moderate", Support: "View", Finance: "None", "Content Manager": "Manage" } },
-  { area: "Domains", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "None", Support: "View", Finance: "None", "Content Manager": "None" } },
-  { area: "Social Platforms", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "View", Support: "None", Finance: "None", "Content Manager": "Manage" } },
-  { area: "Payments", levels: { "Super Admin": "Full", Admin: "View", Moderator: "None", Support: "None", Finance: "Full", "Content Manager": "None" } },
-  { area: "Subscriptions", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "None", Support: "View", Finance: "Manage", "Content Manager": "None" } },
-  { area: "Support", levels: { "Super Admin": "Full", Admin: "Manage", Moderator: "View", Support: "Full", Finance: "None", "Content Manager": "None" } },
-  { area: "Audit Logs", levels: { "Super Admin": "Full", Admin: "View", Moderator: "None", Support: "None", Finance: "View", "Content Manager": "None" } },
-  { area: "Settings", levels: { "Super Admin": "Full", Admin: "Limited", Moderator: "None", Support: "None", Finance: "None", "Content Manager": "Limited" } },
+  {
+    area: "Influencers",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "View",
+      Support: "View",
+      Finance: "None",
+      "Content Manager": "Manage",
+    },
+  },
+  {
+    area: "Businesses",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "View",
+      Support: "View",
+      Finance: "View",
+      "Content Manager": "None",
+    },
+  },
+  {
+    area: "Campaigns",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "Moderate",
+      Support: "View",
+      Finance: "None",
+      "Content Manager": "Moderate",
+    },
+  },
+  {
+    area: "Requirements",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "Moderate",
+      Support: "View",
+      Finance: "None",
+      "Content Manager": "Moderate",
+    },
+  },
+  {
+    area: "Websites",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "Moderate",
+      Support: "View",
+      Finance: "None",
+      "Content Manager": "Manage",
+    },
+  },
+  {
+    area: "Domains",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "None",
+      Support: "View",
+      Finance: "None",
+      "Content Manager": "None",
+    },
+  },
+  {
+    area: "Social Platforms",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "View",
+      Support: "None",
+      Finance: "None",
+      "Content Manager": "Manage",
+    },
+  },
+  {
+    area: "Payments",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "View",
+      Moderator: "None",
+      Support: "None",
+      Finance: "Full",
+      "Content Manager": "None",
+    },
+  },
+  {
+    area: "Subscriptions",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "None",
+      Support: "View",
+      Finance: "Manage",
+      "Content Manager": "None",
+    },
+  },
+  {
+    area: "Support",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Manage",
+      Moderator: "View",
+      Support: "Full",
+      Finance: "None",
+      "Content Manager": "None",
+    },
+  },
+  {
+    area: "Audit Logs",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "View",
+      Moderator: "None",
+      Support: "None",
+      Finance: "View",
+      "Content Manager": "None",
+    },
+  },
+  {
+    area: "Settings",
+    levels: {
+      "Super Admin": "Full",
+      Admin: "Limited",
+      Moderator: "None",
+      Support: "None",
+      Finance: "None",
+      "Content Manager": "Limited",
+    },
+  },
 ];
 
 export const adminStaff: { name: string; email: string; role: string; lastActive: string }[] = [];
@@ -144,8 +264,18 @@ export const adminStaff: { name: string; email: string; role: string; lastActive
 /* ------------------------------------------------------------------ */
 
 export const userGrowth: { month: string; influencers: number; businesses: number }[] = [];
-export const campaignActivity: { month: string; created: number; active: number; completed: number }[] = [];
-export const revenueTrend: { month: string; subscription: number; services: number; refunds: number }[] = [];
+export const campaignActivity: {
+  month: string;
+  created: number;
+  active: number;
+  completed: number;
+}[] = [];
+export const revenueTrend: {
+  month: string;
+  subscription: number;
+  services: number;
+  refunds: number;
+}[] = [];
 export const revenueByPlan: { name: string; value: number }[] = [];
 export const revenueByAccountType: { name: string; value: number }[] = [];
 export const categoryDistribution: { name: string; value: number }[] = [];
@@ -189,14 +319,12 @@ export const getInfluencer = (id: string): Influencer | undefined =>
 export const getBusiness = (id: string): Business | undefined =>
   businesses.find((b) => b.id === id);
 
-export const getCampaign = (id: string): Campaign | undefined =>
-  campaigns.find((c) => c.id === id);
+export const getCampaign = (id: string): Campaign | undefined => campaigns.find((c) => c.id === id);
 
 export const getRequirement = (id: string): Requirement | undefined =>
   requirements.find((r) => r.id === id);
 
-export const getTicket = (id: string): Ticket | undefined =>
-  tickets.find((t) => t.id === id);
+export const getTicket = (id: string): Ticket | undefined => tickets.find((t) => t.id === id);
 
 export const campaignsForBusiness = (_id: string): Campaign[] => [];
 

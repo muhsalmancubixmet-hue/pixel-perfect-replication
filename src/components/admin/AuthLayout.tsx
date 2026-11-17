@@ -2,7 +2,15 @@ import type { ReactNode } from "react";
 import { ShieldCheck } from "lucide-react";
 
 /** Centered card used by staff sign-in, MFA and invite screens. */
-export function AuthLayout({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-8 sm:py-10 overflow-x-hidden box-border">
       <div className="w-full max-w-sm mx-auto box-border min-w-0">

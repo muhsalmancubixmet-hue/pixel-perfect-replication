@@ -16,9 +16,16 @@ export const Route = createFileRoute("/websites")({
   head: () => ({
     meta: [
       { title: "Creator Websites — Influencers.com SaaS Manager" },
-      { name: "description", content: "Every creator website built on Influencers.com, with templates, domains and traffic." },
+      {
+        name: "description",
+        content:
+          "Every creator website built on Influencers.com, with templates, domains and traffic.",
+      },
       { property: "og:title", content: "Creator Websites — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Every creator website with templates, domains and traffic." },
+      {
+        property: "og:description",
+        content: "Every creator website with templates, domains and traffic.",
+      },
     ],
   }),
   component: WebsitesPage,
@@ -31,7 +38,8 @@ function WebsitesPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getWebsites()
+    adminApi
+      .getWebsites()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
@@ -52,7 +60,9 @@ function WebsitesPage() {
       .catch((err) => {
         console.warn("Could not load live websites:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const published = websitesList.filter((w) => w.status === "published").length;
@@ -70,13 +80,39 @@ function WebsitesPage() {
         </div>
       ),
     },
-    { key: "url", header: "Website URL", cell: (r) => <span className="num text-xs text-primary">{r.url}</span> },
-    { key: "template", header: "Template", cell: (r) => <span className="text-xs">{r.template}</span> },
+    {
+      key: "url",
+      header: "Website URL",
+      cell: (r) => <span className="num text-xs text-primary">{r.url}</span>,
+    },
+    {
+      key: "template",
+      header: "Template",
+      cell: (r) => <span className="text-xs">{r.template}</span>,
+    },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
-    { key: "domain", header: "Domain", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.domain}</span> },
-    { key: "visitors", header: "Visitors", cell: (r) => <span className="num text-sm font-semibold">{compact(r.visitors)}</span> },
-    { key: "created", header: "Created", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span> },
-    { key: "updated", header: "Updated", cell: (r) => <span className="num text-xs text-muted-foreground">{r.updated}</span> },
+    {
+      key: "domain",
+      header: "Domain",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.domain}</span>,
+    },
+    {
+      key: "visitors",
+      header: "Visitors",
+      cell: (r) => <span className="num text-sm font-semibold">{compact(r.visitors)}</span>,
+    },
+    {
+      key: "created",
+      header: "Created",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span>,
+    },
+    {
+      key: "updated",
+      header: "Updated",
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.updated}</span>,
+    },
   ];
 
   const filters: FilterDef<Website>[] = [
@@ -86,18 +122,34 @@ function WebsitesPage() {
       key: "domainType",
       label: "Domain type",
       options: ["custom", "subdomain"],
-      match: (r, v) => (v === "subdomain" ? r.domain.endsWith("influencers.com") : !r.domain.endsWith("influencers.com")),
+      match: (r, v) =>
+        v === "subdomain"
+          ? r.domain.endsWith("influencers.com")
+          : !r.domain.endsWith("influencers.com"),
     },
   ];
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Websites" description="Creator websites hosted on the Influencers.com website builder." />
+      <PageHeader
+        title="Websites"
+        description="Creator websites hosted on the Influencers.com website builder."
+      />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        <StatCard label="Total websites" value={String(websitesList.length)} icon={Globe} delta={9.8} />
+        <StatCard
+          label="Total websites"
+          value={String(websitesList.length)}
+          icon={Globe}
+          delta={9.8}
+        />
         <StatCard label="Published" value={String(published)} icon={Layers} delta={6.3} />
-        <StatCard label="Visitors (30d)" value={compact(visitors)} icon={MousePointerClick} delta={18.2} />
+        <StatCard
+          label="Visitors (30d)"
+          value={compact(visitors)}
+          icon={MousePointerClick}
+          delta={18.2}
+        />
       </div>
 
       <div className="w-full overflow-x-auto">
@@ -115,7 +167,9 @@ function WebsitesPage() {
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <StatusBadge value={r.status} />
                 <span className="text-xs text-muted-foreground">{r.template}</span>
-                <span className="num ml-auto text-xs font-semibold">{compact(r.visitors)} visits</span>
+                <span className="num ml-auto text-xs font-semibold">
+                  {compact(r.visitors)} visits
+                </span>
               </div>
             </>
           )}
@@ -130,7 +184,9 @@ function WebsitesPage() {
                   onSelect: async () => {
                     try {
                       await adminApi.moderateWebsite(r.id, { status: "SUSPENDED" });
-                      setWebsitesList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "suspended" } : x)));
+                      setWebsitesList((all) =>
+                        all.map((x) => (x.id === r.id ? { ...x, status: "suspended" } : x)),
+                      );
                     } catch {}
                     saved("Website suspended", r.url);
                   },

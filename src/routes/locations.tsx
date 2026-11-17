@@ -17,7 +17,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { locations } from "@/data/mock";
 import { LEVEL_LABEL, LOCATION_LEVELS, type LocationLevel } from "@/data/geo";
 import { Switch } from "@/components/ui/switch";
@@ -29,9 +35,16 @@ export const Route = createFileRoute("/locations")({
   head: () => ({
     meta: [
       { title: "Locations — Influencers.com SaaS Manager" },
-      { name: "description", content: "Global location hierarchy — countries, regions, districts, cities and areas — powering creator discovery worldwide." },
+      {
+        name: "description",
+        content:
+          "Global location hierarchy — countries, regions, districts, cities and areas — powering creator discovery worldwide.",
+      },
       { property: "og:title", content: "Locations — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Global location hierarchy powering creator discovery worldwide." },
+      {
+        property: "og:description",
+        content: "Global location hierarchy powering creator discovery worldwide.",
+      },
     ],
   }),
   component: LocationsPage,
@@ -40,7 +53,7 @@ export const Route = createFileRoute("/locations")({
 function Node({ node, depth }: { node: LocationNode; depth: number }) {
   const [open, setOpen] = useState(depth < 1);
   const hasChildren = Boolean(node.children?.length);
-  const normalizedType = ((node.type || "city").toLowerCase() as LocationLevel);
+  const normalizedType = (node.type || "city").toLowerCase() as LocationLevel;
   const label = LEVEL_LABEL[normalizedType];
   const levelText = label ? label.split(" /")[0] : String(node.type || "Location");
 
@@ -51,7 +64,11 @@ function Node({ node, depth }: { node: LocationNode; depth: number }) {
         style={{ paddingLeft: 12 + depth * 18 }}
       >
         {hasChildren ? (
-          <button onClick={() => setOpen((o) => !o)} className="grid size-5 place-items-center" aria-label="Toggle">
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="grid size-5 place-items-center"
+            aria-label="Toggle"
+          >
             <ChevronRight className={cn("size-4 transition-transform", open && "rotate-90")} />
           </button>
         ) : (
@@ -77,12 +94,20 @@ function Node({ node, depth }: { node: LocationNode; depth: number }) {
             }
           }}
         />
-        <span className="num w-20 text-right text-xs text-muted-foreground">{node.creators || 0} creators</span>
-        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={mockAction("Edit location", node.name)}>
+        <span className="num w-20 text-right text-xs text-muted-foreground">
+          {node.creators || 0} creators
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs"
+          onClick={mockAction("Edit location", node.name)}
+        >
           Edit
         </Button>
       </div>
-      {open && node.children?.map((child) => <Node key={child.id} node={child} depth={depth + 1} />)}
+      {open &&
+        node.children?.map((child) => <Node key={child.id} node={child} depth={depth + 1} />)}
     </div>
   );
 }
@@ -98,7 +123,8 @@ function LocationsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const loadLocations = () => {
-    adminApi.getLocations()
+    adminApi
+      .getLocations()
       .then((res: any) => {
         const raw = res?.results || (Array.isArray(res) ? res : []);
         if (raw.length === 0) {
@@ -174,7 +200,10 @@ function LocationsPage() {
       setLongitude("");
       loadLocations();
     } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.response?.data?.name?.[0] || "Failed to create location";
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.name?.[0] ||
+        "Failed to create location";
       saved("Failed to add location", msg);
     } finally {
       setSubmitting(false);
@@ -203,7 +232,9 @@ function LocationsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add location</DialogTitle>
-            <DialogDescription>Locations are used for creator filters, requirements and campaign targeting.</DialogDescription>
+            <DialogDescription>
+              Locations are used for creator filters, requirements and campaign targeting.
+            </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <div className="grid gap-1.5">

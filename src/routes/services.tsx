@@ -15,9 +15,15 @@ export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
       { title: "Creator Services — Influencers.com SaaS Manager" },
-      { name: "description", content: "Manage the deliverables creators can sell: reels, posts, UGC, reviews and more." },
+      {
+        name: "description",
+        content: "Manage the deliverables creators can sell: reels, posts, UGC, reviews and more.",
+      },
       { property: "og:title", content: "Creator Services — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Manage the deliverables creators can sell across the platform." },
+      {
+        property: "og:description",
+        content: "Manage the deliverables creators can sell across the platform.",
+      },
     ],
   }),
   component: ServicesPage,
@@ -28,7 +34,8 @@ function ServicesPage() {
   const [loading, setLoading] = useState(true);
 
   const loadServices = () => {
-    adminApi.getServiceTypes()
+    adminApi
+      .getServiceTypes()
       .then((res: any) => {
         const raw = res?.results || (Array.isArray(res) ? res : []);
         if (raw.length > 0) {
@@ -59,19 +66,34 @@ function ServicesPage() {
     const nextActive = currentStatus !== "active";
     try {
       await adminApi.updateServiceType(id, { is_active: nextActive });
-      setItems((s) => s.map((x) => (x.id === id ? { ...x, status: nextActive ? "active" : "inactive" } : x)));
+      setItems((s) =>
+        s.map((x) => (x.id === id ? { ...x, status: nextActive ? "active" : "inactive" } : x)),
+      );
       saved(nextActive ? "Service enabled" : "Service disabled", id);
     } catch {
-      setItems((s) => s.map((x) => (x.id === id ? { ...x, status: nextActive ? "active" : "inactive" } : x)));
+      setItems((s) =>
+        s.map((x) => (x.id === id ? { ...x, status: nextActive ? "active" : "inactive" } : x)),
+      );
     }
   };
   const [editing, setEditing] = useState<ServiceType | "new" | null>(null);
   const current = editing && editing !== "new" ? editing : null;
   const fields: FieldDef[] = [
     { name: "name", label: "Service name", required: true },
-    { name: "platform", label: "Parent platform", type: "select", options: [...socialPlatforms.map((p) => p.name), "Any"], required: true },
+    {
+      name: "platform",
+      label: "Parent platform",
+      type: "select",
+      options: [...socialPlatforms.map((p) => p.name), "Any"],
+      required: true,
+    },
     { name: "avgPrice", label: "Benchmark avg price", type: "number", required: true },
-    { name: "deliverables", label: "Deliverables spec", type: "textarea", placeholder: "e.g. 1 × 30–60s vertical video, raw files, 2 revisions" },
+    {
+      name: "deliverables",
+      label: "Deliverables spec",
+      type: "textarea",
+      placeholder: "e.g. 1 × 30–60s vertical video, raw files, 2 revisions",
+    },
   ];
 
   return (
@@ -107,10 +129,19 @@ function ServicesPage() {
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-              <Button variant="ghost" size="sm" className="h-9 px-3 text-xs" onClick={() => setEditing(s)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 px-3 text-xs"
+                onClick={() => setEditing(s)}
+              >
                 Edit
               </Button>
-              <Switch checked={s.status === "active"} onCheckedChange={() => toggle(s.id, s.status)} aria-label="Enabled" />
+              <Switch
+                checked={s.status === "active"}
+                onCheckedChange={() => toggle(s.id, s.status)}
+                aria-label="Enabled"
+              />
             </div>
           </div>
         ))}
@@ -121,7 +152,16 @@ function ServicesPage() {
         onOpenChange={(o) => !o && setEditing(null)}
         title={current ? `Edit ${current.name}` : "Add service"}
         fields={fields}
-        initial={current ? { name: current.name, platform: current.platform, avgPrice: String(current.avgPrice), deliverables: "" } : {}}
+        initial={
+          current
+            ? {
+                name: current.name,
+                platform: current.platform,
+                avgPrice: String(current.avgPrice),
+                deliverables: "",
+              }
+            : {}
+        }
         submitLabel={current ? "Save changes" : "Add service"}
         onSubmit={async (v) => {
           const patch = {

@@ -7,7 +7,14 @@ import { DataTable, type Column, type FilterDef } from "@/components/admin/DataT
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ActionMenu } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ConfirmDialog, saved } from "@/components/admin/Dialogs";
 import type { DomainRecord } from "@/data/types";
 import { adminApi } from "@/lib/admin-api";
@@ -16,9 +23,15 @@ export const Route = createFileRoute("/domains")({
   head: () => ({
     meta: [
       { title: "Domain Management — Influencers.com SaaS Manager" },
-      { name: "description", content: "Track custom domains, DNS verification and SSL for creator websites." },
+      {
+        name: "description",
+        content: "Track custom domains, DNS verification and SSL for creator websites.",
+      },
       { property: "og:title", content: "Domain Management — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Track custom domains, DNS verification and SSL for creator websites." },
+      {
+        property: "og:description",
+        content: "Track custom domains, DNS verification and SSL for creator websites.",
+      },
     ],
   }),
   component: DomainsPage,
@@ -32,7 +45,8 @@ function DomainsPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getDomains()
+    adminApi
+      .getDomains()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
@@ -41,9 +55,15 @@ function DomainsPage() {
           creator: d.creator_name || d.creator || "Creator",
           domain: d.domain || d.custom_domain,
           type: (d.type || "custom").toLowerCase() as DomainRecord["type"],
-          verification: (d.verification || d.status || "pending").toLowerCase() as DomainRecord["verification"],
+          verification: (
+            d.verification ||
+            d.status ||
+            "pending"
+          ).toLowerCase() as DomainRecord["verification"],
           ssl: (d.ssl || "pending").toLowerCase() as DomainRecord["ssl"],
-          websiteStatus: (d.website_status || "published").toLowerCase() as DomainRecord["websiteStatus"],
+          websiteStatus: (
+            d.website_status || "published"
+          ).toLowerCase() as DomainRecord["websiteStatus"],
           created: d.created_at ? new Date(d.created_at).toLocaleDateString() : "Recent",
         }));
         setDomainList(mapped);
@@ -51,28 +71,64 @@ function DomainsPage() {
       .catch((err) => {
         console.warn("Could not load live domains:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const columns: Column<DomainRecord>[] = [
-    { key: "creator", header: "Creator", cell: (r) => <span className="text-sm font-medium">{r.creator}</span> },
-    { key: "domain", header: "Domain", cell: (r) => <span className="num text-xs text-primary">{r.domain}</span> },
-    { key: "type", header: "Type", cell: (r) => <span className="text-xs capitalize">{r.type}</span> },
-    { key: "verification", header: "Verification", cell: (r) => <StatusBadge value={r.verification} /> },
+    {
+      key: "creator",
+      header: "Creator",
+      cell: (r) => <span className="text-sm font-medium">{r.creator}</span>,
+    },
+    {
+      key: "domain",
+      header: "Domain",
+      cell: (r) => <span className="num text-xs text-primary">{r.domain}</span>,
+    },
+    {
+      key: "type",
+      header: "Type",
+      cell: (r) => <span className="text-xs capitalize">{r.type}</span>,
+    },
+    {
+      key: "verification",
+      header: "Verification",
+      cell: (r) => <StatusBadge value={r.verification} />,
+    },
     { key: "ssl", header: "SSL", cell: (r) => <StatusBadge value={r.ssl} /> },
     { key: "website", header: "Website", cell: (r) => <StatusBadge value={r.websiteStatus} /> },
-    { key: "created", header: "Created", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span> },
+    {
+      key: "created",
+      header: "Created",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span>,
+    },
   ];
 
   const filters: FilterDef<DomainRecord>[] = [
-    { key: "verification", label: "Verification", options: ["verified", "pending", "failed"], match: (r, v) => r.verification === v },
-    { key: "ssl", label: "SSL", options: ["active", "pending", "failed"], match: (r, v) => r.ssl === v },
+    {
+      key: "verification",
+      label: "Verification",
+      options: ["verified", "pending", "failed"],
+      match: (r, v) => r.verification === v,
+    },
+    {
+      key: "ssl",
+      label: "SSL",
+      options: ["active", "pending", "failed"],
+      match: (r, v) => r.ssl === v,
+    },
     { key: "type", label: "Type", options: ["custom", "subdomain"], match: (r, v) => r.type === v },
   ];
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Domains" description="Custom domains and subdomains connected to creator websites." />
+      <PageHeader
+        title="Domains"
+        description="Custom domains and subdomains connected to creator websites."
+      />
 
       <div className="w-full overflow-x-auto">
         <DataTable
@@ -81,7 +137,9 @@ function DomainsPage() {
           filters={filters}
           getId={(r) => r.id}
           searchPlaceholder="Search domain or creator…"
-          search={(r, t) => r.domain.toLowerCase().includes(t) || r.creator.toLowerCase().includes(t)}
+          search={(r, t) =>
+            r.domain.toLowerCase().includes(t) || r.creator.toLowerCase().includes(t)
+          }
           mobileCard={(r) => (
             <>
               <p className="num truncate text-sm font-semibold text-primary">{r.domain}</p>
@@ -99,7 +157,12 @@ function DomainsPage() {
                 { label: "Verify", onSelect: () => setDiagnosing(r) },
                 { label: "Retry", onSelect: () => setDiagnosing(r) },
                 { label: "View instructions", onSelect: () => setInstructions(r) },
-                { label: "Disconnect", onSelect: () => setDisconnecting(r), destructive: true, separatorBefore: true },
+                {
+                  label: "Disconnect",
+                  onSelect: () => setDisconnecting(r),
+                  destructive: true,
+                  separatorBefore: true,
+                },
               ]}
             />
           )}
@@ -111,7 +174,8 @@ function DomainsPage() {
           <DialogHeader>
             <DialogTitle>DNS instructions</DialogTitle>
             <DialogDescription>
-              Ask {instructions?.creator} to add these records at their registrar for {instructions?.domain}.
+              Ask {instructions?.creator} to add these records at their registrar for{" "}
+              {instructions?.domain}.
             </DialogDescription>
           </DialogHeader>
           <div className="overflow-x-auto rounded-lg border border-border">
@@ -142,7 +206,9 @@ function DomainsPage() {
               </tbody>
             </table>
           </div>
-          <Button onClick={() => saved("Instructions emailed", instructions?.creator ?? "")}>Email instructions</Button>
+          <Button onClick={() => saved("Instructions emailed", instructions?.creator ?? "")}>
+            Email instructions
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -171,9 +237,30 @@ function DnsDiagnostics({ domain, onClose }: { domain: DomainRecord | null; onCl
   // Simulated: failed domains fail the apex check; pending ones fail CNAME.
   const records = domain
     ? [
-        { type: "A", host: "@", expected: "76.76.21.21", ok: domain.verification !== "failed", found: domain.verification === "failed" ? "185.199.108.153" : "76.76.21.21" },
-        { type: "CNAME", host: "www", expected: "sites.influencers.com", ok: domain.verification === "verified", found: domain.verification === "verified" ? "sites.influencers.com" : "— no record" },
-        { type: "TXT", host: "_influencers", expected: `verify=${domain.id.toLowerCase()}`, ok: domain.verification === "verified", found: domain.verification === "verified" ? `verify=${domain.id.toLowerCase()}` : "— no record" },
+        {
+          type: "A",
+          host: "@",
+          expected: "76.76.21.21",
+          ok: domain.verification !== "failed",
+          found: domain.verification === "failed" ? "185.199.108.153" : "76.76.21.21",
+        },
+        {
+          type: "CNAME",
+          host: "www",
+          expected: "sites.influencers.com",
+          ok: domain.verification === "verified",
+          found: domain.verification === "verified" ? "sites.influencers.com" : "— no record",
+        },
+        {
+          type: "TXT",
+          host: "_influencers",
+          expected: `verify=${domain.id.toLowerCase()}`,
+          ok: domain.verification === "verified",
+          found:
+            domain.verification === "verified"
+              ? `verify=${domain.id.toLowerCase()}`
+              : "— no record",
+        },
       ]
     : [];
   const allOk = records.every((r) => r.ok);
@@ -186,7 +273,10 @@ function DnsDiagnostics({ domain, onClose }: { domain: DomainRecord | null; onCl
         </DialogHeader>
         <div className="flex flex-col gap-2">
           {records.map((r) => (
-            <div key={r.type} className="flex items-start gap-3 rounded-lg border border-border p-3">
+            <div
+              key={r.type}
+              className="flex items-start gap-3 rounded-lg border border-border p-3"
+            >
               {checking ? (
                 <Loader2 className="mt-0.5 size-5 shrink-0 animate-spin text-muted-foreground" />
               ) : r.ok ? (
@@ -199,19 +289,33 @@ function DnsDiagnostics({ domain, onClose }: { domain: DomainRecord | null; onCl
                   {r.type} <span className="font-normal text-muted-foreground">{r.host}</span>
                 </p>
                 <p className="truncate text-muted-foreground">Expected: {r.expected}</p>
-                {!checking && <p className={r.ok ? "truncate text-success" : "truncate text-destructive"}>Found: {r.found}</p>}
+                {!checking && (
+                  <p className={r.ok ? "truncate text-success" : "truncate text-destructive"}>
+                    Found: {r.found}
+                  </p>
+                )}
               </div>
             </div>
           ))}
         </div>
         {!checking && (
-          <p className={allOk ? "text-sm font-medium text-success" : "text-sm font-medium text-destructive"}>
-            {allOk ? "All records resolve correctly. SSL will be issued automatically." : "Some records are missing or wrong. Share the DNS instructions with the creator."}
+          <p
+            className={
+              allOk ? "text-sm font-medium text-success" : "text-sm font-medium text-destructive"
+            }
+          >
+            {allOk
+              ? "All records resolve correctly. SSL will be issued automatically."
+              : "Some records are missing or wrong. Share the DNS instructions with the creator."}
           </p>
         )}
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="h-10" onClick={onClose}>Close</Button>
-          <Button className="h-10" disabled={checking} onClick={() => setRun((n) => n + 1)}>Re-run check</Button>
+          <Button variant="outline" className="h-10" onClick={onClose}>
+            Close
+          </Button>
+          <Button className="h-10" disabled={checking} onClick={() => setRun((n) => n + 1)}>
+            Re-run check
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

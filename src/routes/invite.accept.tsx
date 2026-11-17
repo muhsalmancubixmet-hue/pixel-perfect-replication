@@ -22,7 +22,10 @@ export const Route = createFileRoute("/invite/accept")({
       { title: "Accept staff invite — SaaS Manager" },
       { name: "description", content: "Set your password to join the Influencers.com admin team." },
       { property: "og:title", content: "Accept staff invite — SaaS Manager" },
-      { property: "og:description", content: "Set your password to join the Influencers.com admin team." },
+      {
+        property: "og:description",
+        content: "Set your password to join the Influencers.com admin team.",
+      },
     ],
   }),
   component: InvitePage,
@@ -42,8 +45,15 @@ function InvitePage() {
 
   if (!token) {
     return (
-      <AuthLayout title="Invite link missing" subtitle="This link has no invite token. Ask a Super Admin to resend your invite.">
-        <Button variant="outline" className="h-10 w-full" onClick={() => void navigate({ to: "/login" })}>
+      <AuthLayout
+        title="Invite link missing"
+        subtitle="This link has no invite token. Ask a Super Admin to resend your invite."
+      >
+        <Button
+          variant="outline"
+          className="h-10 w-full"
+          onClick={() => void navigate({ to: "/login" })}
+        >
           Go to sign in
         </Button>
       </AuthLayout>
@@ -82,7 +92,11 @@ function InvitePage() {
           </div>
         )}
         {revoked ? (
-          <Button variant="outline" className="h-10 w-full" onClick={() => void navigate({ to: "/login" })}>
+          <Button
+            variant="outline"
+            className="h-10 w-full"
+            onClick={() => void navigate({ to: "/login" })}
+          >
             Return to Login
           </Button>
         ) : (
@@ -146,7 +160,10 @@ function InvitePage() {
   };
 
   return (
-    <AuthLayout title="Join the admin team" subtitle="You've been invited as an administrative staff member. Choose a secure password to activate your account.">
+    <AuthLayout
+      title="Join the admin team"
+      subtitle="You've been invited as an administrative staff member. Choose a secure password to activate your account."
+    >
       <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
         {errorMsg && (
           <div className="rounded-md bg-destructive/10 p-3 text-xs font-medium text-destructive">

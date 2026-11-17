@@ -105,14 +105,22 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
-        <Link to="/" className="flex items-center gap-2.5 overflow-hidden" onClick={() => setOpenMobile(false)}>
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 overflow-hidden"
+          onClick={() => setOpenMobile(false)}
+        >
           <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-sidebar-primary text-sm font-black text-sidebar-primary-foreground">
             i.
           </span>
           {!collapsed && (
             <span className="min-w-0">
-              <span className="block truncate text-sm font-bold text-sidebar-accent-foreground">Influencers.com</span>
-              <span className="block truncate text-[11px] text-sidebar-foreground/70">SaaS Manager</span>
+              <span className="block truncate text-sm font-bold text-sidebar-accent-foreground">
+                Influencers.com
+              </span>
+              <span className="block truncate text-[11px] text-sidebar-foreground/70">
+                SaaS Manager
+              </span>
             </span>
           )}
         </Link>
@@ -130,7 +138,12 @@ export function AdminSidebar() {
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title} size="sm">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.url)}
+                      tooltip={item.title}
+                      size="sm"
+                    >
                       <Link to={item.url} onClick={() => setOpenMobile(false)}>
                         <item.icon className="size-4" />
                         <span>{item.title}</span>

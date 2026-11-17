@@ -9,7 +9,14 @@ import { StatCard } from "@/components/admin/StatCard";
 import { ActionMenu } from "@/components/admin/ActionMenu";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ConfirmDialog, saved } from "@/components/admin/Dialogs";
 import { adminApi } from "@/lib/admin-api";
 import { media } from "@/data/mock";
@@ -19,9 +26,15 @@ export const Route = createFileRoute("/media")({
   head: () => ({
     meta: [
       { title: "Media Library — Influencers.com SaaS Manager" },
-      { name: "description", content: "Central overview of portfolio images, videos, avatars and website media." },
+      {
+        name: "description",
+        content: "Central overview of portfolio images, videos, avatars and website media.",
+      },
       { property: "og:title", content: "Media Library — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Central overview of portfolio images, videos and website media." },
+      {
+        property: "og:description",
+        content: "Central overview of portfolio images, videos and website media.",
+      },
     ],
   }),
   component: MediaPage,
@@ -29,7 +42,8 @@ export const Route = createFileRoute("/media")({
 
 const mb = (kb: number) => `${(kb / 1024).toFixed(1)} MB`;
 
-const cdnUrl = (m: MediaItem) => `https://cdn.influencers.com/media/${m.id.toLowerCase()}/${m.name}`;
+const cdnUrl = (m: MediaItem) =>
+  `https://cdn.influencers.com/media/${m.id.toLowerCase()}/${m.name}`;
 
 function MediaPage() {
   const [rows, setRows] = useState<MediaItem[]>(media);
@@ -49,7 +63,9 @@ function MediaPage() {
             type: (m.file_type || "image").toLowerCase() as MediaItem["type"],
             creator: m.uploader_name || m.uploader_email || "Creator",
             size: m.size_kb || Math.round((m.file_size_bytes || 0) / 1024) || 100,
-            uploaded: m.created_at ? new Date(m.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+            uploaded: m.created_at
+              ? new Date(m.created_at).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
           }));
           setRows(mapped);
         }
@@ -83,20 +99,45 @@ function MediaPage() {
       cell: (r) => (
         <div className="flex items-center gap-2.5">
           <span className="grid size-8 place-items-center rounded-md bg-muted text-muted-foreground">
-            {r.type === "video" ? <FileVideo className="size-4" /> : <ImageIcon className="size-4" />}
+            {r.type === "video" ? (
+              <FileVideo className="size-4" />
+            ) : (
+              <ImageIcon className="size-4" />
+            )}
           </span>
           <span className="num truncate text-xs">{r.name}</span>
         </div>
       ),
     },
-    { key: "type", header: "Type", cell: (r) => <span className="text-xs capitalize">{r.type}</span> },
-    { key: "creator", header: "Creator", cell: (r) => <span className="text-xs">{r.creator}</span> },
-    { key: "size", header: "Size", cell: (r) => <span className="num text-xs font-semibold">{mb(r.size)}</span> },
-    { key: "uploaded", header: "Uploaded", cell: (r) => <span className="num text-xs text-muted-foreground">{r.uploaded}</span> },
+    {
+      key: "type",
+      header: "Type",
+      cell: (r) => <span className="text-xs capitalize">{r.type}</span>,
+    },
+    {
+      key: "creator",
+      header: "Creator",
+      cell: (r) => <span className="text-xs">{r.creator}</span>,
+    },
+    {
+      key: "size",
+      header: "Size",
+      cell: (r) => <span className="num text-xs font-semibold">{mb(r.size)}</span>,
+    },
+    {
+      key: "uploaded",
+      header: "Uploaded",
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.uploaded}</span>,
+    },
   ];
 
   const filters: FilterDef<MediaItem>[] = [
-    { key: "type", label: "File type", options: ["image", "video", "avatar", "website"], match: (r, v) => r.type === v },
+    {
+      key: "type",
+      label: "File type",
+      options: ["image", "video", "avatar", "website"],
+      match: (r, v) => r.type === v,
+    },
     {
       key: "creator",
       label: "Creator",
@@ -116,13 +157,21 @@ function MediaPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Media" description="Portfolio, profile and website media across all creator accounts." />
+      <PageHeader
+        title="Media"
+        description="Portfolio, profile and website media across all creator accounts."
+      />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Files" value={String(rows.length)} icon={ImageIcon} delta={7.6} />
         <StatCard label="Images" value={String(images)} icon={ImageIcon} delta={5.1} />
         <StatCard label="Videos" value={String(videos)} icon={FileVideo} delta={12.9} />
-        <StatCard label="Storage used" value={`${(totalKb / 1024 / 1024).toFixed(2)} GB`} icon={HardDrive} hint="of 5 TB plan" />
+        <StatCard
+          label="Storage used"
+          value={`${(totalKb / 1024 / 1024).toFixed(2)} GB`}
+          icon={HardDrive}
+          hint="of 5 TB plan"
+        />
       </div>
 
       <div className="panel p-4">
@@ -156,7 +205,12 @@ function MediaPage() {
               items={[
                 { label: "Preview", onSelect: () => setPreview(r) },
                 { label: "Copy CDN URL", onSelect: () => void copy(r) },
-                { label: "Delete", onSelect: () => setDeleting(r), destructive: true, separatorBefore: true },
+                {
+                  label: "Delete",
+                  onSelect: () => setDeleting(r),
+                  destructive: true,
+                  separatorBefore: true,
+                },
               ]}
             />
           )}
@@ -172,7 +226,11 @@ function MediaPage() {
           {preview && (
             <>
               <div className="grid aspect-video place-items-center rounded-lg border border-border bg-muted text-muted-foreground">
-                {preview.type === "video" ? <FileVideo className="size-12" /> : <ImageIcon className="size-12" />}
+                {preview.type === "video" ? (
+                  <FileVideo className="size-12" />
+                ) : (
+                  <ImageIcon className="size-12" />
+                )}
               </div>
               <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-4">
                 {[
@@ -187,11 +245,17 @@ function MediaPage() {
                   </div>
                 ))}
               </dl>
-              <p className="num truncate rounded-md bg-muted px-3 py-2 text-xs">{cdnUrl(preview)}</p>
+              <p className="num truncate rounded-md bg-muted px-3 py-2 text-xs">
+                {cdnUrl(preview)}
+              </p>
             </>
           )}
           <DialogFooter className="gap-2">
-            <Button variant="outline" className="h-10 text-destructive" onClick={() => preview && setDeleting(preview)}>
+            <Button
+              variant="outline"
+              className="h-10 text-destructive"
+              onClick={() => preview && setDeleting(preview)}
+            >
               <Trash2 className="size-4" /> Delete
             </Button>
             <Button className="h-10" onClick={() => preview && void copy(preview)}>

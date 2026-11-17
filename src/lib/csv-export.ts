@@ -5,11 +5,7 @@ export interface CsvColumn<T> {
   accessor: (item: T) => any;
 }
 
-export function exportToCsv<T>(
-  filename: string,
-  columns: CsvColumn<T>[],
-  items: T[]
-) {
+export function exportToCsv<T>(filename: string, columns: CsvColumn<T>[], items: T[]) {
   if (!items || items.length === 0) {
     saved("Export notice", `No data available to export for ${filename}.`);
     return;
@@ -23,7 +19,7 @@ export function exportToCsv<T>(
         if (val === null || val === undefined) return '""';
         return `"${String(val).replace(/"/g, '""')}"`;
       })
-      .join(",")
+      .join(","),
   );
 
   const csvContent = [headers.join(","), ...rows].join("\r\n");
@@ -33,7 +29,7 @@ export function exportToCsv<T>(
   link.href = url;
   link.setAttribute(
     "download",
-    `${filename.replace(/\.csv$/, "")}-${new Date().toISOString().slice(0, 10)}.csv`
+    `${filename.replace(/\.csv$/, "")}-${new Date().toISOString().slice(0, 10)}.csv`,
   );
   document.body.appendChild(link);
   link.click();
@@ -41,4 +37,3 @@ export function exportToCsv<T>(
   URL.revokeObjectURL(url);
   saved("Export successful", `${filename} downloaded`);
 }
-

@@ -14,9 +14,15 @@ export const Route = createFileRoute("/audit-logs")({
   head: () => ({
     meta: [
       { title: "Audit Logs — Influencers.com SaaS Manager" },
-      { name: "description", content: "A full trail of every administrative action taken on the platform." },
+      {
+        name: "description",
+        content: "A full trail of every administrative action taken on the platform.",
+      },
       { property: "og:title", content: "Audit Logs — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "A full trail of every administrative action on the platform." },
+      {
+        property: "og:description",
+        content: "A full trail of every administrative action on the platform.",
+      },
     ],
   }),
   component: AuditLogsPage,
@@ -27,7 +33,8 @@ function AuditLogsPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getAuditLogs()
+    adminApi
+      .getAuditLogs()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
@@ -47,15 +54,29 @@ function AuditLogsPage() {
       .catch((err) => {
         console.warn("Could not load live audit logs:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const columns: Column<AuditLog>[] = [
-    { key: "datetime", header: "Date / time", cell: (r) => <span className="num text-xs font-medium">{r.datetime}</span> },
+    {
+      key: "datetime",
+      header: "Date / time",
+      cell: (r) => <span className="num text-xs font-medium">{r.datetime}</span>,
+    },
     { key: "admin", header: "Admin", cell: (r) => <span className="num text-xs">{r.admin}</span> },
-    { key: "action", header: "Action", cell: (r) => <span className="text-sm font-medium">{r.action}</span> },
+    {
+      key: "action",
+      header: "Action",
+      cell: (r) => <span className="text-sm font-medium">{r.action}</span>,
+    },
     { key: "entity", header: "Entity", cell: (r) => <span className="text-xs">{r.entity}</span> },
-    { key: "entityId", header: "Entity ID", cell: (r) => <span className="num text-xs text-muted-foreground">{r.entityId}</span> },
+    {
+      key: "entityId",
+      header: "Entity ID",
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.entityId}</span>,
+    },
     {
       key: "device",
       header: "IP / device",
@@ -67,14 +88,38 @@ function AuditLogsPage() {
         </span>
       ),
     },
-    { key: "result", header: "Result", cell: (r) => <StatusBadge value={r.result === "success" ? "approved" : "failed"} /> },
+    {
+      key: "result",
+      header: "Result",
+      cell: (r) => <StatusBadge value={r.result === "success" ? "approved" : "failed"} />,
+    },
   ];
 
   const filters: FilterDef<AuditLog>[] = [
-    { key: "admin", label: "Admin", options: [...new Set(logsList.map((l) => l.admin))], match: (r, v) => r.admin === v },
-    { key: "action", label: "Action", options: [...new Set(logsList.map((l) => l.action))], match: (r, v) => r.action === v },
-    { key: "entity", label: "Entity", options: [...new Set(logsList.map((l) => l.entity))], match: (r, v) => r.entity === v },
-    { key: "result", label: "Result", options: ["success", "failed"], match: (r, v) => r.result === v },
+    {
+      key: "admin",
+      label: "Admin",
+      options: [...new Set(logsList.map((l) => l.admin))],
+      match: (r, v) => r.admin === v,
+    },
+    {
+      key: "action",
+      label: "Action",
+      options: [...new Set(logsList.map((l) => l.action))],
+      match: (r, v) => r.action === v,
+    },
+    {
+      key: "entity",
+      label: "Entity",
+      options: [...new Set(logsList.map((l) => l.entity))],
+      match: (r, v) => r.entity === v,
+    },
+    {
+      key: "result",
+      label: "Result",
+      options: ["success", "failed"],
+      match: (r, v) => r.result === v,
+    },
     {
       key: "date",
       label: "Date",
@@ -91,7 +136,16 @@ function AuditLogsPage() {
       saved("Export notice", "No audit logs available to export.");
       return;
     }
-    const headers = ["Timestamp", "Admin", "Action", "Entity", "Entity ID", "IP Address", "Device / User-Agent", "Status"];
+    const headers = [
+      "Timestamp",
+      "Admin",
+      "Action",
+      "Entity",
+      "Entity ID",
+      "IP Address",
+      "Device / User-Agent",
+      "Status",
+    ];
     const rows = logsList.map((l) => [
       `"${String(l.datetime).replace(/"/g, '""')}"`,
       `"${String(l.admin).replace(/"/g, '""')}"`,
@@ -136,13 +190,18 @@ function AuditLogsPage() {
           pageSize={15}
           searchPlaceholder="Search action, admin or entity ID…"
           search={(r, t) =>
-            r.action.toLowerCase().includes(t) || r.admin.toLowerCase().includes(t) || r.entityId.toLowerCase().includes(t)
+            r.action.toLowerCase().includes(t) ||
+            r.admin.toLowerCase().includes(t) ||
+            r.entityId.toLowerCase().includes(t)
           }
           mobileCard={(r) => (
             <>
               <div className="flex items-center gap-2">
                 <p className="text-sm font-semibold">{r.action}</p>
-                <StatusBadge value={r.result === "success" ? "approved" : "failed"} className="ml-auto" />
+                <StatusBadge
+                  value={r.result === "success" ? "approved" : "failed"}
+                  className="ml-auto"
+                />
               </div>
               <p className="num mt-1 text-xs text-muted-foreground">
                 {r.entity} · {r.entityId}

@@ -21,7 +21,9 @@ export interface ActionItem {
 
 /** Placeholder handler for prototype-only actions. */
 export const mockAction = (label: string, subject: string) => () =>
-  toast.success(`${label} — ${subject}`, { description: "Prototype action: no backend call was made." });
+  toast.success(`${label} — ${subject}`, {
+    description: "Prototype action: no backend call was made.",
+  });
 
 export function ActionMenu({ items }: { items: ActionItem[] }) {
   return (

@@ -128,9 +128,15 @@ export function GlobalSearch() {
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search influencers, businesses, campaigns…" value={term} onValueChange={setTerm} />
+        <CommandInput
+          placeholder="Search influencers, businesses, campaigns…"
+          value={term}
+          onValueChange={setTerm}
+        />
         <CommandList>
-          <CommandEmpty>{term ? "No matches found." : "Start typing to search the platform."}</CommandEmpty>
+          <CommandEmpty>
+            {term ? "No matches found." : "Start typing to search the platform."}
+          </CommandEmpty>
           {groups.map(([group, items]) => (
             <CommandGroup key={group} heading={group}>
               {items.map((r) => (

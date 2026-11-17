@@ -8,14 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authService } from "@/lib/auth-service";
 
-
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Staff sign in — Influencers.com SaaS Manager" },
       { name: "description", content: "Secure sign-in for Influencers.com administration staff." },
       { property: "og:title", content: "Staff sign in — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Secure sign-in for Influencers.com administration staff." },
+      {
+        property: "og:description",
+        content: "Secure sign-in for Influencers.com administration staff.",
+      },
     ],
   }),
   component: LoginPage,
@@ -27,21 +29,23 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
       await authService.Login({ email, password });
 
-      window.location.href = '/';
-    } catch(error: any) {
-      console.error('login failed:', error);
+      window.location.href = "/";
+    } catch (error: any) {
+      console.error("login failed:", error);
       setErrorMessage(
-        error.response?.data?.detail || error.message || 'Invalid email or password. Please check credentials.'
+        error.response?.data?.detail ||
+          error.message ||
+          "Invalid email or password. Please check credentials.",
       );
     } finally {
       setLoading(false);
@@ -49,8 +53,15 @@ function LoginPage() {
   };
 
   return (
-    <AuthLayout title="Sign in to the admin console" subtitle="Use your corporate @influencers.com account.">
-      {errorMessage && <div className="mb-4 text-xs text-destructive bg-destructive/10 p-2.5 rounded-md">{errorMessage}</div>}
+    <AuthLayout
+      title="Sign in to the admin console"
+      subtitle="Use your corporate @influencers.com account."
+    >
+      {errorMessage && (
+        <div className="mb-4 text-xs text-destructive bg-destructive/10 p-2.5 rounded-md">
+          {errorMessage}
+        </div>
+      )}
       <form onSubmit={handleLogin} className="space-y-4">
         <div className="grid w-full min-w-0 box-border gap-1.5">
           <Label htmlFor="email">Corporate email</Label>
@@ -86,7 +97,11 @@ function LoginPage() {
             </button>
           </div>
         </div>
-        <Button type="submit" disabled={loading} className="h-10 w-full min-w-0 box-border font-bold">
+        <Button
+          type="submit"
+          disabled={loading}
+          className="h-10 w-full min-w-0 box-border font-bold"
+        >
           {loading ? "Signing in..." : "Continue"}
         </Button>
       </form>
@@ -94,7 +109,8 @@ function LoginPage() {
       <div className="mt-5 flex w-full min-w-0 box-border gap-2 rounded-lg border border-info/25 bg-info/10 p-3 text-xs text-info whitespace-normal break-words">
         <Lock className="mt-0.5 size-3.5 shrink-0" />
         <p className="min-w-0 flex-1 whitespace-normal break-words">
-          Restricted system. All sign-ins require two-factor authentication and are recorded in the audit log. Got an invite?{" "}
+          Restricted system. All sign-ins require two-factor authentication and are recorded in the
+          audit log. Got an invite?{" "}
           <Link to="/invite/accept" search={{ token: "demo" }} className="font-semibold underline">
             Accept it here
           </Link>

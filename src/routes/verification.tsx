@@ -15,9 +15,15 @@ export const Route = createFileRoute("/verification")({
   head: () => ({
     meta: [
       { title: "Verification Center — Influencers.com SaaS Manager" },
-      { name: "description", content: "Review creator, social account and business verification requests in one queue." },
+      {
+        name: "description",
+        content: "Review creator, social account and business verification requests in one queue.",
+      },
       { property: "og:title", content: "Verification Center — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Review creator, social and business verification requests." },
+      {
+        property: "og:description",
+        content: "Review creator, social and business verification requests.",
+      },
     ],
   }),
   component: VerificationPage,
@@ -33,7 +39,10 @@ function Queue({
   if (items.length === 0) {
     return (
       <div className="panel">
-        <EmptyState title="Queue is clear" description="Nothing waiting for review in this category." />
+        <EmptyState
+          title="Queue is clear"
+          description="Nothing waiting for review in this category."
+        />
       </div>
     );
   }
@@ -104,15 +113,18 @@ function VerificationPage() {
     try {
       if (item.kind === "creator") {
         await adminApi.moderateInfluencer(id, {
-          verification_status: status === "approved" ? "VERIFIED" : status === "rejected" ? "REJECTED" : "PENDING",
+          verification_status:
+            status === "approved" ? "VERIFIED" : status === "rejected" ? "REJECTED" : "PENDING",
         });
       } else if (item.kind === "business") {
         await adminApi.moderateBusiness(id, {
-          verification_status: status === "approved" ? "VERIFIED" : status === "rejected" ? "REJECTED" : "PENDING",
+          verification_status:
+            status === "approved" ? "VERIFIED" : status === "rejected" ? "REJECTED" : "PENDING",
         });
       } else if (item.kind === "social") {
         await adminApi.reviewPlatformRequest(id, {
-          status: status === "approved" ? "APPROVED" : status === "rejected" ? "REJECTED" : "PENDING",
+          status:
+            status === "approved" ? "APPROVED" : status === "rejected" ? "REJECTED" : "PENDING",
         });
       }
 
@@ -125,7 +137,8 @@ function VerificationPage() {
   };
 
   const byKind = (kind: VerificationItem["kind"]) => items.filter((i) => i.kind === kind);
-  const pending = (kind: VerificationItem["kind"]) => byKind(kind).filter((i) => i.status === "pending").length;
+  const pending = (kind: VerificationItem["kind"]) =>
+    byKind(kind).filter((i) => i.status === "pending").length;
 
   return (
     <div className="flex flex-col gap-4">

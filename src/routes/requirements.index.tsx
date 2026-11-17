@@ -18,9 +18,15 @@ export const Route = createFileRoute("/requirements/")({
   head: () => ({
     meta: [
       { title: "Requirements — Influencers.com SaaS Manager" },
-      { name: "description", content: "Moderate creator requirements posted by businesses worldwide." },
+      {
+        name: "description",
+        content: "Moderate creator requirements posted by businesses worldwide.",
+      },
       { property: "og:title", content: "Requirements — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Moderate creator requirements posted by businesses worldwide." },
+      {
+        property: "og:description",
+        content: "Moderate creator requirements posted by businesses worldwide.",
+      },
     ],
   }),
   component: RequirementsPage,
@@ -32,7 +38,8 @@ function RequirementsPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getRequirements()
+    adminApi
+      .getRequirements()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
@@ -54,7 +61,9 @@ function RequirementsPage() {
       .catch((err) => {
         console.warn("Could not load live requirements:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const totalBudget = requirementsList.reduce((a, r) => a + (r.budget || 0), 0);
@@ -67,31 +76,76 @@ function RequirementsPage() {
       key: "requirement",
       header: "Requirement",
       cell: (r) => (
-        <Link
-          to="/requirements/$id"
-          params={{ id: r.id }}
-          className="group/link block min-w-0"
-        >
+        <Link to="/requirements/$id" params={{ id: r.id }} className="group/link block min-w-0">
           <p className="truncate text-sm font-medium group-hover/link:underline">{r.title}</p>
           <p className="num truncate text-xs text-muted-foreground">{r.id}</p>
         </Link>
       ),
     },
-    { key: "business", header: "Business", cell: (r) => <span className="text-xs">{r.business}</span> },
-    { key: "category", header: "Category", cell: (r) => <span className="text-xs">{r.category}</span> },
-    { key: "location", header: "Location", cell: (r) => <span className="text-xs">{r.location}</span> },
-    { key: "budget", header: "Budget", cell: (r) => <span className="num text-sm font-semibold">{money(r.budget, r.currency)}</span> },
-    { key: "needed", header: "Creators", cell: (r) => <span className="num text-xs">{r.creatorsNeeded}</span> },
-    { key: "apps", header: "Applications", cell: (r) => <span className="num text-xs font-semibold">{r.applications}</span> },
+    {
+      key: "business",
+      header: "Business",
+      cell: (r) => <span className="text-xs">{r.business}</span>,
+    },
+    {
+      key: "category",
+      header: "Category",
+      cell: (r) => <span className="text-xs">{r.category}</span>,
+    },
+    {
+      key: "location",
+      header: "Location",
+      cell: (r) => <span className="text-xs">{r.location}</span>,
+    },
+    {
+      key: "budget",
+      header: "Budget",
+      cell: (r) => <span className="num text-sm font-semibold">{money(r.budget, r.currency)}</span>,
+    },
+    {
+      key: "needed",
+      header: "Creators",
+      cell: (r) => <span className="num text-xs">{r.creatorsNeeded}</span>,
+    },
+    {
+      key: "apps",
+      header: "Applications",
+      cell: (r) => <span className="num text-xs font-semibold">{r.applications}</span>,
+    },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
-    { key: "created", header: "Created", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span> },
+    {
+      key: "created",
+      header: "Created",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span>,
+    },
   ];
 
   const filters: FilterDef<Requirement>[] = [
-    { key: "status", label: "Status", options: ["open", "featured", "hidden", "closed"], match: (r, v) => r.status === v },
-    { key: "category", label: "Category", options: CATEGORY_NAMES, match: (r, v) => r.category === v },
-    { key: "location", label: "Country", options: COUNTRY_OPTIONS, match: (r, v) => r.location.endsWith(v) },
-    { key: "business", label: "Business", options: [...new Set(requirementsList.map((r) => r.business))], match: (r, v) => r.business === v },
+    {
+      key: "status",
+      label: "Status",
+      options: ["open", "featured", "hidden", "closed"],
+      match: (r, v) => r.status === v,
+    },
+    {
+      key: "category",
+      label: "Category",
+      options: CATEGORY_NAMES,
+      match: (r, v) => r.category === v,
+    },
+    {
+      key: "location",
+      label: "Country",
+      options: COUNTRY_OPTIONS,
+      match: (r, v) => r.location.endsWith(v),
+    },
+    {
+      key: "business",
+      label: "Business",
+      options: [...new Set(requirementsList.map((r) => r.business))],
+      match: (r, v) => r.business === v,
+    },
   ];
 
   return (
@@ -116,7 +170,7 @@ function RequirementsPage() {
                   { header: "Applications", accessor: (r) => r.applications },
                   { header: "Created", accessor: (r) => r.created },
                 ],
-                requirementsList
+                requirementsList,
               )
             }
           >
@@ -126,10 +180,21 @@ function RequirementsPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Total requirements" value={String(requirementsList.length)} icon={ClipboardList} delta={8.2} />
+        <StatCard
+          label="Total requirements"
+          value={String(requirementsList.length)}
+          icon={ClipboardList}
+          delta={8.2}
+        />
         <StatCard label="Open" value={String(openCount)} icon={CheckCircle2} delta={4.1} />
         <StatCard label="Total applications" value={String(totalApps)} icon={Users} delta={12.5} />
-        <StatCard label="Total budget" value={money(totalBudget)} icon={Wallet} delta={6.3} hint={`${totalNeeded} creators needed`} />
+        <StatCard
+          label="Total budget"
+          value={money(totalBudget)}
+          icon={Wallet}
+          delta={6.3}
+          hint={`${totalNeeded} creators needed`}
+        />
       </div>
 
       <div className="w-full overflow-x-auto">
@@ -139,7 +204,9 @@ function RequirementsPage() {
           filters={filters}
           getId={(r) => r.id}
           searchPlaceholder="Search requirement or business…"
-          search={(r, t) => r.title.toLowerCase().includes(t) || r.business.toLowerCase().includes(t)}
+          search={(r, t) =>
+            r.title.toLowerCase().includes(t) || r.business.toLowerCase().includes(t)
+          }
           onRowClick={(r) => navigate({ to: "/requirements/$id", params: { id: r.id } })}
           mobileCard={(r) => (
             <Link to="/requirements/$id" params={{ id: r.id }} className="block">
@@ -150,20 +217,31 @@ function RequirementsPage() {
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <StatusBadge value={r.status} />
                 <span className="num text-xs font-semibold">{money(r.budget, r.currency)}</span>
-                <span className="num ml-auto text-xs text-muted-foreground">{r.applications} applications</span>
+                <span className="num ml-auto text-xs text-muted-foreground">
+                  {r.applications} applications
+                </span>
               </div>
             </Link>
           )}
           rowAction={(r) => (
             <ActionMenu
               items={[
-                { label: "View requirement", node: <Link to="/requirements/$id" params={{ id: r.id }}>View requirement</Link> },
+                {
+                  label: "View requirement",
+                  node: (
+                    <Link to="/requirements/$id" params={{ id: r.id }}>
+                      View requirement
+                    </Link>
+                  ),
+                },
                 {
                   label: "Feature",
                   onSelect: async () => {
                     try {
                       await adminApi.moderateRequirement(r.id, { status: "FEATURED" });
-                      setRequirementsList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "featured" } : x)));
+                      setRequirementsList((all) =>
+                        all.map((x) => (x.id === r.id ? { ...x, status: "featured" } : x)),
+                      );
                     } catch {}
                     saved("Requirement featured", r.title);
                   },
@@ -173,7 +251,9 @@ function RequirementsPage() {
                   onSelect: async () => {
                     try {
                       await adminApi.moderateRequirement(r.id, { status: "HIDDEN" });
-                      setRequirementsList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "hidden" } : x)));
+                      setRequirementsList((all) =>
+                        all.map((x) => (x.id === r.id ? { ...x, status: "hidden" } : x)),
+                      );
                     } catch {}
                     saved("Requirement hidden", r.title);
                   },
@@ -183,7 +263,9 @@ function RequirementsPage() {
                   onSelect: async () => {
                     try {
                       await adminApi.moderateRequirement(r.id, { status: "CLOSED" });
-                      setRequirementsList((all) => all.map((x) => (x.id === r.id ? { ...x, status: "closed" } : x)));
+                      setRequirementsList((all) =>
+                        all.map((x) => (x.id === r.id ? { ...x, status: "closed" } : x)),
+                      );
                     } catch {}
                     saved("Requirement closed", r.title);
                   },

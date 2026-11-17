@@ -20,7 +20,9 @@ export function StatCard({
     <div className="panel group relative overflow-hidden p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-[12px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="truncate text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
+            {label}
+          </p>
           <p className="num mt-1.5 text-2xl font-bold tracking-tight">{value}</p>
         </div>
         <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-accent text-accent-foreground">

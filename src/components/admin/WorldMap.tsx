@@ -44,7 +44,9 @@ export function WorldMap({ markers, center, onSelect, className }: WorldMapProps
         maxZoom: 18,
       }).addTo(map);
       mapRef.current = map;
-      layerRef.current = (L as unknown as { markerClusterGroup: () => import("leaflet").LayerGroup })
+      layerRef.current = (
+        L as unknown as { markerClusterGroup: () => import("leaflet").LayerGroup }
+      )
         .markerClusterGroup()
         .addTo(map);
       draw();
@@ -69,7 +71,8 @@ export function WorldMap({ markers, center, onSelect, className }: WorldMapProps
       iconSize: [14, 14],
     });
     markers.forEach((m) => {
-      if (typeof m.lat !== "number" || typeof m.lng !== "number" || isNaN(m.lat) || isNaN(m.lng)) return;
+      if (typeof m.lat !== "number" || typeof m.lng !== "number" || isNaN(m.lat) || isNaN(m.lng))
+        return;
       const mk = L.marker([m.lat, m.lng], { icon, title: m.title });
       const div = document.createElement("div");
       div.style.minWidth = "140px";
@@ -102,7 +105,10 @@ export function WorldMap({ markers, center, onSelect, className }: WorldMapProps
         map.setView([center.lat, center.lng], 10);
       }
     } else if (markers.length) {
-      map.fitBounds(L.latLngBounds(markers.map((m) => [m.lat, m.lng])), { padding: [30, 30], maxZoom: 6 });
+      map.fitBounds(L.latLngBounds(markers.map((m) => [m.lat, m.lng])), {
+        padding: [30, 30],
+        maxZoom: 6,
+      });
     }
   }
 

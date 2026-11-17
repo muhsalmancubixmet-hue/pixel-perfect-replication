@@ -222,34 +222,48 @@ export function DataTable<T>({
               Array.from({ length: Math.min(pageSize, 6) }, (_, i) => (
                 <tr key={`sk-${i}`} className="border-b border-border/70">
                   {columns.map((c) => (
-                    <td key={c.key} className={cn("px-3 py-3", c.secondary && "hidden xl:table-cell")}>
+                    <td
+                      key={c.key}
+                      className={cn("px-3 py-3", c.secondary && "hidden xl:table-cell")}
+                    >
                       <Skeleton className="h-4 w-full max-w-[10rem]" />
                     </td>
                   ))}
                   {rowAction && <td className="px-3 py-3" />}
                 </tr>
               ))}
-            {!loading && slice.map((row) => (
-              <tr
-                key={getId(row)}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
-                className={cn("group border-b border-border/70 transition-colors last:border-0 hover:bg-muted/40", onRowClick && "cursor-pointer")}
-              >
-                {columns.map((c) => (
-                  <td
-                    key={c.key}
-                    className={cn("px-3 py-2.5 align-middle", c.secondary && "hidden xl:table-cell", c.className)}
-                  >
-                    {c.cell(row)}
-                  </td>
-                ))}
-                {rowAction && (
-                  <td className="sticky right-0 bg-card px-3 py-2.5 text-right group-hover:bg-muted" onClick={(e) => e.stopPropagation()}>
-                    {rowAction(row)}
-                  </td>
-                )}
-              </tr>
-            ))}
+            {!loading &&
+              slice.map((row) => (
+                <tr
+                  key={getId(row)}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  className={cn(
+                    "group border-b border-border/70 transition-colors last:border-0 hover:bg-muted/40",
+                    onRowClick && "cursor-pointer",
+                  )}
+                >
+                  {columns.map((c) => (
+                    <td
+                      key={c.key}
+                      className={cn(
+                        "px-3 py-2.5 align-middle",
+                        c.secondary && "hidden xl:table-cell",
+                        c.className,
+                      )}
+                    >
+                      {c.cell(row)}
+                    </td>
+                  ))}
+                  {rowAction && (
+                    <td
+                      className="sticky right-0 bg-card px-3 py-2.5 text-right group-hover:bg-muted"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {rowAction(row)}
+                    </td>
+                  )}
+                </tr>
+              ))}
           </tbody>
         </table>
         {!loading && slice.length === 0 && (
@@ -258,7 +272,9 @@ export function DataTable<T>({
               <SearchX className="size-5" />
             </span>
             <p className="text-sm font-semibold">No records match your filters</p>
-            <p className="text-xs text-muted-foreground">Try a different search term or clear the filters.</p>
+            <p className="text-xs text-muted-foreground">
+              Try a different search term or clear the filters.
+            </p>
             {(term || activeFilters > 0) && (
               <Button variant="outline" size="sm" className="mt-1 h-10" onClick={clearAll}>
                 <X className="size-4" /> Clear filters
@@ -272,32 +288,38 @@ export function DataTable<T>({
       <div className="flex flex-col gap-2 p-3 md:hidden">
         {loading &&
           Array.from({ length: 4 }, (_, i) => (
-            <div key={`msk-${i}`} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
+            <div
+              key={`msk-${i}`}
+              className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3"
+            >
               <Skeleton className="h-4 w-2/3" />
               <Skeleton className="h-3 w-1/2" />
               <Skeleton className="h-5 w-1/3" />
             </div>
           ))}
-        {!loading && slice.map((row) => (
-          <div key={getId(row)} className="rounded-lg border border-border bg-card p-3">
-            <div className="flex items-start justify-between gap-2">
-              <div
-                className={cn("min-w-0 flex-1", onRowClick && "cursor-pointer")}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
-              >
-                {mobileCard(row)}
+        {!loading &&
+          slice.map((row) => (
+            <div key={getId(row)} className="rounded-lg border border-border bg-card p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div
+                  className={cn("min-w-0 flex-1", onRowClick && "cursor-pointer")}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                >
+                  {mobileCard(row)}
+                </div>
+                {rowAction && <div className="shrink-0 [&_button]:size-10">{rowAction(row)}</div>}
               </div>
-              {rowAction && <div className="shrink-0 [&_button]:size-10">{rowAction(row)}</div>}
             </div>
-          </div>
-        ))}
+          ))}
         {!loading && slice.length === 0 && (
           <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
             <span className="grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
               <SearchX className="size-5" />
             </span>
             <p className="text-sm font-semibold">No records match your filters</p>
-            <p className="text-xs text-muted-foreground">Try a different search term or clear the filters.</p>
+            <p className="text-xs text-muted-foreground">
+              Try a different search term or clear the filters.
+            </p>
             {(term || activeFilters > 0) && (
               <Button variant="outline" size="sm" className="mt-1 h-10" onClick={clearAll}>
                 <X className="size-4" /> Clear filters
@@ -309,8 +331,8 @@ export function DataTable<T>({
 
       <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2.5">
         <p className="num text-xs text-muted-foreground">
-          {filtered.length === 0 ? 0 : (current - 1) * pageSize + 1}–{Math.min(current * pageSize, filtered.length)} of{" "}
-          {filtered.length}
+          {filtered.length === 0 ? 0 : (current - 1) * pageSize + 1}–
+          {Math.min(current * pageSize, filtered.length)} of {filtered.length}
         </p>
         <div className="flex items-center gap-1">
           <Button

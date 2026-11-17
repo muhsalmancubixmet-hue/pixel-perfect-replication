@@ -12,7 +12,10 @@ export const Route = createFileRoute("/mfa/verify")({
       { title: "Two-factor verification — SaaS Manager" },
       { name: "description", content: "Enter the 6-digit code from your authenticator app." },
       { property: "og:title", content: "Two-factor verification — SaaS Manager" },
-      { property: "og:description", content: "Enter the 6-digit code from your authenticator app." },
+      {
+        property: "og:description",
+        content: "Enter the 6-digit code from your authenticator app.",
+      },
     ],
   }),
   component: MfaPage,
@@ -29,7 +32,10 @@ function MfaPage() {
   }, []);
 
   return (
-    <AuthLayout title="Two-factor verification" subtitle="Enter the 6-digit code from your authenticator app. Any code works in this demo.">
+    <AuthLayout
+      title="Two-factor verification"
+      subtitle="Enter the 6-digit code from your authenticator app. Any code works in this demo."
+    >
       <div className="flex flex-col items-center gap-4">
         <InputOTP maxLength={6} value={code} onChange={setCode}>
           <InputOTPGroup>

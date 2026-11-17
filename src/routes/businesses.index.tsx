@@ -8,7 +8,13 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { FormDialog, FormDrawer, ReasonDialog, saved, type FieldDef } from "@/components/admin/Dialogs";
+import {
+  FormDialog,
+  FormDrawer,
+  ReasonDialog,
+  saved,
+  type FieldDef,
+} from "@/components/admin/Dialogs";
 import { COUNTRY_OPTIONS, CITY_OPTIONS, businesses } from "@/data/mock";
 import type { Business } from "@/data/types";
 import { adminApi } from "@/lib/admin-api";
@@ -18,9 +24,15 @@ export const Route = createFileRoute("/businesses/")({
   head: () => ({
     meta: [
       { title: "Business Management — Influencers.com SaaS Manager" },
-      { name: "description", content: "Manage every business account, subscription and campaign owner on the platform." },
+      {
+        name: "description",
+        content: "Manage every business account, subscription and campaign owner on the platform.",
+      },
       { property: "og:title", content: "Business Management — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Manage business accounts, subscriptions and campaign owners." },
+      {
+        property: "og:description",
+        content: "Manage business accounts, subscriptions and campaign owners.",
+      },
     ],
   }),
   component: BusinessesPage,
@@ -34,7 +46,8 @@ function BusinessesPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getBusinesses()
+    adminApi
+      .getBusinesses()
       .then((res: any) => {
         if (!active) return;
         const list = res.results || (Array.isArray(res) ? res : []);
@@ -64,7 +77,9 @@ function BusinessesPage() {
       .finally(() => {
         if (active) setLoading(false);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const [adding, setAdding] = useState(false);
@@ -114,7 +129,11 @@ function BusinessesPage() {
         </span>
       ),
     },
-    { key: "campaigns", header: "Campaigns", cell: (r) => <span className="num text-sm font-semibold">{r.campaigns}</span> },
+    {
+      key: "campaigns",
+      header: "Campaigns",
+      cell: (r) => <span className="num text-sm font-semibold">{r.campaigns}</span>,
+    },
     {
       key: "subscription",
       header: "Subscription",
@@ -125,7 +144,12 @@ function BusinessesPage() {
       ),
     },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
-    { key: "joined", header: "Joined", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.joined}</span> },
+    {
+      key: "joined",
+      header: "Joined",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.joined}</span>,
+    },
   ];
 
   // Subscription column needs the plan name, not a status tone.
@@ -133,16 +157,33 @@ function BusinessesPage() {
     key: "subscription",
     header: "Subscription",
     cell: (r) => (
-      <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold">{r.subscription}</span>
+      <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold">
+        {r.subscription}
+      </span>
     ),
   };
 
   const filters: FilterDef<Business>[] = [
     { key: "type", label: "Business type", options: TYPES, match: (r, v) => r.type === v },
-    { key: "country", label: "Country", options: COUNTRY_OPTIONS, match: (r, v) => r.location.country === v },
+    {
+      key: "country",
+      label: "Country",
+      options: COUNTRY_OPTIONS,
+      match: (r, v) => r.location.country === v,
+    },
     { key: "city", label: "City", options: CITY_OPTIONS, match: (r, v) => r.location.city === v },
-    { key: "subscription", label: "Subscription", options: ["Free", "Pro", "Agency"], match: (r, v) => r.subscription === v },
-    { key: "status", label: "Status", options: ["active", "suspended", "pending"], match: (r, v) => r.status === v },
+    {
+      key: "subscription",
+      label: "Subscription",
+      options: ["Free", "Pro", "Agency"],
+      match: (r, v) => r.subscription === v,
+    },
+    {
+      key: "status",
+      label: "Status",
+      options: ["active", "suspended", "pending"],
+      match: (r, v) => r.status === v,
+    },
   ];
 
   return (
@@ -170,7 +211,7 @@ function BusinessesPage() {
                     { header: "City", accessor: (b) => b.location?.city || "" },
                     { header: "Country", accessor: (b) => b.location?.country || "" },
                   ],
-                  rows
+                  rows,
                 )
               }
             >
@@ -191,7 +232,9 @@ function BusinessesPage() {
           getId={(r) => r.id}
           searchPlaceholder="Search business, contact or city…"
           search={(r, t) =>
-            r.name.toLowerCase().includes(t) || r.contactName.toLowerCase().includes(t) || (r.location?.city || "").toLowerCase().includes(t)
+            r.name.toLowerCase().includes(t) ||
+            r.contactName.toLowerCase().includes(t) ||
+            (r.location?.city || "").toLowerCase().includes(t)
           }
           mobileCard={(r) => (
             <Link to="/businesses/$id" params={{ id: r.id }} className="block">
@@ -200,7 +243,8 @@ function BusinessesPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{r.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {r.type} · {r.location?.city || "Remote"}, {r.location?.countryCode || r.location?.country || "Global"}
+                    {r.type} · {r.location?.city || "Remote"},{" "}
+                    {r.location?.countryCode || r.location?.country || "Global"}
                   </p>
                 </div>
               </div>
@@ -209,18 +253,32 @@ function BusinessesPage() {
                 <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold">
                   {r.subscription}
                 </span>
-                <span className="num ml-auto text-xs text-muted-foreground">{r.campaigns} campaigns</span>
+                <span className="num ml-auto text-xs text-muted-foreground">
+                  {r.campaigns} campaigns
+                </span>
               </div>
             </Link>
           )}
           rowAction={(r) => (
             <ActionMenu
               items={[
-                { label: "View", node: <Link to="/businesses/$id" params={{ id: r.id }}>View</Link> },
+                {
+                  label: "View",
+                  node: (
+                    <Link to="/businesses/$id" params={{ id: r.id }}>
+                      View
+                    </Link>
+                  ),
+                },
                 { label: "Edit", onSelect: () => setEditing(r) },
                 { label: "View Campaigns", node: <Link to="/campaigns">View Campaigns</Link> },
                 { label: "Activate", onSelect: () => setToggling({ b: r, to: "active" }) },
-                { label: "Suspend", onSelect: () => setToggling({ b: r, to: "suspended" }), destructive: true, separatorBefore: true },
+                {
+                  label: "Suspend",
+                  onSelect: () => setToggling({ b: r, to: "suspended" }),
+                  destructive: true,
+                  separatorBefore: true,
+                },
               ]}
             />
           )}
@@ -235,7 +293,9 @@ function BusinessesPage() {
         fields={fields}
         initial={{ plan: "Free" }}
         submitLabel="Create business"
-        onSubmit={(v) => saved("Business created", `${String(v["name"])} was invited to the Business App.`)}
+        onSubmit={(v) =>
+          saved("Business created", `${String(v["name"])} was invited to the Business App.`)
+        }
       />
       <FormDrawer
         open={Boolean(editing)}
@@ -244,7 +304,14 @@ function BusinessesPage() {
         fields={fields}
         initial={
           editing
-            ? { name: editing.name, type: editing.type, hq: `${editing.location.city}, ${editing.location.country}`, email: editing.email, phone: editing.phone, plan: editing.subscription.replace(/^Business /, "") }
+            ? {
+                name: editing.name,
+                type: editing.type,
+                hq: `${editing.location.city}, ${editing.location.country}`,
+                email: editing.email,
+                phone: editing.phone,
+                plan: editing.subscription.replace(/^Business /, ""),
+              }
             : {}
         }
         onSubmit={async (v) => {
@@ -257,15 +324,35 @@ function BusinessesPage() {
           } catch (err) {
             console.warn("Failed to update business on backend:", err);
           }
-          setRows((rs) => rs.map((b) => (b.id === editing.id ? { ...b, name: String(v["name"]), type: String(v["type"]), email: String(v["email"]), phone: String(v["phone"]) } : b)));
+          setRows((rs) =>
+            rs.map((b) =>
+              b.id === editing.id
+                ? {
+                    ...b,
+                    name: String(v["name"]),
+                    type: String(v["type"]),
+                    email: String(v["email"]),
+                    phone: String(v["phone"]),
+                  }
+                : b,
+            ),
+          );
           saved("Business updated", String(v["name"]));
         }}
       />
       <ReasonDialog
         open={Boolean(toggling)}
         onOpenChange={(o) => !o && setToggling(null)}
-        title={toggling?.to === "suspended" ? `Suspend ${toggling.b.name}?` : `Activate ${toggling?.b.name ?? ""}?`}
-        description={toggling?.to === "suspended" ? "The business loses access to campaigns and messaging until reactivated." : "The business regains full access."}
+        title={
+          toggling?.to === "suspended"
+            ? `Suspend ${toggling.b.name}?`
+            : `Activate ${toggling?.b.name ?? ""}?`
+        }
+        description={
+          toggling?.to === "suspended"
+            ? "The business loses access to campaigns and messaging until reactivated."
+            : "The business regains full access."
+        }
         confirmLabel={toggling?.to === "suspended" ? "Suspend account" : "Activate account"}
         destructive={toggling?.to === "suspended"}
         onConfirm={async () => {
@@ -278,8 +365,13 @@ function BusinessesPage() {
           } catch (err) {
             console.warn("Failed to toggle business status on backend:", err);
           }
-          setRows((rs) => rs.map((b) => (b.id === toggling.b.id ? { ...b, status: toggling.to } : b)));
-          saved(toggling.to === "suspended" ? "Account suspended" : "Account activated", toggling.b.name);
+          setRows((rs) =>
+            rs.map((b) => (b.id === toggling.b.id ? { ...b, status: toggling.to } : b)),
+          );
+          saved(
+            toggling.to === "suspended" ? "Account suspended" : "Account activated",
+            toggling.b.name,
+          );
         }}
       />
     </div>

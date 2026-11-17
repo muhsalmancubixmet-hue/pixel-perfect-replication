@@ -8,10 +8,23 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { ActionMenu, mockAction } from "@/components/admin/ActionMenu";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FormDialog, FormDrawer, ReasonDialog, saved, type FieldDef } from "@/components/admin/Dialogs";
+import {
+  FormDialog,
+  FormDrawer,
+  ReasonDialog,
+  saved,
+  type FieldDef,
+} from "@/components/admin/Dialogs";
 import { toast } from "sonner";
 import { CATEGORY_NAMES, COUNTRY_OPTIONS, CITY_OPTIONS, compact, influencers } from "@/data/mock";
 import type { Influencer } from "@/data/types";
@@ -22,15 +35,32 @@ export const Route = createFileRoute("/influencers/")({
   head: () => ({
     meta: [
       { title: "Influencer Management — Influencers.com SaaS Manager" },
-      { name: "description", content: "Search, filter, verify and moderate every creator on Influencers.com." },
+      {
+        name: "description",
+        content: "Search, filter, verify and moderate every creator on Influencers.com.",
+      },
       { property: "og:title", content: "Influencer Management — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Search, filter, verify and moderate every creator on the platform." },
+      {
+        property: "og:description",
+        content: "Search, filter, verify and moderate every creator on the platform.",
+      },
     ],
   }),
   component: InfluencersPage,
 });
 
-const PLATFORMS = ["Instagram", "YouTube", "Facebook", "TikTok", "X", "LinkedIn", "Snapchat", "Threads", "Pinterest", "Twitch"];
+const PLATFORMS = [
+  "Instagram",
+  "YouTube",
+  "Facebook",
+  "TikTok",
+  "X",
+  "LinkedIn",
+  "Snapchat",
+  "Threads",
+  "Pinterest",
+  "Twitch",
+];
 
 function InfluencersPage() {
   const columns: Column<Influencer>[] = [
@@ -47,7 +77,15 @@ function InfluencersPage() {
         </Link>
       ),
     },
-    { key: "category", header: "Category", cell: (r) => <span className="text-xs">{(Array.isArray(r.categories) ? r.categories : []).join(", ") || "General"}</span> },
+    {
+      key: "category",
+      header: "Category",
+      cell: (r) => (
+        <span className="text-xs">
+          {(Array.isArray(r.categories) ? r.categories : []).join(", ") || "General"}
+        </span>
+      ),
+    },
     {
       key: "location",
       header: "Location",
@@ -58,7 +96,11 @@ function InfluencersPage() {
         </span>
       ),
     },
-    { key: "followers", header: "Followers", cell: (r) => <span className="num text-sm font-semibold">{compact(r.followers)}</span> },
+    {
+      key: "followers",
+      header: "Followers",
+      cell: (r) => <span className="num text-sm font-semibold">{compact(r.followers)}</span>,
+    },
     {
       key: "platforms",
       header: "Platforms",
@@ -66,14 +108,21 @@ function InfluencersPage() {
       cell: (r) => (
         <span className="flex flex-wrap gap-1">
           {r.platforms.map((p) => (
-            <span key={p} className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">
+            <span
+              key={p}
+              className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium"
+            >
               {p}
             </span>
           ))}
         </span>
       ),
     },
-    { key: "verification", header: "Verification", cell: (r) => <StatusBadge value={r.verification} /> },
+    {
+      key: "verification",
+      header: "Verification",
+      cell: (r) => <StatusBadge value={r.verification} />,
+    },
     {
       key: "website",
       header: "Website",
@@ -81,35 +130,67 @@ function InfluencersPage() {
       cell: (r) => <StatusBadge value={r.websiteStatus === "none" ? "draft" : r.websiteStatus} />,
     },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
-    { key: "joined", header: "Joined", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.joined}</span> },
+    {
+      key: "joined",
+      header: "Joined",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.joined}</span>,
+    },
   ];
 
   const filters: FilterDef<Influencer>[] = [
-    { key: "category", label: "Category", options: CATEGORY_NAMES, match: (r, v) => r.categories.includes(v) },
-    { key: "country", label: "Country", options: COUNTRY_OPTIONS, match: (r, v) => r.location.country === v },
+    {
+      key: "category",
+      label: "Category",
+      options: CATEGORY_NAMES,
+      match: (r, v) => r.categories.includes(v),
+    },
+    {
+      key: "country",
+      label: "Country",
+      options: COUNTRY_OPTIONS,
+      match: (r, v) => r.location.country === v,
+    },
     { key: "city", label: "City", options: CITY_OPTIONS, match: (r, v) => r.location.city === v },
-    { key: "status", label: "Status", options: ["active", "suspended", "pending"], match: (r, v) => r.status === v },
-    { key: "verification", label: "Verification", options: ["verified", "pending", "unverified"], match: (r, v) => r.verification === v },
+    {
+      key: "status",
+      label: "Status",
+      options: ["active", "suspended", "pending"],
+      match: (r, v) => r.status === v,
+    },
+    {
+      key: "verification",
+      label: "Verification",
+      options: ["verified", "pending", "unverified"],
+      match: (r, v) => r.verification === v,
+    },
     {
       key: "website",
       label: "Website status",
       options: ["published", "draft", "suspended", "none"],
       match: (r, v) => r.websiteStatus === v,
     },
-    { key: "platform", label: "Social platform", options: PLATFORMS, match: (r, v) => r.platforms.includes(v) },
+    {
+      key: "platform",
+      label: "Social platform",
+      options: PLATFORMS,
+      match: (r, v) => r.platforms.includes(v),
+    },
   ];
 
   const [rows, setRows] = useState<Influencer[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchInfluencers = () => {
-    adminApi.getInfluencers()
+    adminApi
+      .getInfluencers()
       .then((res: any) => {
         const raw = res.results || (Array.isArray(res) ? res : []);
         const list = raw.map((i: any) => ({
           ...i,
           name: i.name || i.display_name || i.handle || "Creator",
-          categories: Array.isArray(i.categories) && i.categories.length > 0 ? i.categories : ["General"],
+          categories:
+            Array.isArray(i.categories) && i.categories.length > 0 ? i.categories : ["General"],
           location: {
             city: i.location?.city || i.primary_city || "Mumbai",
             country: i.location?.country || "India",
@@ -122,7 +203,8 @@ function InfluencersPage() {
             region: i.location?.region || "",
           },
           followers: i.followers || 0,
-          platforms: Array.isArray(i.platforms) && i.platforms.length > 0 ? i.platforms : ["Instagram"],
+          platforms:
+            Array.isArray(i.platforms) && i.platforms.length > 0 ? i.platforms : ["Instagram"],
           verification: (i.verification || "unverified").toLowerCase(),
           status: (i.status || "active").toLowerCase(),
         }));
@@ -144,13 +226,22 @@ function InfluencersPage() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Influencer | null>(null);
   const [verifying, setVerifying] = useState<Influencer | null>(null);
-  const [toggling, setToggling] = useState<{ i: Influencer; to: Influencer["status"] } | null>(null);
-  const update = (id: string, patch: Partial<Influencer>) => setRows((rs) => rs.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+  const [toggling, setToggling] = useState<{ i: Influencer; to: Influencer["status"] } | null>(
+    null,
+  );
+  const update = (id: string, patch: Partial<Influencer>) =>
+    setRows((rs) => rs.map((x) => (x.id === id ? { ...x, ...patch } : x)));
   const addFields: FieldDef[] = [
     { name: "name", label: "Full name", required: true },
     { name: "handle", label: "Handle", placeholder: "@creator", required: true },
     { name: "email", label: "Email", type: "email", required: true },
-    { name: "category", label: "Primary category", type: "select", options: CATEGORY_NAMES, required: true },
+    {
+      name: "category",
+      label: "Primary category",
+      type: "select",
+      options: CATEGORY_NAMES,
+      required: true,
+    },
     { name: "tier", label: "Starting tier", type: "select", options: ["Free", "Pro", "Premium"] },
   ];
 
@@ -179,7 +270,7 @@ function InfluencersPage() {
                     { header: "City", accessor: (i) => i.location?.city || "" },
                     { header: "Country", accessor: (i) => i.location?.country || "" },
                   ],
-                  rows
+                  rows,
                 )
               }
             >
@@ -200,7 +291,9 @@ function InfluencersPage() {
           getId={(r) => r.id}
           searchPlaceholder="Search by name, handle or city…"
           search={(r, t) =>
-            r.name.toLowerCase().includes(t) || r.handle.includes(t) || (r.location?.city || "").toLowerCase().includes(t)
+            r.name.toLowerCase().includes(t) ||
+            r.handle.includes(t) ||
+            (r.location?.city || "").toLowerCase().includes(t)
           }
           mobileCard={(r) => (
             <Link to="/influencers/$id" params={{ id: r.id }} className="block">
@@ -209,27 +302,49 @@ function InfluencersPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{r.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {(Array.isArray(r.categories) && r.categories[0]) || "General"} · {r.location?.city || "Mumbai"}, {r.location?.countryCode || r.location?.country || "IN"}
+                    {(Array.isArray(r.categories) && r.categories[0]) || "General"} ·{" "}
+                    {r.location?.city || "Mumbai"},{" "}
+                    {r.location?.countryCode || r.location?.country || "IN"}
                   </p>
                 </div>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <StatusBadge value={r.status} />
                 <StatusBadge value={r.verification} />
-                <span className="num ml-auto text-xs font-semibold">{compact(r.followers)} followers</span>
+                <span className="num ml-auto text-xs font-semibold">
+                  {compact(r.followers)} followers
+                </span>
               </div>
             </Link>
           )}
           rowAction={(r) => (
             <ActionMenu
               items={[
-                { label: "View", node: <Link to="/influencers/$id" params={{ id: r.id }}>View</Link> },
+                {
+                  label: "View",
+                  node: (
+                    <Link to="/influencers/$id" params={{ id: r.id }}>
+                      View
+                    </Link>
+                  ),
+                },
                 { label: "Edit", onSelect: () => setEditing(r) },
                 { label: "Verify", onSelect: () => setVerifying(r) },
                 { label: "Activate", onSelect: () => setToggling({ i: r, to: "active" }) },
-                { label: "View Website", onSelect: mockAction("Opening website", r.websiteUrl ?? "no website") },
-                { label: "View Public Profile", onSelect: mockAction("Opening public profile", r.name) },
-                { label: "Suspend", onSelect: () => setToggling({ i: r, to: "suspended" }), destructive: true, separatorBefore: true },
+                {
+                  label: "View Website",
+                  onSelect: mockAction("Opening website", r.websiteUrl ?? "no website"),
+                },
+                {
+                  label: "View Public Profile",
+                  onSelect: mockAction("Opening public profile", r.name),
+                },
+                {
+                  label: "Suspend",
+                  onSelect: () => setToggling({ i: r, to: "suspended" }),
+                  destructive: true,
+                  separatorBefore: true,
+                },
               ]}
             />
           )}
@@ -274,7 +389,16 @@ function InfluencersPage() {
         onOpenChange={(o) => !o && setEditing(null)}
         title={`Edit ${editing?.name ?? "creator"}`}
         fields={addFields.filter((f) => f.name !== "email")}
-        initial={editing ? { name: editing.name, handle: editing.handle, category: editing.categories[0] ?? "", tier: editing.subscription.replace(/^Influencer /, "") } : {}}
+        initial={
+          editing
+            ? {
+                name: editing.name,
+                handle: editing.handle,
+                category: editing.categories[0] ?? "",
+                tier: editing.subscription.replace(/^Influencer /, ""),
+              }
+            : {}
+        }
         onSubmit={async (v) => {
           if (!editing) return;
           try {
@@ -293,17 +417,32 @@ function InfluencersPage() {
         onClose={() => setVerifying(null)}
         onDecide={(c, d) => {
           const nextStatus = d === "approve" ? "VERIFIED" : d === "reject" ? "REJECTED" : "PENDING";
-          update(c.id, { verification: d === "approve" ? "verified" : d === "reject" ? "unverified" : "pending" });
-          void adminApi.moderateInfluencer(c.id, { verification_status: nextStatus }).catch((err) => {
-            console.warn("Failed to update verification status on backend:", err);
+          update(c.id, {
+            verification: d === "approve" ? "verified" : d === "reject" ? "unverified" : "pending",
           });
-          saved(d === "approve" ? "Creator verified" : d === "reject" ? "Verification rejected" : "More information requested", c.name);
+          void adminApi
+            .moderateInfluencer(c.id, { verification_status: nextStatus })
+            .catch((err) => {
+              console.warn("Failed to update verification status on backend:", err);
+            });
+          saved(
+            d === "approve"
+              ? "Creator verified"
+              : d === "reject"
+                ? "Verification rejected"
+                : "More information requested",
+            c.name,
+          );
         }}
       />
       <ReasonDialog
         open={Boolean(toggling)}
         onOpenChange={(o) => !o && setToggling(null)}
-        title={toggling?.to === "suspended" ? `Suspend ${toggling.i.name}?` : `Activate ${toggling?.i.name ?? ""}?`}
+        title={
+          toggling?.to === "suspended"
+            ? `Suspend ${toggling.i.name}?`
+            : `Activate ${toggling?.i.name ?? ""}?`
+        }
         confirmLabel={toggling?.to === "suspended" ? "Suspend account" : "Activate account"}
         destructive={toggling?.to === "suspended"}
         onConfirm={() => {
@@ -313,7 +452,10 @@ function InfluencersPage() {
           void adminApi.moderateInfluencer(toggling.i.id, { status: nextStatus }).catch((err) => {
             console.warn("Failed to update status on backend:", err);
           });
-          saved(toggling.to === "suspended" ? "Account suspended" : "Account activated", toggling.i.name);
+          saved(
+            toggling.to === "suspended" ? "Account suspended" : "Account activated",
+            toggling.i.name,
+          );
         }}
       />
     </div>
@@ -322,7 +464,15 @@ function InfluencersPage() {
 
 type Decision = "approve" | "reject" | "info";
 
-function VerifyDialog({ creator, onClose, onDecide }: { creator: Influencer | null; onClose: () => void; onDecide: (c: Influencer, d: Decision) => void }) {
+function VerifyDialog({
+  creator,
+  onClose,
+  onDecide,
+}: {
+  creator: Influencer | null;
+  onClose: () => void;
+  onDecide: (c: Influencer, d: Decision) => void;
+}) {
   const [note, setNote] = useState("");
   useEffect(() => setNote(""), [creator]);
   const decide = (d: Decision) => {
@@ -343,21 +493,34 @@ function VerifyDialog({ creator, onClose, onDecide }: { creator: Influencer | nu
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{creator.name}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {creator.handle} · {compact(creator.followers)} followers · {creator.platforms.length} platforms
+                  {creator.handle} · {compact(creator.followers)} followers ·{" "}
+                  {creator.platforms.length} platforms
                 </p>
               </div>
               <StatusBadge value={creator.verification} />
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="vnote">Note to creator (optional)</Label>
-              <Textarea id="vnote" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Please upload a government ID that matches your profile name." />
+              <Textarea
+                id="vnote"
+                rows={3}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="e.g. Please upload a government ID that matches your profile name."
+              />
             </div>
           </div>
         )}
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="h-10" onClick={() => decide("info")}>Request info</Button>
-          <Button variant="destructive" className="h-10" onClick={() => decide("reject")}>Reject</Button>
-          <Button className="h-10" onClick={() => decide("approve")}>Approve</Button>
+          <Button variant="outline" className="h-10" onClick={() => decide("info")}>
+            Request info
+          </Button>
+          <Button variant="destructive" className="h-10" onClick={() => decide("reject")}>
+            Reject
+          </Button>
+          <Button className="h-10" onClick={() => decide("approve")}>
+            Approve
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

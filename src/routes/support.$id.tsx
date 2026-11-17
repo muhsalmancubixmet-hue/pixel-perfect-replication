@@ -8,7 +8,13 @@ import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { STAFF_NAMES, businesses, getTicket, ticketThread } from "@/data/mock";
 import type { Ticket, TicketMessage } from "@/data/types";
 import { cn } from "@/lib/utils";
@@ -33,7 +39,9 @@ export const Route = createFileRoute("/support/$id")({
           subject: data.subject || "Support Inquiry",
           category: data.category || "General",
           priority: (data.priority ? data.priority.toLowerCase() : "medium") as Ticket["priority"],
-          status: (data.status ? data.status.toLowerCase().replace("_", " ") : "open") as Ticket["status"],
+          status: (data.status
+            ? data.status.toLowerCase().replace("_", " ")
+            : "open") as Ticket["status"],
           created: data.created_at ? new Date(data.created_at).toLocaleDateString() : "Recent",
           assignee: data.assignee_name || "Mohammed Fadhil",
         };
@@ -41,17 +49,30 @@ export const Route = createFileRoute("/support/$id")({
           .filter((m: any) => !m.is_internal_note)
           .map((m: any) => ({
             id: m.id,
-            from: m.author_name?.includes("Admin") || m.author_name?.includes("Fadhil") ? "staff" : "user",
+            from:
+              m.author_name?.includes("Admin") || m.author_name?.includes("Fadhil")
+                ? "staff"
+                : "user",
             author: m.author_name || "Support",
             body: m.body,
-            time: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now",
+            time: m.created_at
+              ? new Date(m.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Just now",
           }));
         const notes = (Array.isArray(rawMsgs) ? rawMsgs : [])
           .filter((m: any) => m.is_internal_note)
           .map((m: any) => ({
             author: m.author_name || "Staff",
             body: m.body,
-            time: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now",
+            time: m.created_at
+              ? new Date(m.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Just now",
           }));
         return { ticket, initialMessages: messages, initialNotes: notes };
       }
@@ -64,7 +85,13 @@ export const Route = createFileRoute("/support/$id")({
     return { ticket, initialMessages: [], initialNotes: [] };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Ticket unavailable — SaaS Manager" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData)
+      return {
+        meta: [
+          { title: "Ticket unavailable — SaaS Manager" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     const title = `${loaderData.ticket.id} · ${loaderData.ticket.subject}`;
     const description = `Support conversation with ${loaderData.ticket.user}.`;
     return {
@@ -76,7 +103,9 @@ export const Route = createFileRoute("/support/$id")({
       ],
     };
   },
-  notFoundComponent: () => <div className="panel p-8 text-center text-sm font-semibold">Ticket not found</div>,
+  notFoundComponent: () => (
+    <div className="panel p-8 text-center text-sm font-semibold">Ticket not found</div>
+  ),
   component: TicketConsole,
 });
 
@@ -87,10 +116,10 @@ function TicketConsole() {
   const [status, setStatus] = useState(ticket.status);
   const [assignee, setAssignee] = useState(ticket.assignee);
   const [messages, setMessages] = useState<TicketMessage[]>(
-    initialMessages && initialMessages.length > 0 ? initialMessages : thread.messages
+    initialMessages && initialMessages.length > 0 ? initialMessages : thread.messages,
   );
   const [notes, setNotes] = useState(
-    initialNotes && initialNotes.length > 0 ? initialNotes : thread.notes
+    initialNotes && initialNotes.length > 0 ? initialNotes : thread.notes,
   );
   const [reply, setReply] = useState("");
   const [note, setNote] = useState("");
@@ -102,14 +131,26 @@ function TicketConsole() {
     } catch {
       // handled
     }
-    setMessages((m) => [...m, { id: `m${m.length + 1}`, from: "staff", author: "Mohammed Fadhil", body: reply, time: "Just now" }]);
+    setMessages((m) => [
+      ...m,
+      {
+        id: `m${m.length + 1}`,
+        from: "staff",
+        author: "Mohammed Fadhil",
+        body: reply,
+        time: "Just now",
+      },
+    ]);
     setReply("");
     saved("Reply sent", ticket.user);
   };
 
   return (
     <div className="flex flex-col gap-4">
-      <Link to="/support" className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+      <Link
+        to="/support"
+        className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="size-3.5" /> All tickets
       </Link>
 
@@ -126,7 +167,9 @@ function TicketConsole() {
           <UserAvatar name={ticket.user} size={34} />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">{ticket.user}</p>
-            <p className="text-xs text-muted-foreground">{isBusiness ? "Business account" : "Creator account"}</p>
+            <p className="text-xs text-muted-foreground">
+              {isBusiness ? "Business account" : "Creator account"}
+            </p>
           </div>
         </div>
         <Select
@@ -134,7 +177,9 @@ function TicketConsole() {
           onValueChange={async (v) => {
             const newStatus = v as Ticket["status"];
             try {
-              await adminApi.updateSupportTicket(ticket.id, { status: newStatus.toUpperCase().replace(" ", "_") });
+              await adminApi.updateSupportTicket(ticket.id, {
+                status: newStatus.toUpperCase().replace(" ", "_"),
+              });
             } catch {
               // fallback
             }
@@ -162,11 +207,22 @@ function TicketConsole() {
           </div>
           <div className="flex flex-col gap-3 p-4">
             {messages.map((m) => (
-              <div key={m.id} className={cn("flex gap-2.5", m.from === "staff" && "flex-row-reverse")}>
+              <div
+                key={m.id}
+                className={cn("flex gap-2.5", m.from === "staff" && "flex-row-reverse")}
+              >
                 <UserAvatar name={m.author} size={30} />
-                <div className={cn("max-w-[85%] rounded-lg border px-3 py-2", m.from === "staff" ? "border-primary/20 bg-accent" : "border-border bg-muted/50")}>
+                <div
+                  className={cn(
+                    "max-w-[85%] rounded-lg border px-3 py-2",
+                    m.from === "staff"
+                      ? "border-primary/20 bg-accent"
+                      : "border-border bg-muted/50",
+                  )}
+                >
                   <p className="text-xs font-semibold">
-                    {m.author} <span className="num font-normal text-muted-foreground">· {m.time}</span>
+                    {m.author}{" "}
+                    <span className="num font-normal text-muted-foreground">· {m.time}</span>
                   </p>
                   <p className="mt-1 text-sm">{m.body}</p>
                   {m.attachment && (
@@ -183,9 +239,18 @@ function TicketConsole() {
             ))}
           </div>
           <div className="mt-auto border-t border-border p-3">
-            <Textarea rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder={`Reply to ${ticket.user}…`} />
+            <Textarea
+              rows={3}
+              value={reply}
+              onChange={(e) => setReply(e.target.value)}
+              placeholder={`Reply to ${ticket.user}…`}
+            />
             <div className="mt-2 flex justify-between gap-2">
-              <Button variant="ghost" className="h-10" onClick={() => saved("Attachment added", "screenshot.png")}>
+              <Button
+                variant="ghost"
+                className="h-10"
+                onClick={() => saved("Attachment added", "screenshot.png")}
+              >
                 <Paperclip className="size-4" /> Attach
               </Button>
               <Button className="h-10" disabled={!reply.trim()} onClick={send}>
@@ -240,25 +305,40 @@ function TicketConsole() {
                 <Lock className="size-3" /> Only staff can see these notes.
               </p>
               {notes.map((n, i) => (
-                <div key={i} className="rounded-md border border-warning/35 bg-warning/10 p-2.5 text-sm">
+                <div
+                  key={i}
+                  className="rounded-md border border-warning/35 bg-warning/10 p-2.5 text-sm"
+                >
                   <p className="text-xs font-semibold">
-                    {n.author} <span className="num font-normal text-muted-foreground">· {n.time}</span>
+                    {n.author}{" "}
+                    <span className="num font-normal text-muted-foreground">· {n.time}</span>
                   </p>
                   <p className="mt-0.5">{n.body}</p>
                 </div>
               ))}
-              <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a private note…" />
+              <Textarea
+                rows={2}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Add a private note…"
+              />
               <Button
                 variant="outline"
                 className="h-10"
                 disabled={!note.trim()}
                 onClick={async () => {
                   try {
-                    await adminApi.sendSupportTicketMessage(ticket.id, { body: note, is_internal_note: true });
+                    await adminApi.sendSupportTicketMessage(ticket.id, {
+                      body: note,
+                      is_internal_note: true,
+                    });
                   } catch {
                     // fallback
                   }
-                  setNotes((ns) => [...ns, { author: "Mohammed Fadhil", body: note, time: "Just now" }]);
+                  setNotes((ns) => [
+                    ...ns,
+                    { author: "Mohammed Fadhil", body: note, time: "Just now" },
+                  ]);
                   setNote("");
                 }}
               >

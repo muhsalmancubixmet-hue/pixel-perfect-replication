@@ -25,9 +25,15 @@ export const Route = createFileRoute("/categories")({
   head: () => ({
     meta: [
       { title: "Categories — Influencers.com SaaS Manager" },
-      { name: "description", content: "Manage the creator categories that power discovery across the platform." },
+      {
+        name: "description",
+        content: "Manage the creator categories that power discovery across the platform.",
+      },
       { property: "og:title", content: "Categories — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Manage the creator categories that power discovery." },
+      {
+        property: "og:description",
+        content: "Manage the creator categories that power discovery.",
+      },
     ],
   }),
   component: CategoriesPage,
@@ -37,7 +43,8 @@ function CategoriesPage() {
   const [items, setItems] = useState<Category[]>([]);
 
   const loadCategories = () => {
-    adminApi.getCategories()
+    adminApi
+      .getCategories()
       .then((res: any) => {
         const list = res?.results || (Array.isArray(res) ? res : []);
         const mapped = list.map((c: any, i: number) => ({
@@ -75,7 +82,11 @@ function CategoriesPage() {
   };
 
   const toggle = (id: string) =>
-    setItems((s) => s.map((c) => (c.id === id ? { ...c, status: c.status === "active" ? "inactive" : "active" } : c)));
+    setItems((s) =>
+      s.map((c) =>
+        c.id === id ? { ...c, status: c.status === "active" ? "inactive" : "active" } : c,
+      ),
+    );
 
   const save = async () => {
     const value = name.trim();
@@ -84,7 +95,10 @@ function CategoriesPage() {
       setItems((s) => s.map((c) => (c.id === editing.id ? { ...c, name: value } : c)));
     } else {
       try {
-        await adminApi.createCategory({ name: value, slug: value.toLowerCase().replace(/\s+/g, "-") });
+        await adminApi.createCategory({
+          name: value,
+          slug: value.toLowerCase().replace(/\s+/g, "-"),
+        });
         loadCategories();
       } catch {
         setItems((s) => [
@@ -136,15 +150,31 @@ function CategoriesPage() {
             </div>
             <StatusBadge value={c.status} />
             <div className="flex flex-col">
-              <Button variant="ghost" size="icon" className="size-6" onClick={() => move(i, -1)} aria-label="Move up">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6"
+                onClick={() => move(i, -1)}
+                aria-label="Move up"
+              >
                 <ArrowUp className="size-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" className="size-6" onClick={() => move(i, 1)} aria-label="Move down">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6"
+                onClick={() => move(i, 1)}
+                aria-label="Move down"
+              >
                 <ArrowDown className="size-3.5" />
               </Button>
             </div>
             <div className="flex flex-col items-end gap-1">
-              <Switch checked={c.status === "active"} onCheckedChange={() => toggle(c.id)} aria-label="Enabled" />
+              <Switch
+                checked={c.status === "active"}
+                onCheckedChange={() => toggle(c.id)}
+                aria-label="Enabled"
+              />
               <Button
                 variant="link"
                 size="sm"
@@ -166,11 +196,18 @@ function CategoriesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editing ? "Edit category" : "Add category"}</DialogTitle>
-            <DialogDescription>Categories drive creator discovery, filters and campaign matching.</DialogDescription>
+            <DialogDescription>
+              Categories drive creator discovery, filters and campaign matching.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-1.5">
             <Label htmlFor="catname">Category name</Label>
-            <Input id="catname" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Street Food" />
+            <Input
+              id="catname"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Street Food"
+            />
           </div>
           <DialogFooter>
             <Button onClick={save}>{editing ? "Save changes" : "Add category"}</Button>

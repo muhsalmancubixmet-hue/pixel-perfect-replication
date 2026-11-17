@@ -18,9 +18,16 @@ export const Route = createFileRoute("/payments")({
   head: () => ({
     meta: [
       { title: "Payments — Influencers.com SaaS Manager" },
-      { name: "description", content: "Every transaction on the platform: subscriptions, campaigns, services and refunds." },
+      {
+        name: "description",
+        content:
+          "Every transaction on the platform: subscriptions, campaigns, services and refunds.",
+      },
       { property: "og:title", content: "Payments — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Every transaction: subscriptions, campaigns, services and refunds." },
+      {
+        property: "og:description",
+        content: "Every transaction: subscriptions, campaigns, services and refunds.",
+      },
     ],
   }),
   component: PaymentsPage,
@@ -31,7 +38,8 @@ function PaymentsPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getPayments()
+    adminApi
+      .getPayments()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
@@ -50,7 +58,9 @@ function PaymentsPage() {
       .catch((err) => {
         console.warn("Could not load live payments:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const paid = paymentsList.filter((p) => p.status === "paid");
@@ -58,19 +68,55 @@ function PaymentsPage() {
   const refunded = paymentsList.filter((p) => p.status === "refunded");
 
   const columns: Column<Payment>[] = [
-    { key: "id", header: "Transaction", cell: (r) => <span className="num text-xs font-semibold">{r.id}</span> },
-    { key: "user", header: "User / business", cell: (r) => <span className="text-sm">{r.user}</span> },
+    {
+      key: "id",
+      header: "Transaction",
+      cell: (r) => <span className="num text-xs font-semibold">{r.id}</span>,
+    },
+    {
+      key: "user",
+      header: "User / business",
+      cell: (r) => <span className="text-sm">{r.user}</span>,
+    },
     { key: "type", header: "Type", cell: (r) => <span className="text-xs">{r.type}</span> },
-    { key: "amount", header: "Amount", cell: (r) => <span className="num text-sm font-semibold">{money(r.amount, r.currency)}</span> },
+    {
+      key: "amount",
+      header: "Amount",
+      cell: (r) => <span className="num text-sm font-semibold">{money(r.amount, r.currency)}</span>,
+    },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
-    { key: "method", header: "Method", secondary: true, cell: (r) => <span className="text-xs">{r.method}</span> },
-    { key: "date", header: "Date", cell: (r) => <span className="num text-xs text-muted-foreground">{r.date}</span> },
+    {
+      key: "method",
+      header: "Method",
+      secondary: true,
+      cell: (r) => <span className="text-xs">{r.method}</span>,
+    },
+    {
+      key: "date",
+      header: "Date",
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.date}</span>,
+    },
   ];
 
   const filters: FilterDef<Payment>[] = [
-    { key: "status", label: "Status", options: ["paid", "pending", "failed", "refunded"], match: (r, v) => r.status === v },
-    { key: "type", label: "Type", options: ["Subscription", "Campaign", "Service", "Domain"], match: (r, v) => r.type === v },
-    { key: "method", label: "Method", options: ["UPI", "Card", "Netbanking", "Wallet"], match: (r, v) => r.method === v },
+    {
+      key: "status",
+      label: "Status",
+      options: ["paid", "pending", "failed", "refunded"],
+      match: (r, v) => r.status === v,
+    },
+    {
+      key: "type",
+      label: "Type",
+      options: ["Subscription", "Campaign", "Service", "Domain"],
+      match: (r, v) => r.type === v,
+    },
+    {
+      key: "method",
+      label: "Method",
+      options: ["UPI", "Card", "Netbanking", "Wallet"],
+      match: (r, v) => r.method === v,
+    },
     {
       key: "date",
       label: "Date",
@@ -103,7 +149,7 @@ function PaymentsPage() {
                   { header: "Method", accessor: (p) => p.method },
                   { header: "Date", accessor: (p) => p.date },
                 ],
-                paymentsList
+                paymentsList,
               )
             }
           >
@@ -113,10 +159,30 @@ function PaymentsPage() {
       />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Collected" value={money(paid.reduce((a, p) => a + p.amount, 0))} icon={CheckCircle2} delta={10.3} />
-        <StatCard label="Pending" value={money(pending.reduce((a, p) => a + p.amount, 0))} icon={Clock} delta={-4.2} />
-        <StatCard label="Refunded" value={money(refunded.reduce((a, p) => a + p.amount, 0))} icon={ArrowDownRight} delta={1.8} />
-        <StatCard label="Transactions" value={String(paymentsList.length)} icon={CheckCircle2} delta={6.9} />
+        <StatCard
+          label="Collected"
+          value={money(paid.reduce((a, p) => a + p.amount, 0))}
+          icon={CheckCircle2}
+          delta={10.3}
+        />
+        <StatCard
+          label="Pending"
+          value={money(pending.reduce((a, p) => a + p.amount, 0))}
+          icon={Clock}
+          delta={-4.2}
+        />
+        <StatCard
+          label="Refunded"
+          value={money(refunded.reduce((a, p) => a + p.amount, 0))}
+          icon={ArrowDownRight}
+          delta={1.8}
+        />
+        <StatCard
+          label="Transactions"
+          value={String(paymentsList.length)}
+          icon={CheckCircle2}
+          delta={6.9}
+        />
       </div>
 
       <div className="w-full overflow-x-auto">
@@ -135,7 +201,10 @@ function PaymentsPage() {
               </div>
               <p className="mt-1 truncate text-xs text-muted-foreground">{r.user}</p>
               <p className="num mt-1 text-sm font-bold">
-                {money(r.amount, r.currency)} <span className="text-xs font-normal text-muted-foreground">· {r.type} · {r.method}</span>
+                {money(r.amount, r.currency)}{" "}
+                <span className="text-xs font-normal text-muted-foreground">
+                  · {r.type} · {r.method}
+                </span>
               </p>
             </>
           )}
@@ -153,7 +222,9 @@ function PaymentsPage() {
                         refund_amount_cents: Math.round(r.amount * 100),
                         reason: "Admin initiated refund",
                       });
-                      setPaymentsList((all) => all.map((p) => p.id === r.id ? { ...p, status: "refunded" } : p));
+                      setPaymentsList((all) =>
+                        all.map((p) => (p.id === r.id ? { ...p, status: "refunded" } : p)),
+                      );
                     } catch {}
                     saved("Refund initiated", r.id);
                   },

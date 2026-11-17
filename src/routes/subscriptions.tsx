@@ -28,9 +28,15 @@ export const Route = createFileRoute("/subscriptions")({
   head: () => ({
     meta: [
       { title: "Subscriptions — Influencers.com SaaS Manager" },
-      { name: "description", content: "Create and tune the influencer and business subscription plans." },
+      {
+        name: "description",
+        content: "Create and tune the influencer and business subscription plans.",
+      },
       { property: "og:title", content: "Subscriptions — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Create and tune influencer and business subscription plans." },
+      {
+        property: "og:description",
+        content: "Create and tune influencer and business subscription plans.",
+      },
     ],
   }),
   component: SubscriptionsPage,
@@ -46,7 +52,11 @@ function PlanGrid({
   onEdit: (p: Plan) => void;
 }) {
   if (items.length === 0) {
-    return <div className="panel col-span-3 p-8 text-center text-sm text-muted-foreground">No plans configured yet.</div>;
+    return (
+      <div className="panel col-span-3 p-8 text-center text-sm text-muted-foreground">
+        No plans configured yet.
+      </div>
+    );
   }
   return (
     <div className="grid gap-3 lg:grid-cols-3">
@@ -57,7 +67,9 @@ function PlanGrid({
               <p className="text-sm font-semibold">{p.name}</p>
               <p className="num mt-0.5 text-2xl font-bold">
                 {p.price === 0 ? "Free" : money(p.price)}
-                {p.price > 0 && <span className="text-sm font-medium text-muted-foreground">/mo</span>}
+                {p.price > 0 && (
+                  <span className="text-sm font-medium text-muted-foreground">/mo</span>
+                )}
               </p>
             </div>
             <StatusBadge value={p.status} />
@@ -87,7 +99,11 @@ function PlanGrid({
             <Button variant="outline" size="sm" onClick={() => onEdit(p)}>
               Edit plan
             </Button>
-            <Switch checked={p.status === "active"} onCheckedChange={() => onToggle(p.id)} aria-label="Plan enabled" />
+            <Switch
+              checked={p.status === "active"}
+              onCheckedChange={() => onToggle(p.id)}
+              aria-label="Plan enabled"
+            />
           </div>
         </div>
       ))}
@@ -101,14 +117,18 @@ function SubscriptionsPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getBillingPlans()
+    adminApi
+      .getBillingPlans()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
         const mapped = list.map((p: any) => ({
           id: p.id,
           name: p.name,
-          audience: (p.account_type === "INFLUENCER" || p.audience === "Influencer") ? "Influencer" : "Business",
+          audience:
+            p.account_type === "INFLUENCER" || p.audience === "Influencer"
+              ? "Influencer"
+              : "Business",
           price: (p.price_cents || 0) / 100,
           currency: p.currency || "INR",
           interval: "monthly",
@@ -122,11 +142,17 @@ function SubscriptionsPage() {
       .catch((err) => {
         console.warn("Could not load billing plans:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const toggle = (id: string) =>
-    setPlans((s) => s.map((p) => (p.id === id ? { ...p, status: p.status === "active" ? "inactive" : "active" } : p)));
+    setPlans((s) =>
+      s.map((p) =>
+        p.id === id ? { ...p, status: p.status === "active" ? "inactive" : "active" } : p,
+      ),
+    );
 
   const mrr = plans.reduce((a, p) => a + p.monthlyRevenue, 0);
   const paidUsers = plans.filter((p) => p.price > 0).reduce((a, p) => a + p.activeUsers, 0);
@@ -145,9 +171,23 @@ function SubscriptionsPage() {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="MRR" value={money(mrr)} icon={Wallet} delta={11.2} />
-        <StatCard label="Paid accounts" value={paidUsers.toLocaleString("en-IN")} icon={Users} delta={8.6} />
-        <StatCard label="Plans live" value={String(plans.filter((p) => p.status === "active").length)} icon={CreditCard} />
-        <StatCard label="ARPU" value={money(Math.round(mrr / Math.max(1, paidUsers)))} icon={Wallet} delta={2.4} />
+        <StatCard
+          label="Paid accounts"
+          value={paidUsers.toLocaleString("en-IN")}
+          icon={Users}
+          delta={8.6}
+        />
+        <StatCard
+          label="Plans live"
+          value={String(plans.filter((p) => p.status === "active").length)}
+          icon={CreditCard}
+        />
+        <StatCard
+          label="ARPU"
+          value={money(Math.round(mrr / Math.max(1, paidUsers)))}
+          icon={Wallet}
+          delta={2.4}
+        />
       </div>
 
       <Tabs defaultValue="Influencer">
@@ -156,10 +196,18 @@ function SubscriptionsPage() {
           <TabsTrigger value="Business">Business plans</TabsTrigger>
         </TabsList>
         <TabsContent value="Influencer" className="mt-3">
-          <PlanGrid items={plans.filter((p) => p.audience === "Influencer")} onToggle={toggle} onEdit={setEditing} />
+          <PlanGrid
+            items={plans.filter((p) => p.audience === "Influencer")}
+            onToggle={toggle}
+            onEdit={setEditing}
+          />
         </TabsContent>
         <TabsContent value="Business" className="mt-3">
-          <PlanGrid items={plans.filter((p) => p.audience === "Business")} onToggle={toggle} onEdit={setEditing} />
+          <PlanGrid
+            items={plans.filter((p) => p.audience === "Business")}
+            onToggle={toggle}
+            onEdit={setEditing}
+          />
         </TabsContent>
       </Tabs>
 
@@ -178,7 +226,11 @@ function SubscriptionsPage() {
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="limit-campaigns">Campaign / portfolio limit</Label>
-              <Input id="limit-campaigns" type="number" defaultValue={editing?.audience === "Business" ? 10 : 50} />
+              <Input
+                id="limit-campaigns"
+                type="number"
+                defaultValue={editing?.audience === "Business" ? 10 : 50}
+              />
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="limit-socials">Connected social accounts</Label>

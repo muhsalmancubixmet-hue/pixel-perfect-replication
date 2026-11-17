@@ -17,9 +17,15 @@ export const Route = createFileRoute("/campaigns/")({
   head: () => ({
     meta: [
       { title: "Campaign Management — Influencers.com SaaS Manager" },
-      { name: "description", content: "Monitor every brand campaign across the Influencers.com marketplace." },
+      {
+        name: "description",
+        content: "Monitor every brand campaign across the Influencers.com marketplace.",
+      },
       { property: "og:title", content: "Campaign Management — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Monitor every brand campaign across the marketplace." },
+      {
+        property: "og:description",
+        content: "Monitor every brand campaign across the marketplace.",
+      },
     ],
   }),
   component: CampaignsPage,
@@ -42,7 +48,8 @@ function CampaignsPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getCampaigns()
+    adminApi
+      .getCampaigns()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
@@ -51,7 +58,9 @@ function CampaignsPage() {
       .catch((err) => {
         console.warn("Could not load live campaigns:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const totalBudget = campaignsList.reduce((a, c) => a + (c.budget || 0), 0);
@@ -64,11 +73,7 @@ function CampaignsPage() {
       key: "campaign",
       header: "Campaign",
       cell: (r) => (
-        <Link
-          to="/campaigns/$id"
-          params={{ id: r.id }}
-          className="group/link block min-w-0"
-        >
+        <Link to="/campaigns/$id" params={{ id: r.id }} className="group/link block min-w-0">
           <p className="truncate text-sm font-medium group-hover/link:underline">{r.title}</p>
           <p className="num truncate text-xs text-muted-foreground">
             {r.id} · {r.location}
@@ -76,9 +81,21 @@ function CampaignsPage() {
         </Link>
       ),
     },
-    { key: "business", header: "Business", cell: (r) => <span className="text-xs">{r.business}</span> },
-    { key: "category", header: "Category", cell: (r) => <span className="text-xs">{r.category}</span> },
-    { key: "budget", header: "Budget", cell: (r) => <span className="num text-sm font-semibold">{money(r.budget, r.currency)}</span> },
+    {
+      key: "business",
+      header: "Business",
+      cell: (r) => <span className="text-xs">{r.business}</span>,
+    },
+    {
+      key: "category",
+      header: "Category",
+      cell: (r) => <span className="text-xs">{r.category}</span>,
+    },
+    {
+      key: "budget",
+      header: "Budget",
+      cell: (r) => <span className="num text-sm font-semibold">{money(r.budget, r.currency)}</span>,
+    },
     {
       key: "creators",
       header: "Creators",
@@ -89,20 +106,43 @@ function CampaignsPage() {
       ),
     },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
-    { key: "created", header: "Created", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span> },
-    { key: "deadline", header: "Deadline", cell: (r) => <span className="num text-xs text-muted-foreground">{r.deadline}</span> },
+    {
+      key: "created",
+      header: "Created",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span>,
+    },
+    {
+      key: "deadline",
+      header: "Deadline",
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.deadline}</span>,
+    },
   ];
 
   const filters: FilterDef<Campaign>[] = [
     { key: "status", label: "Status", options: STATUSES, match: (r, v) => r.status === v },
-    { key: "category", label: "Category", options: CATEGORY_NAMES, match: (r, v) => r.category === v },
-    { key: "business", label: "Business", options: businesses.map((b) => b.name), match: (r, v) => r.business === v },
+    {
+      key: "category",
+      label: "Category",
+      options: CATEGORY_NAMES,
+      match: (r, v) => r.category === v,
+    },
+    {
+      key: "business",
+      label: "Business",
+      options: businesses.map((b) => b.name),
+      match: (r, v) => r.business === v,
+    },
     {
       key: "budget",
       label: "Budget",
       options: ["Under 50K", "50K – 200K", "Above 200K"],
       match: (r, v) =>
-        v === "Under 50K" ? r.budget < 50000 : v === "50K – 200K" ? r.budget >= 50000 && r.budget <= 200000 : r.budget > 200000,
+        v === "Under 50K"
+          ? r.budget < 50000
+          : v === "50K – 200K"
+            ? r.budget >= 50000 && r.budget <= 200000
+            : r.budget > 200000,
     },
     {
       key: "date",
@@ -140,7 +180,7 @@ function CampaignsPage() {
                   { header: "Created", accessor: (c) => c.created },
                   { header: "Deadline", accessor: (c) => c.deadline },
                 ],
-                campaignsList
+                campaignsList,
               )
             }
           >
@@ -150,10 +190,21 @@ function CampaignsPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Total campaigns" value={String(campaignsList.length)} icon={Megaphone} delta={9.4} />
+        <StatCard
+          label="Total campaigns"
+          value={String(campaignsList.length)}
+          icon={Megaphone}
+          delta={9.4}
+        />
         <StatCard label="Active now" value={String(active)} icon={Megaphone} delta={5.2} />
         <StatCard label="Completed" value={String(completed)} icon={CheckCircle2} delta={13.8} />
-        <StatCard label="Committed budget" value={money(totalBudget)} icon={Wallet} delta={7.1} hint={`${creators} creator slots`} />
+        <StatCard
+          label="Committed budget"
+          value={money(totalBudget)}
+          icon={Wallet}
+          delta={7.1}
+          hint={`${creators} creator slots`}
+        />
       </div>
 
       <div className="w-full overflow-x-auto">
@@ -163,7 +214,9 @@ function CampaignsPage() {
           filters={filters}
           getId={(r) => r.id}
           searchPlaceholder="Search campaign or business…"
-          search={(r, t) => r.title.toLowerCase().includes(t) || r.business.toLowerCase().includes(t)}
+          search={(r, t) =>
+            r.title.toLowerCase().includes(t) || r.business.toLowerCase().includes(t)
+          }
           onRowClick={(r) => navigate({ to: "/campaigns/$id", params: { id: r.id } })}
           mobileCard={(r) => (
             <Link to="/campaigns/$id" params={{ id: r.id }} className="block">
@@ -183,13 +236,22 @@ function CampaignsPage() {
           rowAction={(r) => (
             <ActionMenu
               items={[
-                { label: "View campaign", node: <Link to="/campaigns/$id" params={{ id: r.id }}>View campaign</Link> },
+                {
+                  label: "View campaign",
+                  node: (
+                    <Link to="/campaigns/$id" params={{ id: r.id }}>
+                      View campaign
+                    </Link>
+                  ),
+                },
                 {
                   label: "Feature campaign",
                   onSelect: async () => {
                     try {
                       await adminApi.moderateCampaign(r.id, { is_featured: true });
-                      setCampaignsList((all) => all.map((c) => (c.id === r.id ? { ...c, isFeatured: true } : c)));
+                      setCampaignsList((all) =>
+                        all.map((c) => (c.id === r.id ? { ...c, isFeatured: true } : c)),
+                      );
                     } catch {}
                   },
                 },
@@ -200,7 +262,9 @@ function CampaignsPage() {
                   onSelect: async () => {
                     try {
                       await adminApi.moderateCampaign(r.id, { status: "CANCELLED" });
-                      setCampaignsList((all) => all.map((c) => (c.id === r.id ? { ...c, status: "cancelled" } : c)));
+                      setCampaignsList((all) =>
+                        all.map((c) => (c.id === r.id ? { ...c, status: "cancelled" } : c)),
+                      );
                     } catch {}
                   },
                 },

@@ -52,7 +52,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Admin Dashboard — Influencers.com SaaS Manager" },
       {
         property: "og:description",
-        content: "Platform overview for Influencers.com: creators, businesses, campaigns, websites and revenue.",
+        content:
+          "Platform overview for Influencers.com: creators, businesses, campaigns, websites and revenue.",
       },
     ],
   }),
@@ -191,22 +192,78 @@ function Dashboard() {
 
       {/* Primary KPI Top Metric Cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Influencers" value={compact(stats.totalInfluencers)} delta={stats.totalInfluencers > 0 ? 12.4 : 0} icon={Users} hint="registered creators" />
-        <StatCard label="Active Influencers" value={compact(stats.activeInfluencers)} delta={stats.activeInfluencers > 0 ? 8.1 : 0} icon={BadgeCheck} hint="active profile state" />
-        <StatCard label="Total Businesses" value={compact(stats.totalBusinesses)} delta={stats.totalBusinesses > 0 ? 6.7 : 0} icon={Building2} hint="brand partners" />
-        <StatCard label="Active Businesses" value={compact(stats.activeBusinesses)} delta={stats.activeBusinesses > 0 ? 4.2 : 0} icon={Building2} hint="verified brands" />
-        <StatCard label="Active Campaigns" value={String(stats.activeCampaigns)} delta={stats.activeCampaigns > 0 ? 15.3 : 0} icon={Megaphone} hint="marketplace briefs" />
-        <StatCard label="Total Websites" value={compact(stats.totalWebsites)} delta={stats.totalWebsites > 0 ? 9.8 : 0} icon={Globe} hint="hosted creator sites" />
-        <StatCard label="Monthly Revenue" value={money(stats.monthlyRevenue)} delta={stats.monthlyRevenue > 0 ? 11.2 : 0} icon={Wallet} hint="MRR ledger" />
-        <StatCard label="Pending Requests" value={String(stats.pendingRequests)} delta={0} icon={BadgeCheck} hint="awaiting moderation" />
+        <StatCard
+          label="Total Influencers"
+          value={compact(stats.totalInfluencers)}
+          delta={stats.totalInfluencers > 0 ? 12.4 : 0}
+          icon={Users}
+          hint="registered creators"
+        />
+        <StatCard
+          label="Active Influencers"
+          value={compact(stats.activeInfluencers)}
+          delta={stats.activeInfluencers > 0 ? 8.1 : 0}
+          icon={BadgeCheck}
+          hint="active profile state"
+        />
+        <StatCard
+          label="Total Businesses"
+          value={compact(stats.totalBusinesses)}
+          delta={stats.totalBusinesses > 0 ? 6.7 : 0}
+          icon={Building2}
+          hint="brand partners"
+        />
+        <StatCard
+          label="Active Businesses"
+          value={compact(stats.activeBusinesses)}
+          delta={stats.activeBusinesses > 0 ? 4.2 : 0}
+          icon={Building2}
+          hint="verified brands"
+        />
+        <StatCard
+          label="Active Campaigns"
+          value={String(stats.activeCampaigns)}
+          delta={stats.activeCampaigns > 0 ? 15.3 : 0}
+          icon={Megaphone}
+          hint="marketplace briefs"
+        />
+        <StatCard
+          label="Total Websites"
+          value={compact(stats.totalWebsites)}
+          delta={stats.totalWebsites > 0 ? 9.8 : 0}
+          icon={Globe}
+          hint="hosted creator sites"
+        />
+        <StatCard
+          label="Monthly Revenue"
+          value={money(stats.monthlyRevenue)}
+          delta={stats.monthlyRevenue > 0 ? 11.2 : 0}
+          icon={Wallet}
+          hint="MRR ledger"
+        />
+        <StatCard
+          label="Pending Requests"
+          value={String(stats.pendingRequests)}
+          delta={0}
+          icon={BadgeCheck}
+          hint="awaiting moderation"
+        />
       </div>
 
       {/* Quick actions panel */}
       <div className="panel p-3">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Quick actions</p>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Quick actions
+        </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           {QUICK.map((q) => (
-            <Button key={q.label} asChild variant="outline" size="sm" className="justify-start gap-2">
+            <Button
+              key={q.label}
+              asChild
+              variant="outline"
+              size="sm"
+              className="justify-start gap-2"
+            >
               <Link to={q.to}>
                 <q.icon className="size-4 text-primary" />
                 <span className="truncate">{q.label}</span>
@@ -237,8 +294,20 @@ function Dashboard() {
                 <YAxis tickLine={false} axisLine={false} tick={axis} />
                 {ChartTooltip()}
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Area type="monotone" dataKey="influencers" stroke="var(--chart-1)" fill="url(#gInf)" strokeWidth={2} />
-                <Area type="monotone" dataKey="businesses" stroke="var(--chart-2)" fill="url(#gBiz)" strokeWidth={2} />
+                <Area
+                  type="monotone"
+                  dataKey="influencers"
+                  stroke="var(--chart-1)"
+                  fill="url(#gInf)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="businesses"
+                  stroke="var(--chart-2)"
+                  fill="url(#gBiz)"
+                  strokeWidth={2}
+                />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -277,7 +346,13 @@ function Dashboard() {
                 <XAxis dataKey="month" tickLine={false} axisLine={false} tick={axis} />
                 <YAxis tickLine={false} axisLine={false} tick={axis} />
                 {ChartTooltip()}
-                <Line type="monotone" dataKey="influencers" stroke="var(--chart-1)" strokeWidth={2.5} dot={false} />
+                <Line
+                  type="monotone"
+                  dataKey="influencers"
+                  stroke="var(--chart-1)"
+                  strokeWidth={2.5}
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -291,7 +366,14 @@ function Dashboard() {
           {categoryData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={categoryData} dataKey="value" nameKey="name" innerRadius={52} outerRadius={86} paddingAngle={2}>
+                <Pie
+                  data={categoryData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={52}
+                  outerRadius={86}
+                  paddingAngle={2}
+                >
                   {categoryData.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
@@ -325,11 +407,16 @@ function Dashboard() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{c.title || c.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {c.business_name || c.business || "Brand"} · {c.category || "General"} · {c.location || "Global"}
+                      {c.business_name || c.business || "Brand"} · {c.category || "General"} ·{" "}
+                      {c.location || "Global"}
                     </p>
                   </div>
                   <span className="num hidden text-sm font-semibold sm:block">
-                    {c.budget_cents ? money(c.budget_cents, c.currency) : (c.budget ? money(c.budget, c.currency) : "—")}
+                    {c.budget_cents
+                      ? money(c.budget_cents, c.currency)
+                      : c.budget
+                        ? money(c.budget, c.currency)
+                        : "—"}
                   </span>
                   <StatusBadge value={(c.status || "draft").toLowerCase()} />
                 </div>
@@ -363,14 +450,21 @@ function Dashboard() {
                     params={{ id: String(i.id) }}
                     className="flex items-center gap-2.5 px-4 py-2 transition-colors hover:bg-muted/50"
                   >
-                    <UserAvatar src={i.avatar || i.photo_url} name={i.name || i.display_name} size={30} />
+                    <UserAvatar
+                      src={i.avatar || i.photo_url}
+                      name={i.name || i.display_name}
+                      size={30}
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{i.name || i.display_name}</p>
                       <p className="truncate text-xs text-muted-foreground">
-                        {i.location?.city || i.city || "Online"}, {i.location?.country || i.country || ""}
+                        {i.location?.city || i.city || "Online"},{" "}
+                        {i.location?.country || i.country || ""}
                       </p>
                     </div>
-                    <span className="num text-xs text-muted-foreground">{compact(i.followers || i.followers_count || 0)}</span>
+                    <span className="num text-xs text-muted-foreground">
+                      {compact(i.followers || i.followers_count || 0)}
+                    </span>
                   </Link>
                 ))}
               </div>

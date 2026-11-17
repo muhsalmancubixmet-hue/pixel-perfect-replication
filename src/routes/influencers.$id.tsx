@@ -21,11 +21,17 @@ export const Route = createFileRoute("/influencers/$id")({
       const mappedSocials = Array.isArray(res.socials)
         ? res.socials.map((s: any) => ({
             platform: s.platform_name || s.platform_slug || s.platform?.name || "Instagram",
-            username: s.username ? (s.username.startsWith("@") ? s.username : `@${s.username}`) : "@creator",
+            username: s.username
+              ? s.username.startsWith("@")
+                ? s.username
+                : `@${s.username}`
+              : "@creator",
             followers: Number(s.followers_count || 0),
             engagement: Number(s.engagement_rate || 0),
             verified: Boolean(s.is_verified),
-            lastSynced: s.last_synced_at ? new Date(s.last_synced_at).toLocaleDateString() : "Never",
+            lastSynced: s.last_synced_at
+              ? new Date(s.last_synced_at).toLocaleDateString()
+              : "Never",
           }))
         : [];
 
@@ -35,7 +41,9 @@ export const Route = createFileRoute("/influencers/$id")({
             title: p.title || "Portfolio Item",
             brand: p.brand_name || p.brand || "Independent",
             type: (p.media_type || p.format_tag || "image") as "image" | "video",
-            date: p.deliverable_date || (p.created_at ? new Date(p.created_at).toLocaleDateString() : "Recent"),
+            date:
+              p.deliverable_date ||
+              (p.created_at ? new Date(p.created_at).toLocaleDateString() : "Recent"),
           }))
         : [];
 
@@ -43,21 +51,35 @@ export const Route = createFileRoute("/influencers/$id")({
         ? res.services.map((s: any) => ({
             id: String(s.id),
             name: s.name || s.service_type_name || "Custom Deliverable",
-            price: Number(s.starting_price_cents ? s.starting_price_cents / 100 : s.price_cents ? s.price_cents / 100 : s.price || 0),
-            turnaround: s.turnaround_days ? `${s.turnaround_days} days` : (s.deliverables_spec || "3-5 days"),
+            price: Number(
+              s.starting_price_cents
+                ? s.starting_price_cents / 100
+                : s.price_cents
+                  ? s.price_cents / 100
+                  : s.price || 0,
+            ),
+            turnaround: s.turnaround_days
+              ? `${s.turnaround_days} days`
+              : s.deliverables_spec || "3-5 days",
           }))
         : [];
 
       const mappedActivity = Array.isArray(res.activity)
         ? res.activity.map((a: any) => ({
             date: a.created_at ? new Date(a.created_at).toLocaleString() : "Recent",
-            text: a.action ? `${a.action.replace(/_/g, " ")} (${a.actor_email || "System"})` : (a.text || "Event logged"),
+            text: a.action
+              ? `${a.action.replace(/_/g, " ")} (${a.actor_email || "System"})`
+              : a.text || "Event logged",
           }))
         : [];
 
-      const totalFollowers = mappedSocials.length > 0
-        ? mappedSocials.reduce((acc: number, curr: { followers: number }) => acc + curr.followers, 0)
-        : Number(res.views_count || 0);
+      const totalFollowers =
+        mappedSocials.length > 0
+          ? mappedSocials.reduce(
+              (acc: number, curr: { followers: number }) => acc + curr.followers,
+              0,
+            )
+          : Number(res.views_count || 0);
 
       const mapped: Influencer = {
         id: String(res.id),
@@ -66,19 +88,34 @@ export const Route = createFileRoute("/influencers/$id")({
         avatar: res.photo_url || res.avatar || "",
         bio: res.bio || res.about || "",
         categories: Array.isArray(res.categories)
-          ? res.categories.map((c: any) => (typeof c === "string" ? c : c.category?.name || c.name || "General"))
+          ? res.categories.map((c: any) =>
+              typeof c === "string" ? c : c.category?.name || c.name || "General",
+            )
           : ["Creator"],
         languages: Array.isArray(res.languages)
-          ? res.languages.map((l: any) => (typeof l === "string" ? l : l.language_name || l.language?.name || l.name || l.language_code || "English"))
+          ? res.languages.map((l: any) =>
+              typeof l === "string"
+                ? l
+                : l.language_name || l.language?.name || l.name || l.language_code || "English",
+            )
           : ["English"],
         location: {
-          city: res.primary_location_details?.name || res.primary_location?.name || res.location_text || res.primary_city || "Kochi",
+          city:
+            res.primary_location_details?.name ||
+            res.primary_location?.name ||
+            res.location_text ||
+            res.primary_city ||
+            "Kochi",
           district: "",
           region: "",
           country: res.primary_location_details?.country_code || "India",
           countryCode: res.primary_location_details?.country_code || "IN",
-          lat: res.primary_location_details?.latitude ? Number(res.primary_location_details.latitude) : 9.9312,
-          lng: res.primary_location_details?.longitude ? Number(res.primary_location_details.longitude) : 76.2673,
+          lat: res.primary_location_details?.latitude
+            ? Number(res.primary_location_details.latitude)
+            : 9.9312,
+          lng: res.primary_location_details?.longitude
+            ? Number(res.primary_location_details.longitude)
+            : 76.2673,
           currency: res.currency || "INR",
           languages: ["English"],
         },
@@ -87,23 +124,40 @@ export const Route = createFileRoute("/influencers/$id")({
         remoteAvailable: res.remote_available ?? true,
         currency: res.currency || "INR",
         followers: totalFollowers,
-        engagement: mappedSocials.length > 0 ? (mappedSocials.reduce((a: number, b: { engagement: number }) => a + b.engagement, 0) / mappedSocials.length) : 3.8,
-        platforms: mappedSocials.length > 0 ? Array.from(new Set(mappedSocials.map((s: { platform: string }) => s.platform))) : ["Instagram"],
+        engagement:
+          mappedSocials.length > 0
+            ? mappedSocials.reduce((a: number, b: { engagement: number }) => a + b.engagement, 0) /
+              mappedSocials.length
+            : 3.8,
+        platforms:
+          mappedSocials.length > 0
+            ? Array.from(new Set(mappedSocials.map((s: { platform: string }) => s.platform)))
+            : ["Instagram"],
         socials: mappedSocials,
         portfolio: mappedPortfolio,
         services: mappedServices,
-        verification: (res.verification_status ? res.verification_status.toLowerCase() : "unverified") as Influencer["verification"],
+        verification: (res.verification_status
+          ? res.verification_status.toLowerCase()
+          : "unverified") as Influencer["verification"],
         status: (res.status ? res.status.toLowerCase() : "active") as Influencer["status"],
-        websiteStatus: res.website?.is_published ? "published" : (res.website ? "draft" : "none"),
-        websiteUrl: res.website?.subdomain ? `http://${res.website.subdomain}.localhost:8081` : (res.website?.custom_domain || undefined),
+        websiteStatus: res.website?.is_published ? "published" : res.website ? "draft" : "none",
+        websiteUrl: res.website?.subdomain
+          ? `http://${res.website.subdomain}.${(import.meta.env as Record<string, string | undefined>)['VITE_PUBLIC_DOMAIN'] || "localhost:8082"}`
+          : res.website?.custom_domain || undefined,
         websiteTemplate: res.website?.template || res.website?.theme || "Standard",
         websiteVisits: res.website?.visitors_count || res.website?.page_views || 0,
-        websitePublished: res.website?.published_at ? new Date(res.website.published_at).toLocaleDateString() : undefined,
+        websitePublished: res.website?.published_at
+          ? new Date(res.website.published_at).toLocaleDateString()
+          : undefined,
         subscription: "Influencer Free",
         joined: res.account?.created_at
           ? new Date(res.account.created_at).toLocaleDateString()
-          : (res.created_at ? new Date(res.created_at).toLocaleDateString() : "Recent"),
-        lastLogin: res.account?.last_login ? new Date(res.account.last_login).toLocaleDateString() : "Never",
+          : res.created_at
+            ? new Date(res.created_at).toLocaleDateString()
+            : "Recent",
+        lastLogin: res.account?.last_login
+          ? new Date(res.account.last_login).toLocaleDateString()
+          : "Never",
         activity: mappedActivity,
       };
       return { influencer: mapped as Influencer };
@@ -116,7 +170,12 @@ export const Route = createFileRoute("/influencers/$id")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "Creator unavailable — SaaS Manager" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [
+          { title: "Creator unavailable — SaaS Manager" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     }
     const title = `${loaderData.influencer.name} — Creator profile`;
     return {
@@ -208,12 +267,18 @@ function InfluencerDetail() {
             <p className="mt-2 max-w-2xl text-sm">{inf.bio || "No biography provided."}</p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {inf.categories.map((c) => (
-                <span key={c} className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-accent-foreground">
+                <span
+                  key={c}
+                  className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-accent-foreground"
+                >
                   {c}
                 </span>
               ))}
               {inf.languages.map((l) => (
-                <span key={l} className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
+                <span
+                  key={l}
+                  className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
+                >
                   {l}
                 </span>
               ))}
@@ -289,7 +354,10 @@ function InfluencerDetail() {
                 </thead>
                 <tbody>
                   {inf.socials.map((s, idx) => (
-                    <tr key={`${s.platform}-${idx}`} className="border-b border-border/70 last:border-0">
+                    <tr
+                      key={`${s.platform}-${idx}`}
+                      className="border-b border-border/70 last:border-0"
+                    >
                       <td className="px-3 py-2.5 font-medium">{s.platform}</td>
                       <td className="num px-3 py-2.5 text-muted-foreground">{s.username}</td>
                       <td className="num px-3 py-2.5 font-semibold">{compact(s.followers)}</td>
@@ -351,14 +419,21 @@ function InfluencerDetail() {
         <TabsContent value="website" className="mt-3">
           <div className="panel p-4">
             {inf.websiteStatus === "none" ? (
-              <p className="text-sm text-muted-foreground">This creator has not configured or launched a bio website yet.</p>
+              <p className="text-sm text-muted-foreground">
+                This creator has not configured or launched a bio website yet.
+              </p>
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-2">
                   <Globe className="size-4 text-primary" />
                   <span className="num text-sm font-semibold">{inf.websiteUrl}</span>
                   <StatusBadge value={inf.websiteStatus} />
-                  <Button variant="ghost" size="sm" className="ml-auto gap-1.5" onClick={handlePreviewWebsite}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto gap-1.5"
+                    onClick={handlePreviewWebsite}
+                  >
                     Preview <ExternalLink className="size-3.5" />
                   </Button>
                 </div>
@@ -380,7 +455,17 @@ function InfluencerDetail() {
             <Field label="Last login" value={inf.lastLogin} />
             <Field label="Subscription" value={inf.subscription} />
             <Field label="Verification" value={<StatusBadge value={inf.verification} />} />
-            <Field label="Location" value={[inf.location.city, inf.location.district, inf.location.region, inf.location.country].filter(Boolean).join(", ")} />
+            <Field
+              label="Location"
+              value={[
+                inf.location.city,
+                inf.location.district,
+                inf.location.region,
+                inf.location.country,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            />
           </div>
         </TabsContent>
 

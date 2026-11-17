@@ -30,10 +30,14 @@ export const Route = createFileRoute("/social-platforms")({
       { title: "Social Platforms — Influencers.com SaaS Manager" },
       {
         name: "description",
-        content: "Enable, configure and expand the social networks creators can connect to Influencers.com.",
+        content:
+          "Enable, configure and expand the social networks creators can connect to Influencers.com.",
       },
       { property: "og:title", content: "Social Platforms — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Enable, configure and expand supported social networks." },
+      {
+        property: "og:description",
+        content: "Enable, configure and expand supported social networks.",
+      },
     ],
   }),
   component: SocialPlatformsPage,
@@ -54,37 +58,36 @@ function SocialPlatformsPage() {
   const [addLoading, setAddLoading] = useState(false);
 
   const loadData = () => {
-    Promise.allSettled([
-      adminApi.getSocialPlatforms(),
-      adminApi.getPlatformRequests(),
-    ]).then(([pRes, rRes]) => {
-      if (pRes.status === "fulfilled") {
-        const val = pRes.value?.results || (Array.isArray(pRes.value) ? pRes.value : []);
-        const mapped = val.map((p: any) => ({
-          id: p.id || p.code || p.name.toLowerCase(),
-          name: p.name,
-          color: p.color || "#4F46E5",
-          status: (p.status || "active").toLowerCase() as SocialPlatform["status"],
-          oauth: Boolean(p.oauth_enabled ?? p.oauth ?? true),
-          api: Boolean(p.api_enabled ?? p.api ?? true),
-          activeCreators: p.active_creators_count || p.activeCreators || 0,
-          created: p.created_at ? new Date(p.created_at).toLocaleDateString() : "Recent",
-        }));
-        setPlatformsList(mapped);
-      }
-      if (rRes.status === "fulfilled") {
-        const val = rRes.value?.results || (Array.isArray(rRes.value) ? rRes.value : []);
-        const mappedReq = val.map((r: any) => ({
-          id: r.id,
-          platform: r.platform_name || r.platform,
-          requestedBy: r.requester_name || r.requestedBy || "Creator",
-          votes: r.votes_count || r.votes || 1,
-          status: (r.status || "pending").toLowerCase() as PlatformRequest["status"],
-          requestedAt: r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recent",
-        }));
-        setRequestsList(mappedReq);
-      }
-    });
+    Promise.allSettled([adminApi.getSocialPlatforms(), adminApi.getPlatformRequests()]).then(
+      ([pRes, rRes]) => {
+        if (pRes.status === "fulfilled") {
+          const val = pRes.value?.results || (Array.isArray(pRes.value) ? pRes.value : []);
+          const mapped = val.map((p: any) => ({
+            id: p.id || p.code || p.name.toLowerCase(),
+            name: p.name,
+            color: p.color || "#4F46E5",
+            status: (p.status || "active").toLowerCase() as SocialPlatform["status"],
+            oauth: Boolean(p.oauth_enabled ?? p.oauth ?? true),
+            api: Boolean(p.api_enabled ?? p.api ?? true),
+            activeCreators: p.active_creators_count || p.activeCreators || 0,
+            created: p.created_at ? new Date(p.created_at).toLocaleDateString() : "Recent",
+          }));
+          setPlatformsList(mapped);
+        }
+        if (rRes.status === "fulfilled") {
+          const val = rRes.value?.results || (Array.isArray(rRes.value) ? rRes.value : []);
+          const mappedReq = val.map((r: any) => ({
+            id: r.id,
+            platform: r.platform_name || r.platform,
+            requestedBy: r.requester_name || r.requestedBy || "Creator",
+            votes: r.votes_count || r.votes || 1,
+            status: (r.status || "pending").toLowerCase() as PlatformRequest["status"],
+            requestedAt: r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recent",
+          }));
+          setRequestsList(mappedReq);
+        }
+      },
+    );
   };
 
   useEffect(() => {
@@ -116,21 +119,55 @@ function SocialPlatformsPage() {
       header: "OAuth",
       cell: (r) => <StatusBadge value={r.oauth ? "active" : "inactive"} />,
     },
-    { key: "api", header: "API", cell: (r) => <StatusBadge value={r.api ? "active" : "inactive"} /> },
-    { key: "creators", header: "Active creators", cell: (r) => <span className="num text-sm font-semibold">{compact(r.activeCreators)}</span> },
-    { key: "created", header: "Created", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span> },
+    {
+      key: "api",
+      header: "API",
+      cell: (r) => <StatusBadge value={r.api ? "active" : "inactive"} />,
+    },
+    {
+      key: "creators",
+      header: "Active creators",
+      cell: (r) => <span className="num text-sm font-semibold">{compact(r.activeCreators)}</span>,
+    },
+    {
+      key: "created",
+      header: "Created",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span>,
+    },
   ];
 
   const requestColumns: Column<PlatformRequest>[] = [
-    { key: "platform", header: "Requested platform", cell: (r) => <span className="text-sm font-medium">{r.platform}</span> },
-    { key: "by", header: "Requested by", cell: (r) => <span className="text-xs">{r.requestedBy}</span> },
-    { key: "url", header: "Profile URL", cell: (r) => <span className="num text-xs text-primary">{r.profileUrl}</span> },
-    { key: "date", header: "Request date", cell: (r) => <span className="num text-xs text-muted-foreground">{r.date}</span> },
+    {
+      key: "platform",
+      header: "Requested platform",
+      cell: (r) => <span className="text-sm font-medium">{r.platform}</span>,
+    },
+    {
+      key: "by",
+      header: "Requested by",
+      cell: (r) => <span className="text-xs">{r.requestedBy}</span>,
+    },
+    {
+      key: "url",
+      header: "Profile URL",
+      cell: (r) => <span className="num text-xs text-primary">{r.profileUrl}</span>,
+    },
+    {
+      key: "date",
+      header: "Request date",
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.date}</span>,
+    },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
   ];
 
   const requestFilters: FilterDef<PlatformRequest>[] = [
-    { key: "status", label: "Status", options: ["pending", "approved", "rejected"], match: (r, v) => r.status === v },
+    {
+      key: "status",
+      label: "Status",
+      options: ["pending", "approved", "rejected"],
+      match: (r, v) => r.status === v,
+    },
   ];
 
   return (
@@ -166,8 +203,18 @@ function SocialPlatformsPage() {
               searchPlaceholder="Search platform…"
               search={(r, t) => r.name.toLowerCase().includes(t)}
               filters={[
-                { key: "status", label: "Status", options: ["active", "inactive"], match: (r, v) => r.status === v },
-                { key: "oauth", label: "OAuth", options: ["supported", "not supported"], match: (r, v) => (v === "supported" ? r.oauth : !r.oauth) },
+                {
+                  key: "status",
+                  label: "Status",
+                  options: ["active", "inactive"],
+                  match: (r, v) => r.status === v,
+                },
+                {
+                  key: "oauth",
+                  label: "OAuth",
+                  options: ["supported", "not supported"],
+                  match: (r, v) => (v === "supported" ? r.oauth : !r.oauth),
+                },
               ]}
               mobileCard={(r) => (
                 <>
@@ -182,7 +229,8 @@ function SocialPlatformsPage() {
                     <StatusBadge value={r.status} className="ml-auto" />
                   </div>
                   <p className="num mt-2 text-xs text-muted-foreground">
-                    {compact(r.activeCreators)} creators · OAuth {r.oauth ? "yes" : "no"} · API {r.api ? "yes" : "no"}
+                    {compact(r.activeCreators)} creators · OAuth {r.oauth ? "yes" : "no"} · API{" "}
+                    {r.api ? "yes" : "no"}
                   </p>
                 </>
               )}
@@ -195,10 +243,17 @@ function SocialPlatformsPage() {
                       onSelect: async () => {
                         const newStatus = r.status === "active" ? "inactive" : "active";
                         try {
-                          await adminApi.updateSocialPlatform(r.id, { is_active: newStatus === "active" });
+                          await adminApi.updateSocialPlatform(r.id, {
+                            is_active: newStatus === "active",
+                          });
                         } catch {}
-                        setPlatformsList((all) => all.map((p) => p.id === r.id ? { ...p, status: newStatus } : p));
-                        saved(newStatus === "active" ? "Platform enabled" : "Platform disabled", r.name);
+                        setPlatformsList((all) =>
+                          all.map((p) => (p.id === r.id ? { ...p, status: newStatus } : p)),
+                        );
+                        saved(
+                          newStatus === "active" ? "Platform enabled" : "Platform disabled",
+                          r.name,
+                        );
                       },
                     },
                   ]}
@@ -210,8 +265,8 @@ function SocialPlatformsPage() {
 
         <TabsContent value="requests" className="mt-3">
           <p className="mb-3 text-sm text-muted-foreground">
-            Creators can request networks we don't support yet. Approving one creates a new platform without touching the
-            creator architecture.
+            Creators can request networks we don't support yet. Approving one creates a new platform
+            without touching the creator architecture.
           </p>
           <div className="w-full overflow-x-auto">
             <DataTable
@@ -220,7 +275,9 @@ function SocialPlatformsPage() {
               filters={requestFilters}
               getId={(r) => r.id}
               searchPlaceholder="Search request…"
-              search={(r, t) => r.platform.toLowerCase().includes(t) || r.requestedBy.toLowerCase().includes(t)}
+              search={(r, t) =>
+                r.platform.toLowerCase().includes(t) || r.requestedBy.toLowerCase().includes(t)
+              }
               mobileCard={(r) => (
                 <>
                   <div className="flex items-center gap-2">
@@ -242,7 +299,9 @@ function SocialPlatformsPage() {
                       onSelect: async () => {
                         try {
                           await adminApi.reviewPlatformRequest(r.id, { status: "REJECTED" });
-                          setRequestsList((all) => all.map((x) => x.id === r.id ? { ...x, status: "rejected" } : x));
+                          setRequestsList((all) =>
+                            all.map((x) => (x.id === r.id ? { ...x, status: "rejected" } : x)),
+                          );
                         } catch {}
                         saved("Request rejected", r.platform);
                       },
@@ -262,7 +321,9 @@ function SocialPlatformsPage() {
             <DialogTitle className="flex items-center gap-2">
               <Settings2 className="size-4" /> Configure {configure?.name}
             </DialogTitle>
-            <DialogDescription>Connection settings used by the creator and business apps.</DialogDescription>
+            <DialogDescription>
+              Connection settings used by the creator and business apps.
+            </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <div className="grid gap-1.5">
@@ -271,7 +332,10 @@ function SocialPlatformsPage() {
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="redirect">Redirect URL</Label>
-              <Input id="redirect" defaultValue={`https://influencers.com/oauth/${configure?.name.toLowerCase()}`} />
+              <Input
+                id="redirect"
+                defaultValue={`https://influencers.com/oauth/${configure?.name.toLowerCase()}`}
+              />
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <span className="text-sm">Enable OAuth login</span>
@@ -301,7 +365,8 @@ function SocialPlatformsPage() {
           <DialogHeader>
             <DialogTitle>Approve &amp; create {approve?.platform}</DialogTitle>
             <DialogDescription>
-              Requested by {approve?.requestedBy}. Creating the platform makes it available to every creator immediately.
+              Requested by {approve?.requestedBy}. Creating the platform makes it available to every
+              creator immediately.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3">
@@ -388,14 +453,18 @@ function SocialPlatformsPage() {
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <div>
                 <p className="text-sm font-medium">OAuth Integration</p>
-                <p className="text-xs text-muted-foreground">Support automated OAuth token connection</p>
+                <p className="text-xs text-muted-foreground">
+                  Support automated OAuth token connection
+                </p>
               </div>
               <Switch checked={newPlatformOAuth} onCheckedChange={setNewPlatformOAuth} />
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <div>
                 <p className="text-sm font-medium">Metrics API Sync</p>
-                <p className="text-xs text-muted-foreground">Sync live follower counts and engagement</p>
+                <p className="text-xs text-muted-foreground">
+                  Sync live follower counts and engagement
+                </p>
               </div>
               <Switch checked={newPlatformApi} onCheckedChange={setNewPlatformApi} />
             </div>
@@ -424,7 +493,10 @@ function SocialPlatformsPage() {
                   setNewPlatformApi(false);
                   loadData();
                 } catch (err: any) {
-                  const msg = err?.response?.data?.detail || err?.response?.data?.name?.[0] || "Failed to create platform";
+                  const msg =
+                    err?.response?.data?.detail ||
+                    err?.response?.data?.name?.[0] ||
+                    "Failed to create platform";
                   saved("Create failed", msg);
                 } finally {
                   setAddLoading(false);

@@ -10,22 +10,48 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type FieldDef =
-  | { name: string; label: string; type?: "text" | "email" | "tel" | "number"; placeholder?: string; required?: boolean }
+  | {
+      name: string;
+      label: string;
+      type?: "text" | "email" | "tel" | "number";
+      placeholder?: string;
+      required?: boolean;
+    }
   | { name: string; label: string; type: "textarea"; placeholder?: string; required?: boolean }
   | { name: string; label: string; type: "select"; options: readonly string[]; required?: boolean }
   | { name: string; label: string; type: "switch" };
 
 export type FormValues = Record<string, string | boolean>;
 
-function Fields({ fields, values, set }: { fields: FieldDef[]; values: FormValues; set: (k: string, v: string | boolean) => void }) {
+function Fields({
+  fields,
+  values,
+  set,
+}: {
+  fields: FieldDef[];
+  values: FormValues;
+  set: (k: string, v: string | boolean) => void;
+}) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {fields.map((f) => {
@@ -33,9 +59,16 @@ function Fields({ fields, values, set }: { fields: FieldDef[]; values: FormValue
         const wide = f.type === "textarea";
         if (f.type === "switch") {
           return (
-            <div key={f.name} className="flex items-center justify-between rounded-md border border-border px-3 py-2 sm:col-span-2">
+            <div
+              key={f.name}
+              className="flex items-center justify-between rounded-md border border-border px-3 py-2 sm:col-span-2"
+            >
               <Label htmlFor={id}>{f.label}</Label>
-              <Switch id={id} checked={Boolean(values[f.name])} onCheckedChange={(v) => set(f.name, v)} />
+              <Switch
+                id={id}
+                checked={Boolean(values[f.name])}
+                onCheckedChange={(v) => set(f.name, v)}
+              />
             </div>
           );
         }
@@ -56,7 +89,13 @@ function Fields({ fields, values, set }: { fields: FieldDef[]; values: FormValue
                 </SelectContent>
               </Select>
             ) : f.type === "textarea" ? (
-              <Textarea id={id} rows={3} placeholder={f.placeholder} value={String(values[f.name] ?? "")} onChange={(e) => set(f.name, e.target.value)} />
+              <Textarea
+                id={id}
+                rows={3}
+                placeholder={f.placeholder}
+                value={String(values[f.name] ?? "")}
+                onChange={(e) => set(f.name, e.target.value)}
+              />
             ) : (
               <Input
                 id={id}
@@ -81,7 +120,10 @@ function useForm(open: boolean, initial: FormValues) {
   useEffect(() => {
     if (open) setValues(JSON.parse(key) as FormValues);
   }, [open, key]);
-  return [values, (k: string, v: string | boolean) => setValues((s) => ({ ...s, [k]: v }))] as const;
+  return [
+    values,
+    (k: string, v: string | boolean) => setValues((s) => ({ ...s, [k]: v })),
+  ] as const;
 }
 
 function missing(fields: FieldDef[], values: FormValues) {
@@ -101,7 +143,17 @@ interface FormProps {
 }
 
 /** Centered modal form (bottom-friendly on mobile via 95vw + scrollable body). */
-export function FormDialog({ open, onOpenChange, title, description, fields, initial = {}, submitLabel = "Save", onSubmit, children }: FormProps) {
+export function FormDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  fields,
+  initial = {},
+  submitLabel = "Save",
+  onSubmit,
+  children,
+}: FormProps) {
   const [values, set] = useForm(open, initial);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -133,7 +185,16 @@ export function FormDialog({ open, onOpenChange, title, description, fields, ini
 }
 
 /** Side drawer form used for edits. */
-export function FormDrawer({ open, onOpenChange, title, description, fields, initial = {}, submitLabel = "Save changes", onSubmit }: FormProps) {
+export function FormDrawer({
+  open,
+  onOpenChange,
+  title,
+  description,
+  fields,
+  initial = {},
+  submitLabel = "Save changes",
+  onSubmit,
+}: FormProps) {
   const [values, set] = useForm(open, initial);
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -196,7 +257,13 @@ export function ReasonDialog({
         </DialogHeader>
         <div className="grid gap-1.5">
           <Label htmlFor="reason">Reason (saved to audit log)</Label>
-          <Textarea id="reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain why…" />
+          <Textarea
+            id="reason"
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Explain why…"
+          />
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" className="h-10" onClick={() => onOpenChange(false)}>
@@ -262,4 +329,5 @@ export function ConfirmDialog({
   );
 }
 
-export const saved = (title: string, description?: string) => toast.success(title, description ? { description } : undefined);
+export const saved = (title: string, description?: string) =>
+  toast.success(title, description ? { description } : undefined);

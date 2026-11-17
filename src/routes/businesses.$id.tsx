@@ -28,9 +28,15 @@ export const Route = createFileRoute("/businesses/$id")({
             about: biz.about || "No profile bio provided.",
             location: biz.location || { city: biz.hq_city || "Remote", country: "Global" },
             status: (biz.status || "active").toLowerCase(),
-            verification: (biz.verification_status || biz.verification || "unverified").toLowerCase(),
+            verification: (
+              biz.verification_status ||
+              biz.verification ||
+              "unverified"
+            ).toLowerCase(),
             subscription: "Pro",
-            joined: biz.joined || (biz.created_at ? new Date(biz.created_at).toLocaleDateString() : "Recent"),
+            joined:
+              biz.joined ||
+              (biz.created_at ? new Date(biz.created_at).toLocaleDateString() : "Recent"),
             campaigns: biz.campaigns || 0,
             activity: [],
           },
@@ -45,7 +51,12 @@ export const Route = createFileRoute("/businesses/$id")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "Business unavailable — SaaS Manager" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [
+          { title: "Business unavailable — SaaS Manager" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     }
     const title = `${loaderData.business.name} — Business account`;
     return {
@@ -96,7 +107,9 @@ function BusinessDetail() {
         setBizPayments(val);
       }
     });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [biz.id, biz.name]);
 
   const handleSuspend = async () => {
@@ -154,7 +167,12 @@ function BusinessDetail() {
           <h3 className="mb-2 text-sm font-semibold">Subscription</h3>
           <Field label="Plan" value={biz.subscription} />
           <Field label="Billing" value="Monthly · UPI autopay" />
-          <Field label="Seats" value={biz.subscription === "Agency" ? "Unlimited" : biz.subscription === "Pro" ? "3" : "1"} />
+          <Field
+            label="Seats"
+            value={
+              biz.subscription === "Agency" ? "Unlimited" : biz.subscription === "Pro" ? "3" : "1"
+            }
+          />
           <Field label="Renews" value="05 Oct 2026" />
         </div>
         <div className="panel p-4">
@@ -176,7 +194,9 @@ function BusinessDetail() {
 
         <TabsContent value="campaigns" className="mt-3">
           <div className="panel divide-y divide-border/70">
-            {bizCampaigns.length === 0 && <p className="p-4 text-sm text-muted-foreground">No campaigns yet.</p>}
+            {bizCampaigns.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">No campaigns yet.</p>
+            )}
             {bizCampaigns.map((c) => (
               <div key={c.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5">
                 <div className="min-w-0 flex-1">
@@ -194,7 +214,9 @@ function BusinessDetail() {
 
         <TabsContent value="requirements" className="mt-3">
           <div className="panel divide-y divide-border/70">
-            {bizRequirements.length === 0 && <p className="p-4 text-sm text-muted-foreground">No requirements posted.</p>}
+            {bizRequirements.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">No requirements posted.</p>
+            )}
             {bizRequirements.map((r) => (
               <div key={r.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5">
                 <div className="min-w-0 flex-1">
@@ -212,7 +234,9 @@ function BusinessDetail() {
 
         <TabsContent value="payments" className="mt-3">
           <div className="panel divide-y divide-border/70">
-            {bizPayments.length === 0 && <p className="p-4 text-sm text-muted-foreground">No payments recorded.</p>}
+            {bizPayments.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">No payments recorded.</p>
+            )}
             {bizPayments.map((p) => (
               <div key={p.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5">
                 <div className="min-w-0 flex-1">

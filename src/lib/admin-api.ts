@@ -1,15 +1,15 @@
-import { apiClient } from './api-client';
+import { apiClient } from "./api-client";
 
 export const adminApi = {
   // Executive Dashboard Stats & Analytics
   async getDashboardStats() {
-    const res = await apiClient.get('/admin/dashboard/stats/');
+    const res = await apiClient.get("/admin/dashboard/stats/");
     return res.data;
   },
 
   // Influencers
   async getInfluencers(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/influencers/', { params });
+    const res = await apiClient.get("/admin/influencers/", { params });
     return res.data;
   },
 
@@ -18,19 +18,28 @@ export const adminApi = {
     return res.data;
   },
 
-  async moderateInfluencer(id: string, data: { verification_status?: string; status?: string; is_featured?: boolean }) {
+  async moderateInfluencer(
+    id: string,
+    data: { verification_status?: string; status?: string; is_featured?: boolean },
+  ) {
     const res = await apiClient.patch(`/admin/influencers/${id}/`, data);
     return res.data;
   },
 
-  async createInfluencer(data: { name: string; handle: string; email: string; category?: string; tier?: string }) {
-    const res = await apiClient.post('/admin/influencers/', data);
+  async createInfluencer(data: {
+    name: string;
+    handle: string;
+    email: string;
+    category?: string;
+    tier?: string;
+  }) {
+    const res = await apiClient.post("/admin/influencers/", data);
     return res.data;
   },
 
   // Businesses
   async getBusinesses(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/businesses/', { params });
+    const res = await apiClient.get("/admin/businesses/", { params });
     return res.data;
   },
 
@@ -46,7 +55,7 @@ export const adminApi = {
 
   // Campaigns
   async getCampaigns(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/campaigns/', { params });
+    const res = await apiClient.get("/admin/campaigns/", { params });
     return res.data;
   },
 
@@ -62,7 +71,7 @@ export const adminApi = {
 
   // Requirements
   async getRequirements(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/requirements/', { params });
+    const res = await apiClient.get("/admin/requirements/", { params });
     return res.data;
   },
 
@@ -78,7 +87,7 @@ export const adminApi = {
 
   // Websites & Custom Domains
   async getWebsites(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/websites/', { params });
+    const res = await apiClient.get("/admin/websites/", { params });
     return res.data;
   },
 
@@ -93,7 +102,7 @@ export const adminApi = {
   },
 
   async getDomains(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/domains/', { params });
+    const res = await apiClient.get("/admin/domains/", { params });
     return res.data;
   },
 
@@ -104,27 +113,34 @@ export const adminApi = {
 
   // Taxonomies
   async getTaxonomies() {
-    const res = await apiClient.get('/admin/taxonomies/');
+    const res = await apiClient.get("/admin/taxonomies/");
     return res.data;
   },
 
   async getCategories() {
-    const res = await apiClient.get('/admin/taxonomies/categories/');
+    const res = await apiClient.get("/admin/taxonomies/categories/");
     return res.data;
   },
 
   async createCategory(data: { name: string; slug?: string; description?: string }) {
-    const res = await apiClient.post('/admin/taxonomies/categories/', data);
+    const res = await apiClient.post("/admin/taxonomies/categories/", data);
     return res.data;
   },
 
   async getLocations(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/taxonomies/locations/', { params });
+    const res = await apiClient.get("/admin/taxonomies/locations/", { params });
     return res.data;
   },
 
-  async createLocation(data: { name: string; type: string; parent?: string | undefined; country_code?: string | undefined; latitude?: number | string | undefined; longitude?: number | string | undefined }) {
-    const res = await apiClient.post('/admin/taxonomies/locations/', data);
+  async createLocation(data: {
+    name: string;
+    type: string;
+    parent?: string | undefined;
+    country_code?: string | undefined;
+    latitude?: number | string | undefined;
+    longitude?: number | string | undefined;
+  }) {
+    const res = await apiClient.post("/admin/taxonomies/locations/", data);
     return res.data;
   },
 
@@ -135,16 +151,35 @@ export const adminApi = {
 
   // Creator Deliverable Service Types
   async getServiceTypes(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/service-types/', { params });
+    const res = await apiClient.get("/admin/service-types/", { params });
     return res.data;
   },
 
-  async createServiceType(data: { name: string; platform?: string; avgPrice?: number | string; avg_price?: number | string; deliverables?: string; deliverables_template?: string; is_active?: boolean }) {
-    const res = await apiClient.post('/admin/service-types/', data);
+  async createServiceType(data: {
+    name: string;
+    platform?: string;
+    avgPrice?: number | string;
+    avg_price?: number | string;
+    deliverables?: string;
+    deliverables_template?: string;
+    is_active?: boolean;
+  }) {
+    const res = await apiClient.post("/admin/service-types/", data);
     return res.data;
   },
 
-  async updateServiceType(id: string, data: Partial<{ name: string; platform?: string; avgPrice?: number | string; avg_price?: number | string; deliverables?: string; deliverables_template?: string; is_active?: boolean }>) {
+  async updateServiceType(
+    id: string,
+    data: Partial<{
+      name: string;
+      platform?: string;
+      avgPrice?: number | string;
+      avg_price?: number | string;
+      deliverables?: string;
+      deliverables_template?: string;
+      is_active?: boolean;
+    }>,
+  ) {
     const res = await apiClient.patch(`/admin/service-types/${id}/`, data);
     return res.data;
   },
@@ -156,22 +191,38 @@ export const adminApi = {
 
   // Social Platforms
   async getSocialPlatforms() {
-    const res = await apiClient.get('/admin/social-platforms/');
+    const res = await apiClient.get("/admin/social-platforms/");
     return res.data;
   },
 
-  async createSocialPlatform(data: { name: string; code?: string; color_code?: string; color?: string; supports_oauth?: boolean; supports_api?: boolean; icon_name?: string }) {
-    const res = await apiClient.post('/admin/social-platforms/', data);
+  async createSocialPlatform(data: {
+    name: string;
+    code?: string;
+    color_code?: string;
+    color?: string;
+    supports_oauth?: boolean;
+    supports_api?: boolean;
+    icon_name?: string;
+  }) {
+    const res = await apiClient.post("/admin/social-platforms/", data);
     return res.data;
   },
 
-  async updateSocialPlatform(id: string, data: Partial<{ is_active?: boolean; supports_oauth?: boolean; supports_api?: boolean; color_code?: string }>) {
+  async updateSocialPlatform(
+    id: string,
+    data: Partial<{
+      is_active?: boolean;
+      supports_oauth?: boolean;
+      supports_api?: boolean;
+      color_code?: string;
+    }>,
+  ) {
     const res = await apiClient.patch(`/admin/social-platforms/${id}/`, data);
     return res.data;
   },
 
   async getPlatformRequests(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/social-platforms/requests/', { params });
+    const res = await apiClient.get("/admin/social-platforms/requests/", { params });
     return res.data;
   },
 
@@ -182,7 +233,7 @@ export const adminApi = {
 
   // Support
   async getSupportTickets(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/support/tickets/', { params });
+    const res = await apiClient.get("/admin/support/tickets/", { params });
     return res.data;
   },
 
@@ -208,22 +259,22 @@ export const adminApi = {
 
   // Billing & Reports
   async getBillingReports() {
-    const res = await apiClient.get('/admin/billing/reports/');
+    const res = await apiClient.get("/admin/billing/reports/");
     return res.data;
   },
 
   async getBillingPlans() {
-    const res = await apiClient.get('/admin/billing/plans/');
+    const res = await apiClient.get("/admin/billing/plans/");
     return res.data;
   },
 
   async createBillingPlan(data: Record<string, any>) {
-    const res = await apiClient.post('/admin/billing/plans/', data);
+    const res = await apiClient.post("/admin/billing/plans/", data);
     return res.data;
   },
 
   async getPayments(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/billing/payments/', { params });
+    const res = await apiClient.get("/admin/billing/payments/", { params });
     return res.data;
   },
 
@@ -234,23 +285,28 @@ export const adminApi = {
 
   // Audit Logs & Notifications
   async getAuditLogs(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/audit-logs/', { params });
+    const res = await apiClient.get("/admin/audit-logs/", { params });
     return res.data;
   },
 
   async getNotifications(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/notifications/', { params });
+    const res = await apiClient.get("/admin/notifications/", { params });
     return res.data;
   },
 
-  async createNotification(data: { title: string; message: string; audience?: string; kind?: string }) {
-    const res = await apiClient.post('/admin/notifications/', data);
+  async createNotification(data: {
+    title: string;
+    message: string;
+    audience?: string;
+    kind?: string;
+  }) {
+    const res = await apiClient.post("/admin/notifications/", data);
     return res.data;
   },
 
   // Settings
   async getSettings() {
-    const res = await apiClient.get('/admin/settings/');
+    const res = await apiClient.get("/admin/settings/");
     return res.data;
   },
 
@@ -261,43 +317,53 @@ export const adminApi = {
 
   // Staff & RBAC
   async getStaff(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/accounts/staff/', { params });
+    const res = await apiClient.get("/admin/accounts/staff/", { params });
     return res.data;
   },
 
-  async inviteStaff(data: { email: string; role_template_id: string; first_name?: string; last_name?: string }) {
-    const res = await apiClient.post('/admin/accounts/staff/', data);
+  async inviteStaff(data: {
+    email: string;
+    role_template_id: string;
+    first_name?: string;
+    last_name?: string;
+  }) {
+    const res = await apiClient.post("/admin/accounts/staff/", data);
     return res.data;
   },
 
   async getRoleTemplates() {
-    const res = await apiClient.get('/admin/accounts/role-templates/');
+    const res = await apiClient.get("/admin/accounts/role-templates/");
     return res.data;
   },
 
   async getStaffInvitations() {
-    const res = await apiClient.get('/admin/accounts/staff/invitations/');
+    const res = await apiClient.get("/admin/accounts/staff/invitations/");
     return res.data;
   },
 
-  async acceptStaffInvite(data: { token: string; password: string; first_name?: string; last_name?: string }) {
-    const res = await apiClient.post('/auth/staff/invite/accept/', data);
+  async acceptStaffInvite(data: {
+    token: string;
+    password: string;
+    first_name?: string;
+    last_name?: string;
+  }) {
+    const res = await apiClient.post("/auth/staff/invite/accept/", data);
     return res.data;
   },
 
   async revokeStaffInvite(token: string) {
-    const res = await apiClient.post('/auth/staff/invite/revoke/', { token });
+    const res = await apiClient.post("/auth/staff/invite/revoke/", { token });
     return res.data;
   },
 
   async getVerificationQueue() {
-    const res = await apiClient.get('/admin/verification/queue/');
+    const res = await apiClient.get("/admin/verification/queue/");
     return res.data;
   },
 
   // Media Assets (REQ-ADM-02)
   async getMediaAssets(params?: Record<string, string | number | undefined>) {
-    const res = await apiClient.get('/admin/media/', { params });
+    const res = await apiClient.get("/admin/media/", { params });
     return res.data;
   },
 

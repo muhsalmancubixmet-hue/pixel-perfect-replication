@@ -17,9 +17,15 @@ export const Route = createFileRoute("/support/")({
   head: () => ({
     meta: [
       { title: "Support Tickets — Influencers.com SaaS Manager" },
-      { name: "description", content: "Triage and resolve support tickets from creators and businesses." },
+      {
+        name: "description",
+        content: "Triage and resolve support tickets from creators and businesses.",
+      },
       { property: "og:title", content: "Support Tickets — Influencers.com SaaS Manager" },
-      { property: "og:description", content: "Triage and resolve support tickets from creators and businesses." },
+      {
+        property: "og:description",
+        content: "Triage and resolve support tickets from creators and businesses.",
+      },
     ],
   }),
   component: SupportPage,
@@ -31,7 +37,8 @@ function SupportPage() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getSupportTickets()
+    adminApi
+      .getSupportTickets()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
@@ -50,20 +57,28 @@ function SupportPage() {
       .catch((err) => {
         console.warn("Could not load live support tickets:", err);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const open = ticketsList.filter((t) => t.status === "open").length;
   const progress = ticketsList.filter((t) => t.status === "in progress").length;
   const urgent = ticketsList.filter((t) => t.priority === "urgent").length;
-  const resolved = ticketsList.filter((t) => t.status === "resolved" || t.status === "closed").length;
+  const resolved = ticketsList.filter(
+    (t) => t.status === "resolved" || t.status === "closed",
+  ).length;
 
   const columns: Column<Ticket>[] = [
     {
       key: "id",
       header: "Ticket",
       cell: (r) => (
-        <Link to="/support/$id" params={{ id: r.id }} className="num text-xs font-semibold hover:underline">
+        <Link
+          to="/support/$id"
+          params={{ id: r.id }}
+          className="num text-xs font-semibold hover:underline"
+        >
           {r.id}
         </Link>
       ),
@@ -72,33 +87,57 @@ function SupportPage() {
       key: "subject",
       header: "Subject",
       cell: (r) => (
-        <Link
-          to="/support/$id"
-          params={{ id: r.id }}
-          className="group/link block min-w-0"
-        >
+        <Link to="/support/$id" params={{ id: r.id }} className="group/link block min-w-0">
           <p className="truncate text-sm font-medium group-hover/link:underline">{r.subject}</p>
           <p className="truncate text-xs text-muted-foreground">{r.user}</p>
         </Link>
       ),
     },
-    { key: "category", header: "Category", cell: (r) => <span className="text-xs">{r.category}</span> },
+    {
+      key: "category",
+      header: "Category",
+      cell: (r) => <span className="text-xs">{r.category}</span>,
+    },
     { key: "priority", header: "Priority", cell: (r) => <StatusBadge value={r.priority} /> },
     { key: "status", header: "Status", cell: (r) => <StatusBadge value={r.status} /> },
-    { key: "created", header: "Created", secondary: true, cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span> },
-    { key: "assignee", header: "Assigned", cell: (r) => <span className="text-xs">{r.assignee}</span> },
+    {
+      key: "created",
+      header: "Created",
+      secondary: true,
+      cell: (r) => <span className="num text-xs text-muted-foreground">{r.created}</span>,
+    },
+    {
+      key: "assignee",
+      header: "Assigned",
+      cell: (r) => <span className="text-xs">{r.assignee}</span>,
+    },
   ];
 
   const filters: FilterDef<Ticket>[] = [
-    { key: "status", label: "Status", options: ["open", "in progress", "waiting", "resolved", "closed"], match: (r, v) => r.status === v },
-    { key: "priority", label: "Priority", options: ["low", "medium", "high", "urgent"], match: (r, v) => r.priority === v },
+    {
+      key: "status",
+      label: "Status",
+      options: ["open", "in progress", "waiting", "resolved", "closed"],
+      match: (r, v) => r.status === v,
+    },
+    {
+      key: "priority",
+      label: "Priority",
+      options: ["low", "medium", "high", "urgent"],
+      match: (r, v) => r.priority === v,
+    },
     {
       key: "category",
       label: "Category",
       options: ["Account", "Billing", "Website", "Domain", "Campaign", "Verification"],
       match: (r, v) => r.category === v,
     },
-    { key: "assignee", label: "Assignee", options: [...new Set(ticketsList.map((t) => t.assignee))], match: (r, v) => r.assignee === v },
+    {
+      key: "assignee",
+      label: "Assignee",
+      options: [...new Set(ticketsList.map((t) => t.assignee))],
+      match: (r, v) => r.assignee === v,
+    },
   ];
 
   return (
@@ -122,7 +161,7 @@ function SupportPage() {
                   { header: "Category", accessor: (t) => t.category },
                   { header: "Created", accessor: (t) => t.created },
                 ],
-                ticketsList
+                ticketsList,
               )
             }
           >
@@ -145,7 +184,11 @@ function SupportPage() {
           filters={filters}
           getId={(r) => r.id}
           searchPlaceholder="Search ticket, subject or user…"
-          search={(r, t) => r.id.toLowerCase().includes(t) || r.subject.toLowerCase().includes(t) || r.user.toLowerCase().includes(t)}
+          search={(r, t) =>
+            r.id.toLowerCase().includes(t) ||
+            r.subject.toLowerCase().includes(t) ||
+            r.user.toLowerCase().includes(t)
+          }
           onRowClick={(r) => navigate({ to: "/support/$id", params: { id: r.id } })}
           mobileCard={(r) => (
             <Link to="/support/$id" params={{ id: r.id }} className="block">
@@ -164,13 +207,22 @@ function SupportPage() {
           rowAction={(r) => (
             <ActionMenu
               items={[
-                { label: "Open ticket", node: <Link to="/support/$id" params={{ id: r.id }}>Open ticket</Link> },
+                {
+                  label: "Open ticket",
+                  node: (
+                    <Link to="/support/$id" params={{ id: r.id }}>
+                      Open ticket
+                    </Link>
+                  ),
+                },
                 {
                   label: "Mark resolved",
                   onSelect: async () => {
                     try {
                       await adminApi.updateSupportTicket(r.id, { status: "RESOLVED" });
-                      setTicketsList((all) => all.map((t) => t.id === r.id ? { ...t, status: "resolved" } : t));
+                      setTicketsList((all) =>
+                        all.map((t) => (t.id === r.id ? { ...t, status: "resolved" } : t)),
+                      );
                     } catch {}
                     saved("Ticket resolved", r.id);
                   },
@@ -182,7 +234,9 @@ function SupportPage() {
                   onSelect: async () => {
                     try {
                       await adminApi.updateSupportTicket(r.id, { status: "CLOSED" });
-                      setTicketsList((all) => all.map((t) => t.id === r.id ? { ...t, status: "closed" } : t));
+                      setTicketsList((all) =>
+                        all.map((t) => (t.id === r.id ? { ...t, status: "closed" } : t)),
+                      );
                     } catch {}
                     saved("Ticket closed", r.id);
                   },

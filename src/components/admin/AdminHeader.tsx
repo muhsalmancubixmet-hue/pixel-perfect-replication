@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, ChevronDown, Plus, Share2, Tags, TrendingUp, UserPlus, Building2, BadgeCheck } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  Plus,
+  Share2,
+  Tags,
+  TrendingUp,
+  UserPlus,
+  Building2,
+  BadgeCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { clearSession, getSession } from "@/lib/auth";
 
@@ -42,22 +52,27 @@ export function AdminHeader() {
 
   useEffect(() => {
     let active = true;
-    adminApi.getNotifications()
+    adminApi
+      .getNotifications()
       .then((res: any) => {
         if (!active) return;
         const list = res?.results || (Array.isArray(res) ? res : []);
-        setNotifs(list.map((n: any) => ({
-          id: n.id,
-          title: n.title,
-          message: n.message,
-          audience: n.audience || "All users",
-          schedule: n.created_at ? new Date(n.created_at).toLocaleDateString() : "Recent",
-          status: (n.status || "sent").toLowerCase() as NotificationItem["status"],
-          kind: (n.kind || "system").toLowerCase() as NotificationItem["kind"],
-        })));
+        setNotifs(
+          list.map((n: any) => ({
+            id: n.id,
+            title: n.title,
+            message: n.message,
+            audience: n.audience || "All users",
+            schedule: n.created_at ? new Date(n.created_at).toLocaleDateString() : "Recent",
+            status: (n.status || "sent").toLowerCase() as NotificationItem["status"],
+            kind: (n.kind || "system").toLowerCase() as NotificationItem["kind"],
+          })),
+        );
       })
       .catch(() => {});
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const unread = notifs.filter((n) => n.status !== "draft").length;
@@ -93,7 +108,12 @@ export function AdminHeader() {
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative size-9 shrink-0 sm:size-10" aria-label="Notifications">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative size-9 shrink-0 sm:size-10"
+              aria-label="Notifications"
+            >
               <Bell className="size-4 sm:size-4.5" />
               {unread > 0 && (
                 <span className="num absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
@@ -108,7 +128,9 @@ export function AdminHeader() {
             </div>
             <div className="max-h-80 overflow-y-auto">
               {notifs.length === 0 ? (
-                <div className="p-4 text-center text-xs text-muted-foreground">No unread notifications</div>
+                <div className="p-4 text-center text-xs text-muted-foreground">
+                  No unread notifications
+                </div>
               ) : (
                 notifs.slice(0, 5).map((n) => (
                   <div key={n.id} className="border-b border-border/70 px-3 py-2.5 last:border-0">
@@ -154,7 +176,7 @@ export function AdminHeader() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => {
-                authService.LogOut(); 
+                authService.LogOut();
                 clearSession();
                 toast.success("Signed out");
                 void navigate({ to: "/login", replace: true });

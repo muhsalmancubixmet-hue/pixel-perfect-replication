@@ -6,12 +6,27 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { UserAvatar } from "@/components/admin/UserAvatar";
 import { saved } from "@/components/admin/Dialogs";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { campaignBids, campaignBrief, compact, getCampaign, money } from "@/data/mock";
 import type { Campaign, CampaignBid } from "@/data/types";
 import { adminApi } from "@/lib/admin-api";
 
-const STATUSES: Campaign["status"][] = ["draft", "published", "applications", "shortlisted", "active", "content submitted", "completed", "cancelled"];
+const STATUSES: Campaign["status"][] = [
+  "draft",
+  "published",
+  "applications",
+  "shortlisted",
+  "active",
+  "content submitted",
+  "completed",
+  "cancelled",
+];
 
 export const Route = createFileRoute("/campaigns/$id")({
   loader: async ({ params }) => {
@@ -28,7 +43,13 @@ export const Route = createFileRoute("/campaigns/$id")({
     return { campaign };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Campaign unavailable — SaaS Manager" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData)
+      return {
+        meta: [
+          { title: "Campaign unavailable — SaaS Manager" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     const title = `${loaderData.campaign.title} — Campaign detail`;
     const description = `Brief, escrow and creator bids for ${loaderData.campaign.title} by ${loaderData.campaign.business}.`;
     return {
@@ -67,13 +88,30 @@ function CampaignDetail() {
 
   const actions = (b: CampaignBid) => (
     <div className="flex flex-wrap justify-end gap-1.5">
-      <Button size="sm" variant="outline" className="h-9" disabled={b.status === "shortlisted" || b.status === "accepted"} onClick={() => setBid(b, "shortlisted")}>
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-9"
+        disabled={b.status === "shortlisted" || b.status === "accepted"}
+        onClick={() => setBid(b, "shortlisted")}
+      >
         Shortlist
       </Button>
-      <Button size="sm" className="h-9" disabled={b.status === "accepted"} onClick={() => setBid(b, "accepted")}>
+      <Button
+        size="sm"
+        className="h-9"
+        disabled={b.status === "accepted"}
+        onClick={() => setBid(b, "accepted")}
+      >
         Accept bid
       </Button>
-      <Button size="sm" variant="ghost" className="h-9 text-destructive" disabled={b.status === "rejected"} onClick={() => setBid(b, "rejected")}>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-9 text-destructive"
+        disabled={b.status === "rejected"}
+        onClick={() => setBid(b, "rejected")}
+      >
         Reject
       </Button>
     </div>
@@ -81,7 +119,10 @@ function CampaignDetail() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link to="/campaigns" className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+      <Link
+        to="/campaigns"
+        className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="size-3.5" /> All campaigns
       </Link>
 
@@ -90,12 +131,19 @@ function CampaignDetail() {
           <p className="num text-xs text-muted-foreground">{campaign.id}</p>
           <h1 className="text-xl font-bold tracking-tight">{campaign.title}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <Link to="/businesses/$id" params={{ id: campaign.businessId }} className="font-medium text-primary hover:underline">
+            <Link
+              to="/businesses/$id"
+              params={{ id: campaign.businessId }}
+              className="font-medium text-primary hover:underline"
+            >
               {campaign.business}
             </Link>
-            <span className="rounded-full border border-border bg-muted px-2 py-0.5 font-semibold">{campaign.category}</span>
+            <span className="rounded-full border border-border bg-muted px-2 py-0.5 font-semibold">
+              {campaign.category}
+            </span>
             <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-accent px-2 py-0.5 font-semibold capitalize text-accent-foreground">
-              <Lock className="size-3" /> {brief.escrow} · {money(campaign.budget, campaign.currency)}
+              <Lock className="size-3" /> {brief.escrow} ·{" "}
+              {money(campaign.budget, campaign.currency)}
             </span>
           </div>
         </div>
@@ -108,8 +156,8 @@ function CampaignDetail() {
               try {
                 await adminApi.moderateCampaign(campaign.id, { status: v.toUpperCase() });
               } catch (err) {
-      console.error("Failed to load live campaign:", err);
-    }
+                console.error("Failed to load live campaign:", err);
+              }
               saved("Campaign status changed", v);
             }}
           >
@@ -176,7 +224,15 @@ function CampaignDetail() {
             <table className="w-full min-w-[900px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  {["Influencer", "Category", "Followers", "Proposed fee", "Pitch", "Match", "Status"].map((h) => (
+                  {[
+                    "Influencer",
+                    "Category",
+                    "Followers",
+                    "Proposed fee",
+                    "Pitch",
+                    "Match",
+                    "Status",
+                  ].map((h) => (
                     <th key={h} className="px-3 py-2.5 font-semibold">
                       {h}
                     </th>
@@ -186,9 +242,16 @@ function CampaignDetail() {
               </thead>
               <tbody>
                 {bids.map((b) => (
-                  <tr key={b.id} className="group border-b border-border/70 last:border-0 hover:bg-muted/40">
+                  <tr
+                    key={b.id}
+                    className="group border-b border-border/70 last:border-0 hover:bg-muted/40"
+                  >
                     <td className="px-3 py-2.5">
-                      <Link to="/influencers/$id" params={{ id: b.influencerId }} className="flex items-center gap-2">
+                      <Link
+                        to="/influencers/$id"
+                        params={{ id: b.influencerId }}
+                        className="flex items-center gap-2"
+                      >
                         <UserAvatar src={b.avatar} name={b.name} size={30} />
                         <span className="truncate font-medium">{b.name}</span>
                       </Link>
@@ -203,7 +266,9 @@ function CampaignDetail() {
                     <td className="px-3 py-2.5">
                       <StatusBadge value={b.status} />
                     </td>
-                    <td className="sticky right-0 bg-card px-3 py-2.5 group-hover:bg-muted">{actions(b)}</td>
+                    <td className="sticky right-0 bg-card px-3 py-2.5 group-hover:bg-muted">
+                      {actions(b)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

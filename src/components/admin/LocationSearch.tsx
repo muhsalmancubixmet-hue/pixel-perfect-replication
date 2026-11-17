@@ -46,7 +46,9 @@ export function LocationSearch({
       )
         .then((r) => r.json())
         .then((rows: { display_name: string; lat: string; lon: string }[]) =>
-          setRemote(rows.map((r) => ({ label: r.display_name, lat: Number(r.lat), lng: Number(r.lon) }))),
+          setRemote(
+            rows.map((r) => ({ label: r.display_name, lat: Number(r.lat), lng: Number(r.lon) })),
+          ),
         )
         .catch(() => {});
     }, 400);
@@ -56,7 +58,10 @@ export function LocationSearch({
     };
   }, [q]);
 
-  const results = [...local, ...remote.filter((r) => !local.some((l) => r.label.startsWith(l.label.split(",")[0]!)))];
+  const results = [
+    ...local,
+    ...remote.filter((r) => !local.some((l) => r.label.startsWith(l.label.split(",")[0]!))),
+  ];
 
   if (value) {
     return (

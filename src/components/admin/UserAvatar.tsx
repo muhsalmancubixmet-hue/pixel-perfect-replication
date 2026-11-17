@@ -26,7 +26,11 @@ export function UserAvatar({
       )}
       style={{ width: size, height: size }}
     >
-      {src ? <img src={src} alt={name} className="size-full object-cover" loading="lazy" /> : initials}
+      {src ? (
+        <img src={src} alt={name} className="size-full object-cover" loading="lazy" />
+      ) : (
+        initials
+      )}
     </span>
   );
 }
